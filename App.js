@@ -1,20 +1,33 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import React from "react";
 import "./global.css";
-export default function App() {
+import AppNavigator from "./AppNavigator";
+import { AuthProvider } from "./context/AuthContext";
+import { StatusBar } from "react-native";
+import { StatusBarProvider, useStatusBar } from "./context/StatusBarContext";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
+import { toastConfig } from "./components/ToastComponent/ToastConfig";
+
+function GlobalStatusBar() {
+  const { barType } = useStatusBar();
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <StatusBar
+      barStyle={barType === "secondary" ? "dark-content" : "light-content"}
+      backgroundColor={barType === "secondary" ? "#FFFAFD" : "#EB278D"}
+    />
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBarProvider>
+        <GlobalStatusBar />
+        <AuthProvider>
+          <AppNavigator />
+          <Toast config={toastConfig} />
+        </AuthProvider>
+      </StatusBarProvider>
+    </GestureHandlerRootView>
+  );
+}

@@ -1,0 +1,202 @@
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  TextInput,
+  Image,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useStatusBar } from "../../../context/StatusBarContext";
+import Ionicons from "@expo/vector-icons/Ionicons";
+const bookings = [
+  {
+    id: "32145",
+    client: "Raji Balikis",
+    amount: 188528,
+    status: "Pending",
+    date: "July 17th",
+    time: "09:30AM",
+  },
+  {
+    id: "32146",
+    client: "Alimosho",
+    amount: 202000,
+    status: "Completed",
+    date: "July 17th",
+    time: "09:30AM",
+  },
+  {
+    id: "32147",
+    client: "James",
+    amount: 12528,
+    status: "Pending",
+    date: "July 17th",
+    time: "09:30AM",
+  },
+  {
+    id: "32148",
+    client: "Precious",
+    amount: 60000,
+    status: "Completed",
+    date: "July 17th",
+    time: "09:30AM",
+  },
+];
+
+export default function VendorBookingsScreen() {
+  const navigation = useNavigation();
+  const { setBarType } = useStatusBar();
+  const [tab, setTab] = useState("ALL");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    setBarType("primary");
+  }, []);
+
+  const filteredBookings = bookings.filter((b) => {
+    if (tab === "ALL") return true;
+    return b.status === tab;
+  });
+
+  const totalBookings = bookings.length;
+  const totalAmount = bookings.reduce((sum, b) => sum + b.amount, 0);
+
+  return (
+    <View className="flex-1 bg-white">
+      {/* Header */}
+      <View className="bg-primary pt-[60px] pb-4 px-4">
+        <View className="flex-row items-center mb-2">
+          <Image
+            source={require("../../../assets/img/blackman.jpg")}
+            style={{ width: 40, height: 40, borderRadius: 25 }}
+          />
+          <View className="ml-3 flex-1">
+            <Text
+              style={{ fontFamily: "poppinsMedium" }}
+              className="text-white text-[16px]"
+            >
+              Heritage Spa and Beauty Services
+            </Text>
+            <Text
+              className="text-white text-[12px] opacity-80"
+              style={{ fontFamily: "poppinsRegular" }}
+            >
+              <Ionicons name="location-sharp" size={12} color="white" />
+              {"  "}No. 4 Lagos, Nigeria
+            </Text>
+          </View>
+        </View>
+      </View>
+      {/* Summary */}
+      <View
+        className="bg-white mx-4 rounded-2xl p-5 mt-[-10px] mb-4 flex-row justify-between"
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 2,
+        }}
+      >
+        <View className="flex-1 items-center">
+          <Text
+            className="text-[12px] text-[#A5A5A5]"
+            style={{ fontFamily: "latoRegular" }}
+          >
+            Total Bookings
+          </Text>
+          <Text className="text-[18px] mt-1" style={{ fontFamily: "latoBold" }}>
+            {totalBookings}
+          </Text>
+        </View>
+        <View className="w-[1px] bg-[#FDE9F4] mx-4" />
+        <View className="flex-1 items-center">
+          <Text
+            className="text-[12px] text-[#A5A5A5]"
+            style={{ fontFamily: "latoRegular" }}
+          >
+            Total Amount
+          </Text>
+          <Text className="text-[18px] mt-1" style={{ fontFamily: "latoBold" }}>
+            {totalAmount.toLocaleString()}
+          </Text>
+        </View>
+      </View>
+      {/* Tabs */}
+      <View className="flex-row justify-between mb-2 px-4 gap-3">
+        {["ALL", "COMPLETED", "PENDING"].map((t) => (
+          <Pressable
+            key={t}
+            className={`px-6 py-[10px] rounded-[8px] ${tab === t ? "bg-primary" : "bg-white border border-[#FCDFEE]"}`}
+            onPress={() => setTab(t)}
+          >
+            <Text
+              style={{ fontFamily: "latoBold" }}
+              className={`text-[12px] uppercase ${tab === t ? "text-white" : "text-fadedDark"}`}
+            >
+              {t.charAt(0) + t.slice(1).toLowerCase()}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      {/* Search */}
+      <View className="mx-4 my-2">
+        <TextInput
+          className="bg-[#F5F5F5] rounded-[8px] px-4 py-3 text-[14px]"
+          placeholder="Search"
+          value={search}
+          onChangeText={setSearch}
+        />
+      </View>
+      {/* Bookings List */}
+      <ScrollView className="px-4" showsVerticalScrollIndicator={false}>
+        {filteredBookings.map((b) => (
+          <Pressable
+            key={b.id}
+            className="bg-white rounded-[12px] shadow mb-4 p-4"
+            onPress={() =>
+              navigation.navigate("VendorBookingDetailScreen", { booking: b })
+            }
+          >
+            <View className="flex-row justify-between items-center mb-2">
+              <Text
+                className="text-[12px] text-[#0000004D]"
+                style={{ fontFamily: "latoBold" }}
+              >
+                #{b.id} {b.date} {b.time}
+              </Text>
+              <Text
+                className={`text-[12px] ${b.status === "Completed" ? "text-success" : "text-pending"}`}
+                style={{ fontFamily: "latoBold" }}
+              >
+                {b.status}
+              </Text>
+            </View>
+            <Text
+              className="text-[18px] text-fadedDark"
+              style={{ fontFamily: "latoBold" }}
+            >
+              ₦{b.amount.toLocaleString()}
+            </Text>
+            <View className="flex-row justify-between items-center mt-2">
+              <Text
+                className="text-[14px]"
+                style={{ fontFamily: "latoRegular" }}
+              >
+                {b.client}
+              </Text>
+              <Text
+                className="text-faintDark text-[12px]"
+                style={{ fontFamily: "latoRegular" }}
+              >
+                View details &gt;
+              </Text>
+            </View>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
