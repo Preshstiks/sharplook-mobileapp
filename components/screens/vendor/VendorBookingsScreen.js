@@ -10,6 +10,11 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useStatusBar } from "../../../context/StatusBarContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useAuth } from "../../../context/AuthContext";
+import { HttpClient } from "../../../api/HttpClient";
+import EmptySVG from "../../../assets/img/empty.svg";
+import { ActivityIndicator } from "react-native";
+
 const bookings = [
   {
     id: "32145",
@@ -45,14 +50,98 @@ const bookings = [
   },
 ];
 
+// Skeleton Loader Component
+function SkeletonLoader() {
+  return (
+    <View style={{ paddingHorizontal: 16 }}>
+      {[1, 2, 3].map((_, i) => (
+        <View
+          key={i}
+          style={{
+            backgroundColor: "#f3f3f3",
+            borderRadius: 12,
+            marginBottom: 16,
+            padding: 16,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: "#e0e0e0",
+              marginRight: 12,
+            }}
+          />
+          <View style={{ flex: 1 }}>
+            <View
+              style={{
+                width: "60%",
+                height: 14,
+                borderRadius: 7,
+                backgroundColor: "#e0e0e0",
+                marginBottom: 6,
+              }}
+            />
+            <View
+              style={{
+                width: "40%",
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: "#e0e0e0",
+              }}
+            />
+          </View>
+          <View style={{ alignItems: "flex-end" }}>
+            <View
+              style={{
+                width: 60,
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: "#e0e0e0",
+                marginBottom: 4,
+              }}
+            />
+            <View
+              style={{
+                width: 40,
+                height: 14,
+                borderRadius: 7,
+                backgroundColor: "#e0e0e0",
+              }}
+            />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export default function VendorBookingsScreen() {
   const navigation = useNavigation();
   const { setBarType } = useStatusBar();
   const [tab, setTab] = useState("ALL");
   const [search, setSearch] = useState("");
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState([]);
 
   useEffect(() => {
     setBarType("primary");
+    const fetchBookings = async () => {
+      setLoading(true);
+      try {
+        const res = await HttpClient.get("/bookings/getBookings");
+        setBookings(res.data?.data || []);
+      } catch (err) {
+        setBookings([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBookings();
   }, []);
 
   const filteredBookings = bookings.filter((b) => {
@@ -69,7 +158,11 @@ export default function VendorBookingsScreen() {
       <View className="bg-primary pt-[60px] pb-4 px-4">
         <View className="flex-row items-center mb-2">
           <Image
-            source={require("../../../assets/img/blackman.jpg")}
+            source={
+              user?.avatar
+                ? { uri: user.avatar }
+                : require("../../../assets/icon/avatar.png")
+            }
             style={{ width: 40, height: 40, borderRadius: 25 }}
           />
           <View className="ml-3 flex-1">
@@ -77,14 +170,15 @@ export default function VendorBookingsScreen() {
               style={{ fontFamily: "poppinsMedium" }}
               className="text-white text-[16px]"
             >
-              Heritage Spa and Beauty Services
+              {user?.vendorOnboarding?.businessName}
             </Text>
             <Text
               className="text-white text-[12px] opacity-80"
               style={{ fontFamily: "poppinsRegular" }}
             >
               <Ionicons name="location-sharp" size={12} color="white" />
-              {"  "}No. 4 Lagos, Nigeria
+              {"  "}
+              {user?.vendorOnboarding?.location}
             </Text>
           </View>
         </View>
@@ -152,50 +246,64 @@ export default function VendorBookingsScreen() {
       </View>
       {/* Bookings List */}
       <ScrollView className="px-4" showsVerticalScrollIndicator={false}>
-        {filteredBookings.map((b) => (
-          <Pressable
-            key={b.id}
-            className="bg-white rounded-[12px] shadow mb-4 p-4"
-            onPress={() =>
-              navigation.navigate("VendorBookingDetailScreen", { booking: b })
-            }
-          >
-            <View className="flex-row justify-between items-center mb-2">
-              <Text
-                className="text-[12px] text-[#0000004D]"
-                style={{ fontFamily: "latoBold" }}
-              >
-                #{b.id} {b.date} {b.time}
-              </Text>
-              <Text
-                className={`text-[12px] ${b.status === "Completed" ? "text-success" : "text-pending"}`}
-                style={{ fontFamily: "latoBold" }}
-              >
-                {b.status}
-              </Text>
-            </View>
+        {loading ? (
+          <SkeletonLoader />
+        ) : filteredBookings.length === 0 ? (
+          <View className="items-center justify-center py-8">
+            <EmptySVG width={120} height={120} />
             <Text
-              className="text-[18px] text-fadedDark"
-              style={{ fontFamily: "latoBold" }}
+              className="text-[14px] text-gray-400 mt-2"
+              style={{ fontFamily: "poppinsRegular" }}
             >
-              ₦{b.amount.toLocaleString()}
+              No bookings found
             </Text>
-            <View className="flex-row justify-between items-center mt-2">
+          </View>
+        ) : (
+          filteredBookings.map((b) => (
+            <Pressable
+              key={b.id}
+              className="bg-white rounded-[12px] shadow mb-4 p-4"
+              onPress={() =>
+                navigation.navigate("VendorBookingDetailScreen", { booking: b })
+              }
+            >
+              <View className="flex-row justify-between items-center mb-2">
+                <Text
+                  className="text-[12px] text-[#0000004D]"
+                  style={{ fontFamily: "latoBold" }}
+                >
+                  #{b.id} {b.date} {b.time}
+                </Text>
+                <Text
+                  className={`text-[12px] ${b.status === "Completed" ? "text-success" : "text-pending"}`}
+                  style={{ fontFamily: "latoBold" }}
+                >
+                  {b.status}
+                </Text>
+              </View>
               <Text
-                className="text-[14px]"
-                style={{ fontFamily: "latoRegular" }}
+                className="text-[18px] text-fadedDark"
+                style={{ fontFamily: "latoBold" }}
               >
-                {b.client}
+                ₦{b.amount.toLocaleString()}
               </Text>
-              <Text
-                className="text-faintDark text-[12px]"
-                style={{ fontFamily: "latoRegular" }}
-              >
-                View details &gt;
-              </Text>
-            </View>
-          </Pressable>
-        ))}
+              <View className="flex-row justify-between items-center mt-2">
+                <Text
+                  className="text-[14px]"
+                  style={{ fontFamily: "latoRegular" }}
+                >
+                  {b.client}
+                </Text>
+                <Text
+                  className="text-faintDark text-[12px]"
+                  style={{ fontFamily: "latoRegular" }}
+                >
+                  View details &gt;
+                </Text>
+              </View>
+            </Pressable>
+          ))
+        )}
       </ScrollView>
     </View>
   );

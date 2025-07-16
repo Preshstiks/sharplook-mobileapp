@@ -10,15 +10,60 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { useStatusBar } from "../../../context/StatusBarContext";
 import { loginSchema } from "../../../utils/validationSchemas";
+import { HttpClient } from "../../../api/HttpClient";
+import { showToast } from "../../ToastComponent/Toast";
+import { useAuth } from "../../../context/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen({ navigation }) {
   const [role, setRole] = useState("client"); // For demo, let user pick role
   const [rememberMe, setRememberMe] = useState(false);
   const { setBarType } = useStatusBar();
+  const { setIsAuthenticated, login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setBarType("secondary");
   }, []);
+
+  const handleLogin = async (values) => {
+    setIsLoading(true);
+    try {
+      const response = await HttpClient.post("/auth/login", values);
+      console.log("[DEBUG] handleLogin response:", response);
+      const statusCode = response.data.statusCode || response.status;
+      const userRole = response.data.user && response.data.user.role;
+      if (response.data.token) {
+        await login(response.data.token);
+      }
+      if (statusCode === 200) {
+        if (userRole === "CLIENT") {
+          showToast.success(response.data.message);
+          navigation.replace("Client");
+          setIsAuthenticated(true);
+        } else {
+          showToast.error("Unauthorized role");
+        }
+        console.log("[DEBUG] handleLogin response:", userRole);
+      }
+    } catch (error) {
+      console.log("[DEBUG] handleLogin error:", error);
+      if (error.response) {
+        const message = error.response.data && error.response.data.message;
+        if (message === "Please set your location preference to continue.") {
+          navigation.navigate("ClientAddLocation");
+        } else {
+          showToast.error(
+            message || error.message || "An unknown error occurred"
+          );
+        }
+      } else {
+        showToast.error(error.message || "An unknown error occurred");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <View
@@ -47,11 +92,7 @@ export default function LoginScreen({ navigation }) {
         validationSchema={loginSchema}
         validateOnChange={true}
         validateOnBlur={true}
-        onSubmit={(values) => {
-          console.log(values);
-          // navigation.navigate("ClientAddLocation");
-          navigation.navigate("Client");
-        }}
+        onSubmit={handleLogin}
       >
         {({
           handleChange,
@@ -61,17 +102,6 @@ export default function LoginScreen({ navigation }) {
           touched,
           handleSubmit,
         }) => {
-          // Debug logging
-          console.log("Form values:", values);
-          console.log("Form errors:", errors);
-          console.log("Form touched:", touched);
-          console.log("Password error:", errors.password);
-          console.log("Password touched:", touched.password);
-          console.log(
-            "Should show password error:",
-            errors.password && touched.password
-          );
-
           return (
             <View className="mt-10">
               <AuthInput
@@ -122,7 +152,8 @@ export default function LoginScreen({ navigation }) {
               </View>
               <AuthButton
                 title="Login"
-                isloading={false}
+                loadingMsg="Logging in"
+                isloading={isLoading}
                 onPress={handleSubmit}
               />
               {/* Social Login Section */}

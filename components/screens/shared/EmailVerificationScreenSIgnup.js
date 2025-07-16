@@ -1,73 +1,51 @@
+// NOTE: All API integrations are commented out. Submit actions are navigation-based only for demo/testing.
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
   Pressable,
   TextInput,
-  ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
+import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { Formik } from "formik";
-import { emailVerificationSchema } from "../../../../utils/validationSchemas";
-import { isAxiosError } from "axios";
-import { showToast } from "../../../ToastComponent/Toast";
-import { HttpClient } from "../../../../api/HttpClient";
+import { emailVerificationSchema } from "../../../utils/validationSchemas";
+import SuccessModal from "../../Modal/SuccessModal";
+import { showToast } from "../../ToastComponent/Toast";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { HttpClient } from "../../../api/HttpClient";
+import { Feather } from "@expo/vector-icons";
 
-export default function VendorEmailVerificationScreen({ navigation, route }) {
+export default function EmailVerificationScreenSignup({ navigation, route }) {
   const [code, setCode] = useState(["", "", "", ""]);
   const [timer, setTimer] = useState(60);
+
   const [loading, setLoading] = useState(false);
-  const [verifying, setVerifying] = useState(false);
+  const inputs = useRef([]);
+  const email = route?.params?.email || "raj****@gmail.com";
+
   // Handler for resending OTP
-  const email = route?.params?.email;
   const handleResend = async () => {
     setLoading(true);
-    console.log("Touched");
     try {
-      const res = await HttpClient.post("/auth/send-otp", { email });
+      const res = await HttpClient.post("/auth/send-otp", {
+        email: route?.params?.email,
+      });
       showToast.success(res.data.message);
-      setTimer(60);
+      setTimer(60); // Reset timer
     } catch (error) {
-      if (isAxiosError(error)) {
-        if (error.response && error.response.data) {
-          const errorMessage =
-            error.response.data.message || "An unknown error occurred";
-          showToast.error(errorMessage);
-        } else {
-          showToast.error("An unexpected error occurred. Please try again.");
-        }
+      if (error.response && error.response.data) {
+        const errorMessage =
+          error.response.data.message || "An unknown error occurred";
+        showToast.error(errorMessage);
+      } else {
+        showToast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
     }
   };
-  const handleVerify = async (values) => {
-    setVerifying(true);
-    // Always include email in the payload
-    const payload = { ...values, email };
-    console.log("[DEBUG] handleVerify called with payload:", payload);
-    try {
-      const res = await HttpClient.post("/auth/verify-otp", payload);
-      console.log("[DEBUG] Registration response:", res);
-      showToast.success(res.data.message);
-      navigation.navigate("VendorLogin");
-    } catch (error) {
-      if (isAxiosError(error)) {
-        if (error.response && error.response.data) {
-          const errorMessage =
-            error.response.data.message || "An unknown error occurred";
-          showToast.error(errorMessage);
-        } else {
-          showToast.error("An unexpected error occurred. Please try again.");
-        }
-      }
-    } finally {
-      setVerifying(false);
-    }
-  };
-  const inputs = useRef([]);
 
   useEffect(() => {
     if (timer > 0) {
@@ -83,16 +61,43 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
       setCode(newCode);
 
       // Update Formik field value
-      const otp = newCode.join("");
-      setFieldValue("otp", otp);
+      const verificationCode = newCode.join("");
+      setFieldValue("otp", verificationCode);
 
       if (text && idx < 3) inputs.current[idx + 1].focus();
       if (!text && idx > 0) inputs.current[idx - 1].focus();
     }
   };
-
+  const handleProceed = () => {
+    setVisible(false);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Login" }],
+    });
+  };
+  const handleVerify = async (values) => {
+    setLoading(true);
+    try {
+      const res = await HttpClient.post("/auth/verify-otp", {
+        email: route?.params?.email,
+        otp: values.otp,
+      });
+      showToast.success(res.data.message);
+      navigation.replace("Login");
+    } catch (error) {
+      if (error.response && error.response.data) {
+        const errorMessage =
+          error.response.data.message || "An unknown error occurred";
+        showToast.error(errorMessage);
+      } else {
+        showToast.error("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
-    <View className="flex-1 bg-secondary px-5 py-[60px]">
+    <View className="flex-1 bg-secondary px-5 py-[40px]">
       <View className="flex-row items-center mb-8 gap-8">
         <Pressable onPress={() => navigation.goBack()}>
           <MaterialIcons name="arrow-back-ios" size={24} color="black" />
@@ -155,39 +160,47 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
             {/* Timer or Resend Code */}
             {timer > 0 ? (
               <Text
+                className="text-center text-sm mb-2"
                 style={{ fontFamily: "poppinsRegular" }}
-                className="text-center text-[14px] mb-4"
               >
                 Resend code in{" "}
-                <Text
-                  style={{ fontFamily: "latoBold" }}
-                  className="text-primary text-[16px]"
-                >
-                  {Math.floor(timer / 60)} :{" "}
-                  {String(timer % 60).padStart(2, "0")}
+                <Text className="text-primary">
+                  {`${Math.floor(timer / 60)}:${(timer % 60).toString().padStart(2, "0")}`}
                 </Text>
               </Text>
-            ) : loading ? (
-              <View style={{ alignItems: "center", marginBottom: 16 }}>
-                <ActivityIndicator size="small" color="#eb278c" />
-              </View>
             ) : (
-              <TouchableOpacity onPress={handleResend}>
+              <Pressable onPress={handleResend}>
                 <Text
                   style={{ fontFamily: "latoBold" }}
-                  className="text-primary text-[14px] underline text-center mb-4"
+                  className="text-primary text-[14px] underline text-center mb-2"
                 >
                   Resend Code
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             )}
+            <TouchableOpacity
+              className="flex-row gap-3 justify-center items-center mt-[50px] mb-8"
+              onPress={() => alert("Switch to phone number verification")}
+            >
+              <Feather name="phone" size={20} color="#EB278D" />
+              <Text
+                style={{ fontFamily: "poppinsRegular" }}
+                className="text-primary text-[12px]"
+              >
+                Verify with Phone Number instead
+              </Text>
+            </TouchableOpacity>
             <View className="flex-1" />
             <View className="mb-8">
               <AuthButton
                 title="Verify"
+                disabled={loading}
                 loadingMsg="Verifying"
-                onPress={handleSubmit}
-                isloading={verifying}
+                onPress={() => {
+                  console.log("Submit button pressed");
+                  handleSubmit();
+                }}
+                isloading={loading}
               />
             </View>
           </>

@@ -1,11 +1,9 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { View, Text } from "react-native";
 import OnboardingScreen from "./OnboardingScreen";
 import VendorBottomNav from "./VendorBottomNav";
 import LoginScreen from "../shared/LoginScreen";
 import VendorLoginScreen from "./auth/LoginScreen";
-import RegisterScreen from "../shared/RegisterScreen";
 import ForgotPasswordScreen from "../shared/ForgotPasswordScreen";
 import ResetPasswordScreen from "../shared/ResetPasswordScreen";
 import EmailVerificationScreen from "../shared/EmailVerificationScreen";
@@ -16,7 +14,6 @@ import VendorBusinessInfoScreen from "./auth/VendorBusinessInfoScreen";
 import AddLocationScreen from "./auth/AddLocationScreen";
 import PhoneNumberVerificationScreen from "./auth/PhoneNumberVerificationScreen";
 import OTPVerificationScreen from "./auth/OTPVerificationScreen";
-import AddProductScreen from "./AddProductScreen";
 import VendorBookingDetailScreen from "./VendorBookingDetailScreen";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import CustomDrawerContent from "./CustomDrawerContent";
@@ -53,6 +50,11 @@ import InformationRelatingToChildrenAndTeensScreen from "./vendorprivacypolicy/I
 import PrivacyPolicyUpdateScreen from "./vendorprivacypolicy/PrivacyPolicyUpdateScreen";
 import ContactScreen from "./vendorprivacypolicy/ContactScreen";
 import JurisdictionSpecificScreen from "./vendorprivacypolicy/JurisdictionSpecificScreen";
+import AddProductScreen from "./ProductAndServices/AddProductScreen";
+import AddServicesScreen from "./ProductAndServices/AddServicesScreen";
+import EditProductScreen from "./ProductAndServices/EditProduct";
+
+// import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -159,6 +161,17 @@ export default function VendorNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="AddServices"
+        component={AddServicesScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="EditProduct"
+        component={EditProductScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
         name="VendorBookingDetailScreen"
         component={VendorBookingDetailScreen}
         options={{ headerShown: false }}
@@ -190,137 +203,326 @@ export default function VendorNavigator() {
       />
       <Stack.Screen
         name="VendorSettingsScreen"
-        component={VendorSettingsScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={VendorSettingsScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <VendorSettingsScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="VendorHelpSupportScreen"
-        component={VendorHelpSupportScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={VendorHelpSupportScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <VendorHelpSupportScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="VendorLegalScreen"
-        component={VendorLegalScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={VendorLegalScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <VendorLegalScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="VendorPrivacyPolicyScreen"
-        component={VendorPrivacyPolicyScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={VendorPrivacyPolicyScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <VendorPrivacyPolicyScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="VendorTermsOfUseScreen"
-        component={VendorTermsOfUseScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={VendorTermsOfUseScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <VendorTermsOfUseScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseYourRelationshipWithUsScreen"
-        component={TermsOfUseYourRelationshipWithUsScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseYourRelationshipWithUsScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseYourRelationshipWithUsScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseAcceptingTheTermsScreen"
-        component={TermsOfUseAcceptingTheTermsScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseAcceptingTheTermsScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseAcceptingTheTermsScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseChangesToTheTermsScreen"
-        component={TermsOfUseChangesToTheTermsScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseChangesToTheTermsScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseChangesToTheTermsScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseYourAccountWithUsScreen"
-        component={TermsOfUseYourAccountWithUsScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseYourAccountWithUsScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseYourAccountWithUsScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseYourAccessToAndUseOfOurServicesScreen"
-        component={TermsOfUseYourAccessToAndUseOfOurServicesScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseYourAccessToAndUseOfOurServicesScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseYourAccessToAndUseOfOurServicesScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseIntellectualPropertyRightsScreen"
-        component={TermsOfUseIntellectualPropertyRightsScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseIntellectualPropertyRightsScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseIntellectualPropertyRightsScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseContentScreen"
-        component={TermsOfUseContentScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseContentScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseContentScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseIndemnityScreen"
-        component={TermsOfUseIndemnityScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseIndemnityScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseIndemnityScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseExclusionOfWarrantiesScreen"
-        component={TermsOfUseExclusionOfWarrantiesScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseExclusionOfWarrantiesScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseExclusionOfWarrantiesScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseLimitationOfLiabilityScreen"
-        component={TermsOfUseLimitationOfLiabilityScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseLimitationOfLiabilityScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseLimitationOfLiabilityScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TermsOfUseOtherTermsScreen"
-        component={TermsOfUseOtherTermsScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TermsOfUseOtherTermsScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TermsOfUseOtherTermsScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="WhatInformationWeCollectScreen"
-        component={WhatInformationWeCollectScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={WhatInformationWeCollectScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <WhatInformationWeCollectScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="HowWeUseYourInformationScreen"
-        component={HowWeUseYourInformationScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={HowWeUseYourInformationScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <HowWeUseYourInformationScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="HowWeShareYourInformationScreen"
-        component={HowWeShareYourInformationScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={HowWeShareYourInformationScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <HowWeShareYourInformationScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="WhereWeStoreYourInformationScreen"
-        component={WhereWeStoreYourInformationScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={WhereWeStoreYourInformationScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <WhereWeStoreYourInformationScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="YourRightsAndChoicesScreen"
-        component={YourRightsAndChoicesScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={YourRightsAndChoicesScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <YourRightsAndChoicesScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TheSecurityOfYourInformationScreen"
-        component={TheSecurityOfYourInformationScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={TheSecurityOfYourInformationScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <TheSecurityOfYourInformationScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="HowLongWeKeepYourInformationScreen"
-        component={HowLongWeKeepYourInformationScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={HowLongWeKeepYourInformationScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <HowLongWeKeepYourInformationScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="InformationRelatingToChildrenAndTeensScreen"
-        component={InformationRelatingToChildrenAndTeensScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={InformationRelatingToChildrenAndTeensScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <InformationRelatingToChildrenAndTeensScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="PrivacyPolicyUpdateScreen"
-        component={PrivacyPolicyUpdateScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={PrivacyPolicyUpdateScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <PrivacyPolicyUpdateScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="ContactScreen"
-        component={ContactScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={ContactScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <ContactScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="JurisdictionSpecificScreen"
-        component={JurisdictionSpecificScreen}
+        children={(props) => (
+          // <ProtectedRoute
+          //   {...props}
+          //   Component={JurisdictionSpecificScreen}
+          //   requiredRole="VENDOR"
+          // />
+          <JurisdictionSpecificScreen {...props} />
+        )}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

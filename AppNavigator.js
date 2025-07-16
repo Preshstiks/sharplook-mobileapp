@@ -22,6 +22,7 @@ import ClientVerifyPhoneNumber from "./components/screens/shared/VerifyPhoneNumb
 import VerifyWithPhoneOTP from "./components/screens/shared/VerifyWithPhoneOTP";
 import EmailVerificationForgotPassword from "./components/screens/shared/EmailVerificationForgotPassword";
 import CategoriesScreen from "./components/screens/client/CategoriesScreen";
+import EmailVerificationScreenSignup from "./components/screens/shared/EmailVerificationScreenSIgnup";
 
 const Stack = createNativeStackNavigator();
 
@@ -108,6 +109,11 @@ export default function AppNavigator() {
         <Stack.Screen
           name="EmailVerification"
           component={EmailVerificationScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="EmailVerificationSignup"
+          component={EmailVerificationScreenSignup}
           options={{ headerShown: false }}
         />
         <Stack.Screen

@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Image,
   Pressable,
+  Animated,
+  Easing,
 } from "react-native";
 import {
   Entypo,
@@ -17,7 +19,7 @@ import {
 import FilterBtn from "../../../assets/icon/filter.svg";
 import Masseuse from "../../../assets/img/blackman.jpg";
 import NailTech from "../../../assets/img/nailtech.jpg";
-import Ped from "../../../assets/img/ped.jpg";
+import EmptySVG from "../../../assets/img/empty.svg";
 import MakeupPromo from "../../../assets/img/makeuppromo.png";
 import Refer from "../../../assets/img/refer.png";
 import Feather from "@expo/vector-icons/Feather";
@@ -39,6 +41,9 @@ import HomeImg2 from "../../../assets/img/home2.svg";
 import HomeImg3 from "../../../assets/img/home3.svg";
 import HomeImg4 from "../../../assets/img/home4.svg";
 import { useStatusBar } from "../../../context/StatusBarContext";
+import { useAuth } from "../../../context/AuthContext";
+import { HttpClient } from "../../../api/HttpClient";
+import DefaultAvatar from "../../../assets/icon/avatar.png";
 const categories = [
   {
     label: "Nails",
@@ -59,39 +64,6 @@ const categories = [
   {
     label: "Other",
     icon: <OptionsIcon width={28} height={28} color="#EB278D" />,
-  },
-];
-
-const topVendors = [
-  {
-    name: "Alison Leema",
-    role: "Masseuse",
-    image: Masseuse,
-    rating: 4,
-  },
-  {
-    name: "Temilolu",
-    role: "Nail Technician",
-    image: NailTech,
-    rating: 4,
-  },
-  {
-    name: "Alison Leema",
-    role: "Pedicure Spec.",
-    image: Ped,
-    rating: 4,
-  },
-  {
-    name: "Sarah Johnson",
-    role: "Hair Stylist",
-    image: Masseuse,
-    rating: 5,
-  },
-  {
-    name: "Maria Garcia",
-    role: "Makeup Artist",
-    image: NailTech,
-    rating: 4,
   },
 ];
 
@@ -119,17 +91,92 @@ const bestOffers = [
   },
 ];
 
+// SkeletonBox component for loading placeholders
+function SkeletonBox({ width, height, style }) {
+  const animatedValue = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(animatedValue, {
+          toValue: 1,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedValue, {
+          toValue: 0,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const backgroundColor = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["#ececec", "#f5f5f5"],
+  });
+
+  return (
+    <Animated.View
+      style={[
+        {
+          width,
+          height,
+          borderRadius: 8,
+          backgroundColor,
+          marginRight: 12,
+        },
+        style,
+      ]}
+    />
+  );
+}
+
 export default function HomeScreen() {
   const navigation = useNavigation();
   const [isSearchBarActive, setIsSearchBarActive] = useState(false);
   const { setBarType } = useStatusBar();
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [topVendors, setTopVendors] = useState([]);
+  const [loadingVendors, setLoadingVendors] = useState(true);
   const toggleSearchBar = () => {
     setIsSearchBarActive(!isSearchBarActive);
   };
-
+  const user = useAuth();
   useEffect(() => {
     setBarType("secondary");
+    const fetchRecommendedProducts = async () => {
+      setLoadingProducts(true);
+      try {
+        const res = await HttpClient.get("/user/products/top-selling");
+        setRecommendedProducts(res.data.data);
+      } catch (error) {
+        console.log("Error fetching recommended products:", error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    const fetchTopVendors = async () => {
+      setLoadingVendors(true);
+      try {
+        const res = await HttpClient.get("/user/topVendors");
+        setTopVendors(res.data.data);
+      } catch (error) {
+        console.log("Error fetching top vendors:", error);
+      } finally {
+        setLoadingVendors(false);
+      }
+    };
+    fetchRecommendedProducts();
+    fetchTopVendors();
   }, []);
+
+  console.log({ topVendors });
+  const currentUser = user.user;
   return (
     <View className="flex-1 bg-secondary">
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -140,7 +187,7 @@ export default function HomeScreen() {
               style={{ fontFamily: "poppinsSemiBold" }}
               className="text-[18px]"
             >
-              Hello Team Green
+              Hello {currentUser.firstName}
             </Text>
             <Text
               style={{ fontFamily: "poppinsRegular" }}
@@ -285,60 +332,96 @@ export default function HomeScreen() {
                 Top Vendors
               </Text>
             </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ paddingLeft: 20 }}
-            >
-              {topVendors.map((vendor, idx) => (
-                <Pressable
-                  onPress={() => navigation.navigate("VendorProfileScreen")}
-                  key={vendor.name + idx}
-                  className="w-[125px] bg-white rounded-2xl mr-3 py-4 shadow-sm overflow-hidden"
+            {loadingVendors ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ paddingLeft: 20 }}
+              >
+                {[1, 2, 3].map((_, idx) => (
+                  <SkeletonBox key={idx} width={125} height={160} />
+                ))}
+              </ScrollView>
+            ) : topVendors.length === 0 ? (
+              <View className="items-center justify-center py-8">
+                <EmptySVG width={120} height={120} />
+                <Text
+                  className="text-[14px] text-gray-400 mt-2"
+                  style={{ fontFamily: "poppinsRegular" }}
                 >
-                  <Image
-                    source={vendor.image}
-                    style={{
-                      width: "100%",
-                      height: 100,
-                      marginBottom: 8,
-                      marginTop: -16,
-                    }}
-                    resizeMode="cover"
-                  />
-                  <View className="px-[10px]">
-                    <Text
-                      style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[12px] text-fadedDark mt-0.5"
-                    >
-                      {vendor.name}
-                    </Text>
-                    <Text
-                      style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[10px] opacity-60 text-fadedDark"
-                    >
-                      {vendor.role}
-                    </Text>
-                    <View className="flex-row items-center mt-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Ionicons
-                          key={i}
-                          name={i < vendor.rating ? "star" : "star-outline"}
-                          size={16}
-                          color="#FFC107"
-                        />
-                      ))}
+                  No Top Vendors
+                </Text>
+              </View>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ paddingLeft: 20 }}
+              >
+                {topVendors.map((vendor, idx) => (
+                  <Pressable
+                    onPress={() =>
+                      navigation.navigate("VendorProfileScreen", {
+                        vendorId: vendor.id,
+                      })
+                    }
+                    key={vendor.id || idx}
+                    className="w-[125px] bg-white rounded-2xl mr-3 py-4 shadow-sm overflow-hidden"
+                  >
+                    <Image
+                      source={
+                        vendor.avatar ? { uri: vendor.avatar } : DefaultAvatar
+                      }
+                      style={{
+                        width: "100%",
+                        height: 100,
+                        marginBottom: 8,
+                        marginTop: -16,
+                      }}
+                      resizeMode="cover"
+                    />
+                    <View className="px-[10px]">
                       <Text
                         style={{ fontFamily: "poppinsRegular" }}
-                        className="text-[12px] text-fadedDark mt-1 ml-1"
+                        className="text-[12px] text-fadedDark mt-0.5"
                       >
-                        {vendor.rating}.0
+                        {vendor.businessName
+                          ? vendor.businessName
+                          : "SharpLook Salon"}
                       </Text>
+                      <Text
+                        style={{ fontFamily: "poppinsRegular" }}
+                        className="text-[10px] opacity-60 text-fadedDark"
+                      >
+                        {vendor.specialties && vendor.specialties.length > 0
+                          ? vendor.specialties[0]
+                          : "Specialist"}
+                      </Text>
+                      <View className="flex-row items-center mt-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Ionicons
+                            key={i}
+                            name={
+                              i < Math.round(vendor.rating)
+                                ? "star"
+                                : "star-outline"
+                            }
+                            size={16}
+                            color="#FFC107"
+                          />
+                        ))}
+                        <Text
+                          style={{ fontFamily: "poppinsRegular" }}
+                          className="text-[12px] text-fadedDark mt-1 ml-1"
+                        >
+                          {vendor.rating.toFixed(1)}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </Pressable>
-              ))}
-            </ScrollView>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            )}
             {/* Recommended Products */}
             <View className="flex-row items-center justify-between mt-8 px-5">
               <Text
@@ -356,28 +439,80 @@ export default function HomeScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ paddingLeft: 20 }}
-              className="flex-row px-5 mt-4"
-            >
-              {recommendedProducts.map((prod, idx) => (
-                <View
-                  key={idx}
-                  className="rounded-[4px] mr-4 items-center justify-center w-[220px] h-[202px] overflow-hidden shadow-sm"
+            {loadingProducts ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ paddingLeft: 20 }}
+              >
+                {[1, 2, 3].map((_, idx) => (
+                  <SkeletonBox key={idx} width={220} height={202} />
+                ))}
+              </ScrollView>
+            ) : recommendedProducts.length === 0 ? (
+              <View className="items-center justify-center py-8">
+                <EmptySVG width={120} height={120} />
+                <Text
+                  className="text-[14px] text-gray-400 mt-2"
+                  style={{ fontFamily: "poppinsRegular" }}
                 >
-                  <Image
-                    source={prod.image}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                    }}
-                    resizeMode="cover"
-                  />
-                </View>
-              ))}
-            </ScrollView>
+                  No recommended products
+                </Text>
+              </View>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ paddingLeft: 20 }}
+                className="flex-row px-5 mt-4"
+              >
+                {recommendedProducts.map((prod, idx) => (
+                  <View
+                    key={prod.id || idx}
+                    className="rounded-[4px] mr-4 items-center justify-center w-[220px] h-[202px] overflow-hidden shadow-sm"
+                  >
+                    <Image
+                      source={{ uri: prod.picture }}
+                      style={{ width: "100%", height: "100%" }}
+                      resizeMode="cover"
+                    />
+                    <View
+                      style={{
+                        position: "absolute",
+                        bottom: 8,
+                        left: 8,
+                        right: 8,
+                        backgroundColor: "rgba(255,255,255,0.85)",
+                        borderRadius: 6,
+                        padding: 6,
+                      }}
+                    >
+                      {/* <Text
+                        style={{ fontFamily: "poppinsSemiBold", fontSize: 14 }}
+                        numberOfLines={1}
+                      >
+                        {prod.productName}
+                      </Text>
+                      <Text
+                        style={{ fontFamily: "poppinsRegular", fontSize: 12 }}
+                      >
+                        ₦{prod.price}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: "poppinsRegular",
+                          fontSize: 11,
+                          color: "#888",
+                        }}
+                        numberOfLines={1}
+                      >
+                        By {prod.vendor?.name}
+                      </Text> */}
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
             {/* Best Offers */}
             <View className="mt-8 px-5 pb-[40px]">
               <Text

@@ -10,15 +10,72 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 import { useStatusBar } from "../../../../context/StatusBarContext";
 import { loginSchema } from "../../../../utils/validationSchemas";
+import { HttpClient } from "../../../../api/HttpClient";
+import { useAuth } from "../../../../context/AuthContext";
+import { showToast } from "../../../ToastComponent/Toast";
+import { Axios, AxiosError } from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function VendorLoginScreen({ navigation }) {
   const [rememberMe, setRememberMe] = useState(false);
   const { setBarType } = useStatusBar();
+  const { setIsAuthenticated, login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setBarType("secondary");
   }, []);
 
+  const handleLogin = async (values) => {
+    console.log("[DEBUG] handleLogin called with values:", values);
+    setIsLoading(true);
+    try {
+      const response = await HttpClient.post("/auth/login", values);
+      console.log("[DEBUG] handleLogin response:", response);
+      const statusCode = response.data.statusCode || response.status;
+      const userRole = response.data.user && response.data.user.role;
+      if (response.data.token) {
+        await login(response.data.token); // Use context login
+      }
+      if (statusCode === 200) {
+        if (userRole === "VENDOR") {
+          showToast.success(response.data.message);
+          navigation.replace("Vendor", { screen: "Dashboard" });
+          setIsAuthenticated(true);
+        } else {
+          showToast.error("Unauthorized role");
+        }
+        console.log("[DEBUG] handleLogin response:", userRole);
+      }
+    } catch (error) {
+      console.log("[DEBUG] handleLogin error:", error);
+      if (error.response) {
+        const message = error.response.data && error.response.data.message;
+        if (
+          message ===
+          "Please complete your vendor profile (registration number and location required)."
+        ) {
+          showToast.error(message);
+          const token = error.response.data.token;
+          if (token) {
+            await login(token); // Use context login
+          }
+          navigation.navigate("VendorBusinessInfo");
+          setIsAuthenticated(true);
+        } else if (message === "No location") {
+          navigation.navigate("Vendor", { screen: "AddLocation" });
+        } else {
+          showToast.error(
+            message || error.message || "An unknown error occurred"
+          );
+        }
+      } else {
+        showToast.error(error.message || "An unknown error occurred");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <View
       style={styles.container}
@@ -46,10 +103,7 @@ export default function VendorLoginScreen({ navigation }) {
         validationSchema={loginSchema}
         validateOnChange={true}
         validateOnBlur={true}
-        onSubmit={(values) => {
-          console.log(values);
-          navigation.replace("Vendor", { screen: "Dashboard" });
-        }}
+        onSubmit={handleLogin}
       >
         {({
           handleChange,
@@ -109,7 +163,8 @@ export default function VendorLoginScreen({ navigation }) {
               </View>
               <AuthButton
                 title="Login"
-                isloading={false}
+                loadingMsg="Logging in"
+                isloading={isLoading}
                 onPress={handleSubmit}
               />
               <View className="mt-8 w-full items-center">

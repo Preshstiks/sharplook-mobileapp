@@ -13,6 +13,7 @@ import DashboardScreen from "./DashboardScreen";
 import MyProductsScreen from "./MyProductsScreen";
 import VendorBookingsScreen from "./VendorBookingsScreen";
 import VendorProfileScreen from "./VendorProfileScreen";
+import MyServicesScreen from "./MyServicesScreen";
 
 function Bookings() {
   return (
@@ -67,6 +68,8 @@ export default function VendorBottomNav() {
             return <MaterialIcons name="event" size={size} color={color} />;
           } else if (route.name === "My Products") {
             return <FontAwesome5 name="box-open" size={size} color={color} />;
+          } else if (route.name === "My Services") {
+            return <MaterialIcons name="face" size={size} color={color} />;
           } else if (route.name === "Profile") {
             return <AntDesign name="user" size={24} color={color} />;
           }
@@ -81,6 +84,7 @@ export default function VendorBottomNav() {
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="Bookings" component={VendorBookingsScreen} />
       <Tab.Screen name="My Products" component={MyProductsScreen} />
+      <Tab.Screen name="My Services" component={MyServicesScreen} />
       <Tab.Screen name="Profile" component={VendorProfileScreen} />
     </Tab.Navigator>
   );

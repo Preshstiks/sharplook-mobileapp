@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   Pressable,
   ScrollView,
   TouchableOpacity,
@@ -11,24 +10,42 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 import { AuthInput } from "../../../reusuableComponents/inputFields/AuthInput";
 import { useStatusBar } from "../../../../context/StatusBarContext";
-
+import { Formik } from "formik";
+import { vendorBusinessInfoSchema } from "../../../../utils/validationSchemas";
+import { showToast } from "../../../ToastComponent/Toast";
+import { HttpClient } from "../../../../api/HttpClient";
+import { useAuth } from "../../../../context/AuthContext";
 export default function VendorBusinessInfoScreen({ navigation }) {
   const { setBarType } = useStatusBar();
+  const { userId, setUser, setIsAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     setBarType("primary");
   }, []);
-  const [form, setForm] = React.useState({
-    businessName: "",
-    businessDescription: "",
-    location: "",
-    registrationNumber: "",
-    portfolioLink: "",
-  });
 
-  const handleChange = (key, value) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const handleSubmitBus = async (values) => {
+    setLoading(true);
+    console.log("[DEBUG] handleSubmit called with values:", values);
+    try {
+      console.log("[DEBUG] handleSubmit payload:", values);
+      const res = await HttpClient.put("/vendor/complete-profile", values);
+      console.log("[DEBUG] handleSubmit response:", res);
+      showToast.success(res.data.message);
+
+      navigation.navigate("Vendor", { screen: "AddLocation" });
+    } catch (error) {
+      let errorMsg = "An error occurred. Please try again.";
+      if (error.response && error.response.data) {
+        errorMsg =
+          error.response.data.message || JSON.stringify(error.response.data);
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      showToast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
   };
-
   return (
     <View className="pb-[60px]" style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Header */}
@@ -68,38 +85,92 @@ export default function VendorBusinessInfoScreen({ navigation }) {
 
       {/* Content Area */}
       <View style={{ flex: 1 }}>
-        <ScrollView
-          contentContainerStyle={{ padding: 20 }}
-          showsVerticalScrollIndicator={false}
+        <Formik
+          initialValues={{
+            businessName: "",
+            bio: "",
+            location: "",
+            registerationNumber: "",
+            portfolioLink: "",
+          }}
+          validationSchema={vendorBusinessInfoSchema}
+          onSubmit={handleSubmitBus}
         >
-          <Text
-            style={{
-              fontFamily: "poppinsMedium",
-              fontSize: 16,
-              marginBottom: 20,
-              marginTop: 10,
-            }}
-          >
-            Please fill in the information below
-          </Text>
-          {/* Business Name */}
-          <AuthInput label="Business Name" />
-          <AuthInput label="Business Description" />
-          <AuthInput label="Location" />
-          <AuthInput label="Business Registration Number" />
-          <AuthInput label="Portfolio Link" />
-        </ScrollView>
-      </View>
-
-      {/* Button at bottom */}
-      <View style={{ padding: 20, paddingBottom: 30 }}>
-        <AuthButton
-          title="Continue"
-          onPress={() =>
-            navigation.navigate("Vendor", { screen: "AddLocation" })
-          }
-          isloading={false}
-        />
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+          }) => (
+            <ScrollView
+              contentContainerStyle={{ padding: 20 }}
+              showsVerticalScrollIndicator={false}
+            >
+              <Text
+                style={{
+                  fontFamily: "poppinsMedium",
+                  fontSize: 16,
+                  marginBottom: 20,
+                  marginTop: 10,
+                }}
+              >
+                Please fill in the information below
+              </Text>
+              {/* Business Name */}
+              <AuthInput
+                label="Business Name"
+                value={values.businessName}
+                onChangeText={handleChange("businessName")}
+                onBlur={handleBlur("businessName")}
+                error={errors.businessName}
+                touched={touched.businessName}
+              />
+              <AuthInput
+                label="Business Description"
+                value={values.bio}
+                onChangeText={handleChange("bio")}
+                onBlur={handleBlur("bio")}
+                error={errors.bio}
+                touched={touched.bio}
+              />
+              <AuthInput
+                label="Location"
+                value={values.location}
+                onChangeText={handleChange("location")}
+                onBlur={handleBlur("location")}
+                error={errors.location}
+                touched={touched.location}
+              />
+              <AuthInput
+                label="Business Registration Number"
+                value={values.registerationNumber}
+                onChangeText={handleChange("registerationNumber")}
+                onBlur={handleBlur("registerationNumber")}
+                error={errors.registerationNumber}
+                touched={touched.registerationNumber}
+              />
+              <AuthInput
+                label="Portfolio Link"
+                value={values.portfolioLink}
+                onChangeText={handleChange("portfolioLink")}
+                onBlur={handleBlur("portfolioLink")}
+                error={errors.portfolioLink}
+                touched={touched.portfolioLink}
+              />
+              {/* Button at bottom */}
+              <View style={{ paddingTop: 20, paddingBottom: 30 }}>
+                <AuthButton
+                  loadingMsg="Submitting"
+                  title="Continue"
+                  onPress={handleSubmit}
+                  isloading={loading}
+                />
+              </View>
+            </ScrollView>
+          )}
+        </Formik>
       </View>
     </View>
   );

@@ -12,7 +12,7 @@ HttpClient.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("token");
     if (token) {
-      config.headers["x-auth-token"] = token;
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
     // Add timestamp to prevent caching
     config.params = {

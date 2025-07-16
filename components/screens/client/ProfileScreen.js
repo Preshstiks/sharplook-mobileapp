@@ -7,36 +7,60 @@ import {
 } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useStatusBar } from "../../../context/StatusBarContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import BottomModal from "../../reusuableComponents/BottomModal";
+import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+import { useAuth } from "../../../context/AuthContext";
+
 const ProfileScreen = () => {
   const { setBarType } = useStatusBar();
   const navigation = useNavigation();
+  const { user } = useAuth();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     setBarType("primary");
   }, []);
+
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleClientSelect = () => {
+    setShowLogoutModal(false);
+    navigation.replace("Login");
+  };
+
+  const handleVendorSelect = () => {
+    setShowLogoutModal(false);
+    navigation.replace("VendorLogin");
+  };
+  console.log({ USER: user });
   return (
     <SafeAreaView className="flex-1 bg-secondary">
       {/* Header with avatar, name, email */}
       <View className="bg-primary rounded-b-[40px] items-center pt-[60px] pb-8">
         <Image
-          source={{
-            uri: "https://images.unsplash.com/photo-1614023342667-6f060e9d1e04?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-          }}
+          source={
+            user?.avatar
+              ? { uri: user.avatar }
+              : require("../../../assets/icon/avatar.png")
+          }
           className="w-24 h-24 rounded-full mb-4"
         />
         <Text
           className="text-white text-[16px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
-          Team Green
+          {`${user?.lastName} ${user?.firstName}`}
         </Text>
         <Text
           className="text-white text-[12px] mt-1"
           style={{ fontFamily: "poppinsLight" }}
         >
-          teamgreen@gmail.com
+          {user?.email}
         </Text>
       </View>
       {/* Options List */}
@@ -124,7 +148,7 @@ const ProfileScreen = () => {
         {/* Logout */}
         <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
-          onPress={() => navigation.replace("Login")}
+          onPress={handleLogout}
         >
           <View className="bg-[#FF0000] p-2 rounded-full mr-4">
             <Ionicons name="log-out-outline" size={24} color="#fff" />
@@ -149,6 +173,28 @@ const ProfileScreen = () => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Logout Modal */}
+      <BottomModal
+        isVisible={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        backgroundcolor="#FCFCFC"
+      >
+        <View className="pt-10">
+          <OutlineButton
+            title="Are you a Client?"
+            onPress={handleClientSelect}
+            icon={<AntDesign name="user" size={20} color="#EB278D" />}
+            iconPosition="left"
+          />
+          <OutlineButton
+            title="Are you a Vendor?"
+            onPress={handleVendorSelect}
+            icon={<MaterialIcons name="storefront" size={20} color="#EB278D" />}
+            iconPosition="left"
+          />
+        </View>
+      </BottomModal>
     </SafeAreaView>
   );
 };

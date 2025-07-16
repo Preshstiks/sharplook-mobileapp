@@ -21,19 +21,63 @@ import { useStatusBar } from "../../../../context/StatusBarContext";
 import { registerSchema } from "../../../../utils/validationSchemas";
 import Dropdown from "../../../reusuableComponents/inputFields/Dropdown";
 import * as DocumentPicker from "expo-document-picker";
+import { HttpClient } from "../../../../api/HttpClient";
+import { showToast } from "../../../ToastComponent/Toast";
+import { isAxiosError } from "axios";
+import { useAuth } from "../../../../context/AuthContext";
 
 const SERVICE_OPTIONS = [
-  { label: "In-shop", value: "in-shop" },
-  { label: "Home Service", value: "home-service" },
+  { label: "In-shop", value: "IN_SHOP" },
+  { label: "Home Service", value: "HOME_SERVICE" },
 ];
 
 export default function VendorRegisterScreen({ navigation }) {
-  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { setBarType } = useStatusBar();
+  const { setUserID } = useAuth();
 
   useEffect(() => {
     setBarType("secondary");
   }, []);
+
+  const handleSignup = async (values) => {
+    setLoading(true);
+    console.log("[DEBUG] handleSignup called with values:", values);
+    try {
+      const res = await HttpClient.post("/auth/register", values);
+      console.log("[DEBUG] Registration response:", res);
+      if (res.data && res.data.data && res.data.data.id) {
+        setUserID(res.data.data.id);
+      }
+      showToast.success(res.data.message);
+      if (res.data.statusCode === 201) {
+        console.log(
+          "[DEBUG] Registration successful, sending OTP to:",
+          values.email
+        );
+        await HttpClient.post("/auth/send-otp", {
+          email: values.email,
+        });
+      }
+      navigation.navigate("VendorEmailVerification", { email: values.email });
+    } catch (error) {
+      console.log("[DEBUG] Error during registration:", error);
+      if (isAxiosError(error)) {
+        if (error.response && error.response.data) {
+          const errorMessage =
+            error.response.data.message || "An unknown error occurred";
+          console.log("[DEBUG] Axios error message:", errorMessage);
+          showToast.error(errorMessage);
+        } else {
+          showToast.error("An unexpected error occurred. Please try again.");
+        }
+      }
+      // Already logged error above
+    } finally {
+      setLoading(false);
+      console.log("[DEBUG] handleSignup finished, loading set to false");
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -75,17 +119,13 @@ export default function VendorRegisterScreen({ navigation }) {
               lastName: "",
               email: "",
               password: "",
-              confirmPassword: "",
               serviceType: "",
-              document: null,
+              identityImage: null,
+              role: "VENDOR",
+              acceptedPersonalData: true,
             }}
             validationSchema={registerSchema}
-            onSubmit={(values) => {
-              console.log(values);
-              navigation.navigate("VendorEmailVerification", {
-                email: values.email,
-              });
-            }}
+            onSubmit={handleSignup}
           >
             {({
               handleChange,
@@ -171,7 +211,7 @@ export default function VendorRegisterScreen({ navigation }) {
                       multiple: false,
                     });
                     if (result.type === "success") {
-                      setFieldValue("document", result);
+                      setFieldValue("identityImage", result);
                     }
                   }}
                   style={{
@@ -191,7 +231,8 @@ export default function VendorRegisterScreen({ navigation }) {
                     className="text-[12px]"
                     style={{ fontFamily: "poppinsRegular", color: "#222" }}
                   >
-                    {values.document?.name || "Upload any means of Identity"}
+                    {values.identityImage?.name ||
+                      "Upload any means of Identity"}
                   </Text>
                   <MaterialIcons name="add" size={16} color="#201E1F" />
                 </Pressable>
@@ -211,9 +252,14 @@ export default function VendorRegisterScreen({ navigation }) {
                   <View className="flex-row items-center">
                     <Pressable
                       className="w-5 h-5 border border-primary rounded mr-2 items-center justify-center"
-                      onPress={() => setRememberMe(!rememberMe)}
+                      onPress={() =>
+                        setFieldValue(
+                          "acceptedPersonalData",
+                          !values.acceptedPersonalData
+                        )
+                      }
                     >
-                      {rememberMe && (
+                      {values.acceptedPersonalData && (
                         <MaterialIcons name="check" size={16} color="#EB278D" />
                       )}
                     </Pressable>
@@ -233,7 +279,8 @@ export default function VendorRegisterScreen({ navigation }) {
                 </View>
                 <AuthButton
                   title="Create Account"
-                  isloading={false}
+                  loadingMsg="Creating"
+                  isloading={loading}
                   onPress={handleSubmit}
                 />
                 <View className="mt-8 w-full items-center">

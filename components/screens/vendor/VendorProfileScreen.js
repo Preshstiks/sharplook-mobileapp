@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   SafeAreaView,
@@ -9,28 +9,52 @@ import {
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import { useStatusBar } from "../../../context/StatusBarContext";
 import { useNavigation } from "@react-navigation/native";
+import BottomModal from "../../reusuableComponents/BottomModal";
+import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+import { useAuth } from "../../../context/AuthContext";
 
 const VendorProfileScreen = () => {
   const { setBarType } = useStatusBar();
   const navigation = useNavigation();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     setBarType("primary");
   }, []);
 
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleClientSelect = () => {
+    setShowLogoutModal(false);
+    navigation.replace("Login");
+  };
+
+  const handleVendorSelect = () => {
+    setShowLogoutModal(false);
+    navigation.replace("VendorLogin");
+  };
+  console.log({ user });
   return (
     <SafeAreaView className="flex-1 bg-secondary">
       {/* Header with logo, name, badge, address */}
       <View className="bg-primary rounded-b-[40px] items-center pt-[60px] pb-8">
         <Image
-          source={require("../../../assets/img/logo/applogo.svg")}
+          source={
+            user?.avatar
+              ? { uri: user.avatar }
+              : require("../../../assets/icon/avatar.png")
+          }
           className="w-24 h-24 rounded-full mb-4 bg-white"
         />
         <Text
           className="text-white text-[16px] text-center"
           style={{ fontFamily: "poppinsMedium" }}
         >
-          Heritage Spa and Beauty Services
+          {user?.vendorOnboarding?.businessName}
         </Text>
         <View className="flex-row items-center mt-2">
           <View className="bg-white px-3 py-1 rounded-lg flex-row items-center mr-2">
@@ -39,7 +63,9 @@ const VendorProfileScreen = () => {
               className="text-[12px] text-[#ED2584]"
               style={{ fontFamily: "poppinsMedium" }}
             >
-              In-shop
+              {user?.vendorOnboarding?.serviceType === "IN_SHOP"
+                ? "In-shop"
+                : "Home Service"}
             </Text>
           </View>
         </View>
@@ -49,7 +75,7 @@ const VendorProfileScreen = () => {
             className="text-white text-[12px] ml-1"
             style={{ fontFamily: "poppinsLight" }}
           >
-            No. 4 Lagos, Nigeria
+            {user?.vendorOnboarding?.location}
           </Text>
         </View>
       </View>
@@ -123,7 +149,7 @@ const VendorProfileScreen = () => {
         {/* Logout */}
         <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
-          onPress={() => navigation.replace("VendorLogin")}
+          onPress={handleLogout}
         >
           <View className="bg-[#FF0000] p-2 rounded-full mr-4">
             <Ionicons name="log-out-outline" size={24} color="#fff" />
@@ -148,6 +174,28 @@ const VendorProfileScreen = () => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Logout Modal */}
+      <BottomModal
+        isVisible={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        backgroundcolor="#FCFCFC"
+      >
+        <View className="pt-10">
+          <OutlineButton
+            title="Are you a Client?"
+            onPress={handleClientSelect}
+            icon={<AntDesign name="user" size={20} color="#EB278D" />}
+            iconPosition="left"
+          />
+          <OutlineButton
+            title="Are you a Vendor?"
+            onPress={handleVendorSelect}
+            icon={<MaterialIcons name="storefront" size={20} color="#EB278D" />}
+            iconPosition="left"
+          />
+        </View>
+      </BottomModal>
     </SafeAreaView>
   );
 };

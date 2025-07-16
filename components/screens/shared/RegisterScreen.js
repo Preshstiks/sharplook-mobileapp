@@ -4,18 +4,12 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
-  Button,
   Pressable,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import {
-  AuthInput,
-  AuthTextInput,
-} from "../../reusuableComponents/inputFields/AuthInput";
+import { AuthInput } from "../../reusuableComponents/inputFields/AuthInput";
 import { Formik } from "formik";
 import Logo from "../../../assets/img/logo/sharplooklogo.svg";
 import FBicon from "../../../assets/img/logo/fbicon.svg";
@@ -24,10 +18,10 @@ import Appleicon from "../../../assets/img/logo/appleicon.svg";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { useStatusBar } from "../../../context/StatusBarContext";
-import { registerSchema } from "../../../utils/validationSchemas";
+import { clientRegisterSchema } from "../../../utils/validationSchemas";
 import { showToast } from "../../ToastComponent/Toast";
 import { HttpClient } from "../../../api/HttpClient";
-
+import { isAxiosError } from "axios";
 export default function RegisterScreen({ navigation }) {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,30 +30,42 @@ export default function RegisterScreen({ navigation }) {
   useEffect(() => {
     setBarType("secondary");
   }, []);
+
   const handleSignup = async (values) => {
-    // setLoading(true);
-    // try {
-    //   const res = await HttpClient.post("/auth/register", values);
-    //   console.log(res);
-    //   showToast.success(res.data.message);
-    //   navigation.navigate("EmailVerification", { email: values.email });
-    //   // if (res.data.statusCode === 201) {
-    //   //   await HttpClient.post("users/generate-token", {
-    //   //     email: values.email,
-    //   //   });
-    //   // }
-    // } catch (error) {
-    //   console.log("API call error:", error);
-    //   if (error.response && error.response.data) {
-    //     const errorMessage =
-    //       error.response.data.message || "An unknown error occurred";
-    //     showToast.error(errorMessage);
-    //   }
-    // } finally {
-    //   setLoading(false);
-    // }
-    // Navigation only, no API integration
-    navigation.navigate("EmailVerification", { email: values.email });
+    setLoading(true);
+    try {
+      const { confirmPassword, ...payload } = values;
+      const res = await HttpClient.post("/auth/register", payload);
+
+      showToast.success(res.data.message);
+      if (res.data.statusCode === 201) {
+        if (process.env.NODE_ENV === "development") {
+          console.log("[Register] Sending OTP to:", payload.email);
+        }
+        const otpRes = await HttpClient.post("/auth/send-otp", {
+          email: values.email,
+        });
+        if (process.env.NODE_ENV === "development") {
+          console.log("[Register] OTP response:", otpRes);
+        }
+      }
+      navigation.navigate("EmailVerificationSignup", { email: values.email });
+    } catch (error) {
+      console.log("[Register] Error response:", error.response);
+
+      console.log("[Register] Error message:", error.message);
+      if (isAxiosError(error)) {
+        if (error.response && error.response.data) {
+          const errorMessage =
+            error.response.data.message || "An unknown error occurred";
+          showToast.error(errorMessage);
+        } else {
+          showToast.error("An unexpected error occurred. Please try again.");
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <KeyboardAvoidingView
@@ -100,9 +106,10 @@ export default function RegisterScreen({ navigation }) {
               lastName: "",
               email: "",
               password: "",
-              confirmPassword: "",
+              role: "CLIENT",
+              acceptedPersonalData: true,
             }}
-            validationSchema={registerSchema}
+            validationSchema={clientRegisterSchema}
             onSubmit={handleSignup}
           >
             {({
@@ -112,6 +119,7 @@ export default function RegisterScreen({ navigation }) {
               errors,
               touched,
               handleSubmit,
+              setFieldValue,
             }) => (
               <View className="mt-10 mb-[60px]">
                 <View className="flex-row items-center justify-between gap-3">
@@ -169,9 +177,14 @@ export default function RegisterScreen({ navigation }) {
                   <View className="flex-row items-center">
                     <Pressable
                       className="w-5 h-5 border border-primary rounded mr-2 items-center justify-center"
-                      onPress={() => setRememberMe(!rememberMe)}
+                      onPress={() =>
+                        setFieldValue(
+                          "acceptedPersonalData",
+                          !values.acceptedPersonalData
+                        )
+                      }
                     >
-                      {rememberMe && (
+                      {values.acceptedPersonalData && (
                         <MaterialIcons name="check" size={16} color="#EB278D" />
                       )}
                     </Pressable>

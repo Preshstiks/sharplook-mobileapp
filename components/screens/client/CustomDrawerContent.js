@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import {
   DrawerContentScrollView,
@@ -6,7 +6,26 @@ import {
 } from "@react-navigation/drawer";
 import { MaterialIcons } from "@expo/vector-icons";
 import CloseNavBtn from "../../../assets/icon/closenav.svg";
+import BottomModal from "../../reusuableComponents/BottomModal";
+import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
+import { AntDesign } from "@expo/vector-icons";
+
 export default function CustomDrawerContent(props) {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleClientSelect = () => {
+    setShowLogoutModal(false);
+    props.navigation.replace("Login");
+  };
+
+  const handleVendorSelect = () => {
+    setShowLogoutModal(false);
+    props.navigation.replace("VendorLogin");
+  };
   return (
     <DrawerContentScrollView
       {...props}
@@ -58,9 +77,7 @@ export default function CustomDrawerContent(props) {
           marginLeft: 20,
           marginBottom: 30,
         }}
-        onPress={() => {
-          // handle logout logic here
-        }}
+        onPress={handleLogout}
       >
         <MaterialIcons name="logout" size={24} color="red" />
         <Text
@@ -69,6 +86,28 @@ export default function CustomDrawerContent(props) {
           Logout
         </Text>
       </TouchableOpacity>
+
+      {/* Logout Modal */}
+      <BottomModal
+        isVisible={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        backgroundcolor="#FCFCFC"
+      >
+        <View className="pt-10">
+          <OutlineButton
+            title="Are you a Client?"
+            onPress={handleClientSelect}
+            icon={<AntDesign name="user" size={20} color="#EB278D" />}
+            iconPosition="left"
+          />
+          <OutlineButton
+            title="Are you a Vendor?"
+            onPress={handleVendorSelect}
+            icon={<MaterialIcons name="storefront" size={20} color="#EB278D" />}
+            iconPosition="left"
+          />
+        </View>
+      </BottomModal>
     </DrawerContentScrollView>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ export default function OTPVerificationScreen({ navigation, route }) {
   };
   const phone = route.params?.phone || "";
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => setTimer((t) => t - 1), 1000);
       return () => clearInterval(interval);

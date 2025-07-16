@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,20 +11,18 @@ import {
 } from "react-native";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { Feather, Ionicons } from "@expo/vector-icons";
-import { AuthInput } from "../../reusuableComponents/inputFields/AuthInput";
+import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
+import { AuthInput } from "../../../reusuableComponents/inputFields/AuthInput";
 import * as ImagePicker from "expo-image-picker";
-import AuthButton from "../../reusuableComponents/buttons/AuthButton";
-
-const addProductSchema = yup.object().shape({
-  name: yup.string().required("Product name is required"),
-  price: yup.string().required("Price is required"),
-  quantity: yup.string().required("Quantity is required"),
-});
+import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
+import { HttpClient } from "../../../../api/HttpClient";
+import SuccessModal from "../../../Modal/SuccessModal";
+import { addProductSchema } from "../../../../utils/validationSchemas";
 
 export default function AddProductScreen({ navigation }) {
   const [selectedImage, setSelectedImage] = useState(null);
-
+  const [loading, setLoading] = useState(false);
+  const [visible, setVisible] = useState(false);
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -36,16 +34,87 @@ export default function AddProductScreen({ navigation }) {
       setSelectedImage(result.assets[0].uri);
     }
   };
+  const handleAddProduct = async (values) => {
+    setLoading(true);
+    console.log("handleAddProduct called with values:", values);
+    console.log("Selected image:", selectedImage);
+    try {
+      const formData = new FormData();
+      formData.append("productName", values.productName);
+      formData.append("price", values.price);
+      formData.append("qtyAvailable", values.qtyAvailable);
 
+      if (selectedImage) {
+        const filename = selectedImage.split("/").pop();
+        const match = /\.(\w+)$/.exec(filename ?? "");
+        const type = match ? `image/${match[1]}` : `image`;
+        formData.append("picture", {
+          uri: selectedImage,
+          name: filename,
+          type,
+        });
+      }
+
+      // Debug: log FormData keys and values
+      for (let pair of formData.entries()) {
+        console.log("FormData entry:", pair[0], pair[1]);
+      }
+
+      const res = await HttpClient.post(
+        "/products/vendor/addProducts",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("handleAddProduct response:", res);
+      setVisible(true);
+      navigation.navigate("Home", {
+        screen: "Dashboard",
+        params: { screen: "My Products" },
+      });
+    } catch (error) {
+      console.log("AddProduct error:", error, error.response);
+      let errorMsg = "An error occurred. Please try again.";
+      if (error.response && error.response.data) {
+        errorMsg =
+          error.response.data.message || JSON.stringify(error.response.data);
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      showToast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleProceed = () => {
+    setVisible(false);
+  };
+
+  useEffect(() => {
+    let timer;
+    if (visible) {
+      timer = setTimeout(() => {
+        setVisible(false);
+      }, 3000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [visible]);
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <Formik
-        initialValues={{ name: "", price: "", quantity: "" }}
-        validationSchema={addProductSchema}
-        onSubmit={(values, { resetForm }) => {
-          // handle submit
-          resetForm();
+        initialValues={{
+          productName: "",
+          price: "",
+          qtyAvailable: "",
+          picture: "",
         }}
+        validationSchema={addProductSchema}
+        onSubmit={handleAddProduct}
       >
         {({
           handleChange,
@@ -104,11 +173,11 @@ export default function AddProductScreen({ navigation }) {
                   </Text>
                   <AuthInput
                     label="Product Name"
-                    value={values.name}
-                    onChangeText={handleChange("name")}
-                    onBlur={handleBlur("name")}
-                    error={errors.name}
-                    touched={touched.name}
+                    value={values.productName}
+                    onChangeText={handleChange("productName")}
+                    onBlur={handleBlur("productName")}
+                    error={errors.productName}
+                    touched={touched.productName}
                   />
                   <AuthInput
                     label="Price"
@@ -120,11 +189,11 @@ export default function AddProductScreen({ navigation }) {
                   />
                   <AuthInput
                     label="Quantity Available"
-                    value={values.quantity}
-                    onChangeText={handleChange("quantity")}
-                    onBlur={handleBlur("quantity")}
-                    error={errors.quantity}
-                    touched={touched.quantity}
+                    value={values.qtyAvailable}
+                    onChangeText={handleChange("qtyAvailable")}
+                    onBlur={handleBlur("qtyAvailable")}
+                    error={errors.qtyAvailable}
+                    touched={touched.qtyAvailable}
                   />
 
                   <TouchableOpacity
@@ -140,11 +209,29 @@ export default function AddProductScreen({ navigation }) {
                     <Feather name="plus" size={16} color="black" />
                   </TouchableOpacity>
                   {selectedImage && (
-                    <View className="mb-4">
+                    <View
+                      className="mb-4"
+                      style={{ position: "relative", width: 172, height: 172 }}
+                    >
                       <Image
                         source={{ uri: selectedImage }}
-                        style={{ width: 120, height: 90, borderRadius: 8 }}
+                        style={{ width: 172, height: 172, borderRadius: 8 }}
                       />
+                      <TouchableOpacity
+                        onPress={() => setSelectedImage(null)}
+                        style={{
+                          position: "absolute",
+                          top: 6,
+                          right: 6,
+                          backgroundColor: "rgba(255,255,255,0.7)",
+                          borderRadius: 16,
+                          padding: 8,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <AntDesign name="delete" size={16} color="#E53935" />
+                      </TouchableOpacity>
                     </View>
                   )}
                 </View>
@@ -166,11 +253,23 @@ export default function AddProductScreen({ navigation }) {
                 elevation: 8,
               }}
             >
-              <AuthButton title="Add Product" onPress={handleSubmit} />
+              {/* <Text>Formik values: {JSON.stringify(values)}</Text>
+              <Text>Formik errors: {JSON.stringify(errors)}</Text> */}
+              <AuthButton
+                title="Add Product"
+                isloading={loading}
+                loadingMsg="Adding..."
+                onPress={handleSubmit}
+              />
             </View>
           </>
         )}
       </Formik>
+      <SuccessModal
+        onClose={handleProceed}
+        visible={visible}
+        message="Congratulations, your product was uploaded successfully!!!"
+      />
     </View>
   );
 }

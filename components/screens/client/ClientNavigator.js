@@ -48,29 +48,11 @@ import TermsOfUseLimitationOfLiabilityScreen from "./termsofuse/TermsOfUseLimita
 import TermsOfUseOtherTermsScreen from "./termsofuse/TermsOfUseOtherTermsScreen";
 import UserProfileScreen from "./userprofile/UserProfileScreen";
 import EditProfileScreen from "./userprofile/EditProfileScreen";
-
-// Placeholder screens
-function AccountInfoScreen() {
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Account Information</Text>
-    </View>
-  );
-}
-function BookingsScreen() {
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>My Bookings</Text>
-    </View>
-  );
-}
-function WalletScreen() {
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>My Wallet</Text>
-    </View>
-  );
-}
+import BookingsScreen from "./BookingsScreen";
+import ProfileScreen from "./ProfileScreen";
+import ReferAndEarnScreen from "./ReferAndEarnScreen";
+import WalletScreen from "./WalletScreen";
+// Removed: import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
 
 const Drawer = createDrawerNavigator();
 
@@ -94,15 +76,18 @@ export default function ClientNavigator() {
         component={ClientBottomNav}
         options={{ drawerItemStyle: { display: "none" } }}
       />
+      {/* AccountInfoScreen does not exist in the codebase. If you add it, uncomment below and import it. */}
+
       <Drawer.Screen
         name="Account Information"
-        component={AccountInfoScreen}
+        component={ProfileScreen}
         options={{
           drawerIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />
+
       <Drawer.Screen
         name="My Bookings"
         component={BookingsScreen}
@@ -112,8 +97,9 @@ export default function ClientNavigator() {
           ),
         }}
       />
+
       <Drawer.Screen
-        name="My Wallet"
+        name="SharpPay"
         component={WalletScreen}
         options={{
           drawerIcon: ({ color, size }) => (
@@ -121,6 +107,16 @@ export default function ClientNavigator() {
           ),
         }}
       />
+      <Drawer.Screen
+        name="Refer and Earn"
+        component={ReferAndEarnScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="gift-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
       <Drawer.Screen
         name="Settings"
         component={SettingsScreen}

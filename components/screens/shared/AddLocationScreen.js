@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,35 +7,119 @@ import {
   StyleSheet,
   Dimensions,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { WebView } from "react-native-webview";
-import * as Location from "expo-location";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useStatusBar } from "../../../context/StatusBarContext";
+import {
+  calculateDistance,
+  formatDistance,
+  getCurrentLocation,
+} from "../../../utils/locationUtils";
+import { showToast } from "../../ToastComponent/Toast";
+import { HttpClient } from "../../../api/HttpClient";
 
 const { width, height } = Dimensions.get("window");
 
 export default function ClientAddLocationScreen({ navigation }) {
   const webviewRef = useRef(null);
-  const { setBarType } = useStatusBar();
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [distances, setDistances] = useState({});
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [visible, setVisible] = useState(false);
+
+  // Sample locations data
+  const sampleLocations = [
+    { name: "Sagamu, Ogun State", lat: 6.8333, lng: 3.6333 },
+    { name: "Abeokuta, Ogun State", lat: 7.1557, lng: 3.3451 },
+    { name: "Lekki-Epe, Lagos State", lat: 6.5244, lng: 3.3792 },
+  ];
+
+  // Get current location on component mount and select it by default
   useEffect(() => {
-    setBarType("primary");
+    const getLocation = async () => {
+      try {
+        const location = await getCurrentLocation();
+        setCurrentLocation(location);
+        setSelectedLocation(location); // Select current location by default
+
+        // Update map with current location
+        if (webviewRef.current) {
+          webviewRef.current.postMessage(JSON.stringify(location));
+        }
+      } catch (error) {
+        if (error.response && error.response.data) {
+          const errorMessage =
+            error.response.data.message || "An unknown error occurred";
+          showToast.error(errorMessage);
+        }
+      }
+    };
+    getLocation();
   }, []);
+
+  // Calculate distances when current location changes
+  useEffect(() => {
+    if (currentLocation) {
+      const newDistances = {};
+      sampleLocations.forEach((location) => {
+        const distance = calculateDistance(
+          currentLocation.latitude,
+          currentLocation.longitude,
+          location.lat,
+          location.lng
+        );
+        newDistances[location.name] = distance;
+      });
+      setDistances(newDistances);
+    }
+  }, [currentLocation]);
+
+  const updateServiceRadius = async (latitude, longitude, radiusKm = 10) => {
+    try {
+      const payload = { radiusKm, latitude, longitude };
+      console.log("Sending payload to /user/location:", payload);
+
+      const response = await HttpClient.put("/user/location", payload);
+
+      console.log("API response:", response.data);
+      showToast.success(response.data.message);
+      navigation.replace("Client");
+    } catch (error) {
+      console.error("API error:", error);
+      if (error.response && error.response.data) {
+        const errorMessage =
+          error.response.data.message || "An unknown error occurred";
+        showToast.error(errorMessage);
+      }
+    }
+  };
+
   // Function to get current location and send to WebView
   const handleUseCurrentLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      alert("Permission to access location was denied");
-      return;
+    setIsLoading(true);
+    try {
+      const location = await getCurrentLocation();
+      console.log("handleUseCurrentLocation - got location:", location);
+      setCurrentLocation(location);
+      setSelectedLocation(location);
+
+      webviewRef.current.postMessage(JSON.stringify(location));
+      console.log("handleUseCurrentLocation - sent to WebView:", location);
+
+      await updateServiceRadius(location.latitude, location.longitude);
+    } catch (error) {
+      console.error("handleUseCurrentLocation error:", error);
+      if (error.response && error.response.data) {
+        const errorMessage =
+          error.response.data.message || "An unknown error occurred";
+        showToast.error(errorMessage);
+      }
+    } finally {
+      setIsLoading(false);
     }
-    let location = await Location.getCurrentPositionAsync({});
-    const { latitude, longitude } = location.coords;
-    webviewRef.current.postMessage(JSON.stringify({ latitude, longitude }));
-    navigation.navigate("ClientVerifyPhoneNumber", {
-      latitude,
-      longitude,
-    });
   };
 
   return (
@@ -46,7 +130,7 @@ export default function ClientAddLocationScreen({ navigation }) {
           <MaterialIcons name="arrow-back-ios" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Location</Text>
-        <TouchableOpacity onPress={() => navigation.replace("Home")}>
+        <TouchableOpacity onPress={() => navigation.replace("Client")}>
           {" "}
           {/* Replace with your skip logic */}
           <Text style={styles.skipText}>Skip</Text>
@@ -128,32 +212,34 @@ export default function ClientAddLocationScreen({ navigation }) {
       <View style={styles.bottomSheet}>
         <ScrollView>
           <TouchableOpacity
-            style={styles.locationOption}
+            style={[
+              styles.locationOption,
+              selectedLocation && styles.selectedLocationOption,
+            ]}
             onPress={handleUseCurrentLocation}
+            disabled={isLoading}
           >
             <MaterialIcons name="my-location" size={22} color="#EB278D" />
             <Text style={styles.currentLocationText}>
-              Use my current location
+              {isLoading ? "Updating..." : "Use my current location"}
             </Text>
+            {isLoading && (
+              <ActivityIndicator
+                size="small"
+                color="#EB278D"
+                style={{ marginLeft: 10 }}
+              />
+            )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.locationOption}>
-            <MaterialIcons name="location-on" size={22} color="#BDBDBD" />
-            <Text style={styles.locationText}>
-              Sagamu, Ogun State (24km away from you)
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.locationOption}>
-            <MaterialIcons name="location-on" size={22} color="#BDBDBD" />
-            <Text style={styles.locationText}>
-              Abeokuta, Ogun State (59km away from you)
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.locationOption}>
-            <MaterialIcons name="location-on" size={22} color="#BDBDBD" />
-            <Text style={styles.locationText}>
-              Lekki-Epe, Lagos State (24km away from you)
-            </Text>
-          </TouchableOpacity>
+          {sampleLocations.map((location, index) => (
+            <TouchableOpacity key={index} style={styles.locationOption}>
+              <MaterialIcons name="location-on" size={22} color="#BDBDBD" />
+              <Text style={styles.locationText}>
+                {location.name} ({formatDistance(distances[location.name] || 0)}
+                )
+              </Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       </View>
     </View>
@@ -182,7 +268,7 @@ const styles = StyleSheet.create({
   },
   searchBarContainer: {
     position: "absolute",
-    top: 120,
+    top: 90,
     left: 16,
     right: 16,
     zIndex: 10,
@@ -212,7 +298,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    paddingBottom: 50,
     elevation: 10,
     shadowColor: "#000",
     shadowOpacity: 0.1,
@@ -235,5 +320,10 @@ const styles = StyleSheet.create({
     fontFamily: "poppinsRegular",
     fontSize: 15,
     marginLeft: 10,
+  },
+  selectedLocationOption: {
+    backgroundColor: "#F8F8F8",
+    borderRadius: 8,
+    padding: 8,
   },
 });

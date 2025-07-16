@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
-import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { HttpClient } from "../../../api/HttpClient";
 import EmptySVG from "../../../assets/img/empty.svg";
 import { formatAmount } from "../../formatAmount";
-import BottomModal from "../../reusuableComponents/BottomModal";
+
 function SkeletonLoader() {
   return (
     <View className="flex-row flex-wrap mt-10 justify-between px-1">
@@ -63,26 +63,46 @@ function SkeletonLoader() {
   );
 }
 
-export default function MyProductsScreen({ navigation }) {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  useFocusEffect(
-    useCallback(() => {
-      const fetchProducts = async () => {
-        setLoading(true);
-        try {
-          const res = await HttpClient.get("/products/getVendorProducts");
-          setProducts(res.data.data);
-        } catch (err) {
-          setProducts([]);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchProducts();
-    }, [])
-  );
+export default function MyServicesScreen({ navigation }) {
+  // Dummy data for services
+  const dummyServices = [
+    {
+      id: 1,
+      productName: "Classic Manicure",
+      price: 5000,
+      qtyAvailable: 10,
+      picture:
+        "https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg",
+    },
+    {
+      id: 2,
+      productName: "Deluxe Pedicure",
+      price: 7000,
+      qtyAvailable: 7,
+      picture:
+        "https://images.pexels.com/photos/3993448/pexels-photo-3993448.jpeg",
+    },
+    {
+      id: 3,
+      productName: "Facial Treatment",
+      price: 12000,
+      qtyAvailable: 5,
+      picture:
+        "https://images.pexels.com/photos/3993447/pexels-photo-3993447.jpeg",
+    },
+    {
+      id: 4,
+      productName: "Hair Styling",
+      price: 8000,
+      qtyAvailable: 12,
+      picture:
+        "https://images.pexels.com/photos/3993446/pexels-photo-3993446.jpeg",
+    },
+  ];
+  const [products] = useState(dummyServices);
+  const [loading] = useState(false);
+
+  // Remove useFocusEffect and API call
   console.log({ products });
   return (
     <ScrollView className="flex-1 bg-white">
@@ -102,15 +122,15 @@ export default function MyProductsScreen({ navigation }) {
             className="text-center"
             style={{ fontSize: 18, fontFamily: "latoBold" }}
           >
-            My Products
+            My Services
           </Text>
         </View>
       </View>
       <View className="px-6">
         <AuthButton
           iconRight={<Feather name="plus" size={16} color="#fff" />}
-          title="Add New Product"
-          onPress={() => navigation.navigate("AddProduct")}
+          title="Add New Service"
+          onPress={() => navigation.navigate("AddServices")}
         />
         {loading ? (
           <SkeletonLoader />
@@ -121,7 +141,7 @@ export default function MyProductsScreen({ navigation }) {
               className="text-[14px] text-gray-400 mt-2"
               style={{ fontFamily: "poppinsRegular" }}
             >
-              No products found
+              No services found
             </Text>
           </View>
         ) : (
@@ -143,80 +163,26 @@ export default function MyProductsScreen({ navigation }) {
                   >
                     {p.productName}
                   </Text>
-                  <View>
-                    <View className="flex-row mt-1 items-center justify-between">
-                      <View>
-                        <Text
-                          className="text-primary text-[14px]"
-                          style={{ fontFamily: "latoBold" }}
-                        >
-                          {formatAmount(p.price)}
-                        </Text>
-                      </View>
-                      <TouchableOpacity onPress={() => setShowModal(true)}>
-                        <AntDesign name="delete" size={14} color="#E53935" />
-                      </TouchableOpacity>
-                    </View>
-                    <View className="flex-row mt-2 items-center justify-between">
-                      <View>
-                        <Text
-                          className="text-[8px] mt-1 text-[#00000066] mb-1"
-                          style={{ fontFamily: "latoBold" }}
-                        >
-                          {p.qtyAvailable} pieces remaining
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() =>
-                          navigation.navigate("EditProduct", { product: p })
-                        }
-                      >
-                        <MaterialIcons
-                          name="mode-edit"
-                          size={16}
-                          color="#eb278d"
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
+                  <Text
+                    className="text-primary text-[14px]"
+                    style={{ fontFamily: "latoBold" }}
+                  >
+                    {formatAmount(p.price)}
+                  </Text>
+                  <TouchableOpacity className="bg-primary py-2 rounded-[8px] mt-3">
+                    <Text
+                      style={{ fontFamily: "poppinsRegular" }}
+                      className="text-[11px] text-center text-white"
+                    >
+                      Edit
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             ))}
           </View>
         )}
       </View>
-      <BottomModal
-        isVisible={showModal}
-        onClose={() => setShowModal(false)}
-        showCloseBtn={true}
-      >
-        <View className="mb-8 mt-2">
-          <Text
-            className="text-[16px] text-center text-fadedDark"
-            style={{ fontFamily: "latoBold" }}
-          >
-            Are you sure you want to delete this Product?
-          </Text>
-        </View>
-        <View className="space-y-4 pb-10 mt-2">
-          <TouchableOpacity className="mt-2 rounded-[12px] mb-4 h-[52px] flex flex-row items-center w-full bg-[#ff0000] justify-center">
-            <Text
-              style={{ fontFamily: "poppinsMedium" }}
-              className="text-center text-[13px] text-white"
-            >
-              Yes
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="mt-2 rounded-[12px] mb-4 border h-[52px] flex flex-row items-center w-full border-[#ff0000] justify-center">
-            <Text
-              style={{ fontFamily: "poppinsMedium" }}
-              className="text-center text-[13px] text-[#ff0000]"
-            >
-              No
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </BottomModal>
     </ScrollView>
   );
 }

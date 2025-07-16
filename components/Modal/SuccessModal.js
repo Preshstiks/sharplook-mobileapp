@@ -27,17 +27,19 @@ export default function SuccessModal({
         >
           {message}
         </Text>
-        <TouchableOpacity
-          className="py-[10px] bg-primary w-full items-center rounded-[12px]"
-          onPress={onClose}
-        >
-          <Text
-            className="text-[16px] text-white"
-            style={{ fontFamily: "poppinsMedium" }}
+        {buttonText && (
+          <TouchableOpacity
+            className="py-[10px] bg-primary w-full items-center rounded-[12px]"
+            onPress={onClose}
           >
-            {buttonText}
-          </Text>
-        </TouchableOpacity>
+            <Text
+              className="text-[16px] text-white"
+              style={{ fontFamily: "poppinsMedium" }}
+            >
+              {buttonText}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </Modal>
   );

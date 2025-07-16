@@ -40,10 +40,6 @@ const categories = [
     label: "Massage",
     icon: <HairIcon width={36} height={36} color="#EB278D" />,
   },
-  {
-    label: "Facials",
-    icon: <MakeupIcon width={36} height={36} color="#EB278D" />,
-  },
 ];
 
 export default function OtherScreen({ navigation }) {

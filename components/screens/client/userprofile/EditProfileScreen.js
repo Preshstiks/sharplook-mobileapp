@@ -12,14 +12,23 @@ import {
 import { Ionicons, Feather } from "@expo/vector-icons";
 import OutlineTextInput from "../../../reusuableComponents/inputFields/OutlineTextInput";
 import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
+import { useAuth } from "../../../../context/AuthContext";
 
 const EditProfileScreen = ({ navigation }) => {
-  const [firstName, setFirstName] = useState("Team");
-  const [lastName, setLastName] = useState("Green");
-  const [email, setEmail] = useState("teamgreen@gmail.com");
-  const [phone, setPhone] = useState("+2348065456789");
-  const [location, setLocation] = useState("Lekki Phase 1");
+  const { user } = useAuth();
+  const [firstName, setFirstName] = useState(user?.firstName || "");
+  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [phone, setPhone] = useState(user?.phone || "");
+  const [location, setLocation] = useState(user?.location || "");
 
+  React.useEffect(() => {
+    setFirstName(user?.firstName || "");
+    setLastName(user?.lastName || "");
+    setEmail(user?.email || "");
+    setPhone(user?.phone || "");
+    setLocation(user?.location || "");
+  }, [user]);
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>

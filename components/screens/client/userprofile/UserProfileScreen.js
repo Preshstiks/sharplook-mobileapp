@@ -8,8 +8,10 @@ import {
 } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import OutlineTextInput from "../../../reusuableComponents/inputFields/OutlineTextInput";
+import { useAuth } from "../../../../context/AuthContext";
 
 const UserProfileScreen = ({ navigation }) => {
+  const { user } = useAuth();
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header Section */}
@@ -36,31 +38,39 @@ const UserProfileScreen = ({ navigation }) => {
           className="text-white text-[16px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
-          Team Green
+          {`${user.lastName} ${user.firstName}`}
         </Text>
         <Text
           className="text-white text-[12px] mt-1"
           style={{ fontFamily: "poppinsLight" }}
         >
-          teamgreen@gmail.com
+          {user.email}
         </Text>
       </View>
       {/* Form Section */}
       <View className="flex-1 px-4 pt-6">
-        <OutlineTextInput label="First Name" value="Team" editable={false} />
-        <OutlineTextInput label="Last Name" value="Green" editable={false} />
+        <OutlineTextInput
+          label="First Name"
+          value={user.firstName}
+          editable={false}
+        />
+        <OutlineTextInput
+          label="Last Name"
+          value={user.lastName}
+          editable={false}
+        />
         <OutlineTextInput
           label="Email Address"
-          value="teamgreen@gmail.com"
+          value={user.email}
           editable={false}
         />
         <OutlineTextInput
           label="Phone Number"
-          value="+2348065456789"
+          value={user?.phone}
           editable={false}
         />
         <OutlineTextInput
-          value="Lekki Phase 1"
+          value={user?.location}
           label="Location"
           editable={false}
           style={{ marginTop: 0 }}

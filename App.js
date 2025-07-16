@@ -7,7 +7,11 @@ import { StatusBarProvider, useStatusBar } from "./context/StatusBarContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "./components/ToastComponent/ToastConfig";
-
+if (__DEV__) {
+  global.XMLHttpRequest = global.originalXMLHttpRequest
+    ? global.originalXMLHttpRequest
+    : global.XMLHttpRequest;
+}
 function GlobalStatusBar() {
   const { barType } = useStatusBar();
   return (
