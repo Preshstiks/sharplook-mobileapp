@@ -1,65 +1,117 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, Image, Pressable, ScrollView } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { useStatusBar } from "../../../context/StatusBarContext";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Empty from "../../../assets/img/empty.svg";
-const bookings = [
-  {
-    id: "1",
-    service: "Facials",
-    vendor: "Heritage Spa and Beauty Services",
-    date: "July 26, 2025",
-    time: "9:00PM",
-    day: "Monday",
-    price: "₦ 176,000",
-    image: require("../../../assets/img/facials.png"),
-    status: "Pending",
-  },
-  {
-    id: "2",
-    service: "Facials",
-    vendor: "Heritage Spa and Beauty Services",
-    date: "July 26, 2025",
-    time: "9:00PM",
-    day: "Monday",
-    price: "₦ 176,000",
-    image: require("../../../assets/img/facials.png"),
-    status: "Pending",
-  },
-  {
-    id: "3",
-    service: "Facials",
-    vendor: "Heritage Spa and Beauty Services",
-    date: "July 26, 2025",
-    time: "9:00PM",
-    day: "Monday",
-    price: "₦ 176,000",
-    image: require("../../../assets/img/facials.png"),
-    status: "Pending",
-  },
-];
+import { HttpClient } from "../../../api/HttpClient";
+import AuthButton from "../../../components/reusuableComponents/buttons/AuthButton";
 
 export default function BookingsScreen() {
   const navigation = useNavigation();
-  const [tab, setTab] = React.useState("Pending");
-  const { setBarType } = useStatusBar();
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
+  const [tab, setTab] = useState("Pending");
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchBookings = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const response = await HttpClient.get("/bookings/getBookings");
+          console.log("API response:", response.data);
+          setBookings(response.data.data || []);
+        } catch (err) {
+          setError("Failed to load bookings.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchBookings();
+    }, [])
+  );
+
   const filteredBookings = bookings.filter((b) => b.status === tab);
 
   const EmptyState = () => (
     <View className="flex-1 justify-center items-center px-8">
       <Empty width={150} height={150} />
-
       <Text
         style={{ fontFamily: "poppinsRegular" }}
         className="text-[12px] text-center"
       >
         {tab === "Pending"
-          ? "You don't have any pending bookings at the moment."
-          : "You don't have any completed bookings yet."}
+          ? "You have no pending bookings"
+          : "You have no completed bookings"}
       </Text>
+    </View>
+  );
+
+  // Skeleton loader for booking card
+  const SkeletonCard = () => (
+    <View className="flex-row gap-3 bg-white rounded-[12px] shadow-md mb-5 p-3">
+      <View
+        className="w-[100px] h-[100px] rounded-[8px] mr-2"
+        style={{ backgroundColor: "#e5e7eb" }}
+      />
+      <View className="flex-1 justify-between">
+        <View>
+          <View
+            className="mb-1"
+            style={{
+              width: 120,
+              height: 16,
+              backgroundColor: "#e5e7eb",
+              borderRadius: 4,
+            }}
+          />
+          <View
+            style={{
+              width: 80,
+              height: 10,
+              backgroundColor: "#e5e7eb",
+              borderRadius: 4,
+              marginTop: 4,
+            }}
+          />
+          <View
+            style={{
+              width: 60,
+              height: 10,
+              backgroundColor: "#e5e7eb",
+              borderRadius: 4,
+              marginTop: 4,
+            }}
+          />
+          <View
+            style={{
+              width: 60,
+              height: 10,
+              backgroundColor: "#e5e7eb",
+              borderRadius: 4,
+              marginTop: 4,
+            }}
+          />
+          <View
+            style={{
+              width: 60,
+              height: 10,
+              backgroundColor: "#e5e7eb",
+              borderRadius: 4,
+              marginTop: 4,
+            }}
+          />
+        </View>
+        <View
+          style={{
+            width: 50,
+            height: 14,
+            backgroundColor: "#e5e7eb",
+            borderRadius: 4,
+            alignSelf: "flex-end",
+            marginTop: 8,
+          }}
+        />
+      </View>
     </View>
   );
 
@@ -72,6 +124,12 @@ export default function BookingsScreen() {
         >
           My Bookings
         </Text>
+      </View>
+      <View className="px-4 mt-3">
+        <AuthButton
+          title="Offer your price"
+          onPress={() => navigation.navigate("OfferPriceScreen")}
+        />
       </View>
       <View className="flex-row justify-center mt-8 mb-2 gap-3">
         <Pressable
@@ -97,7 +155,13 @@ export default function BookingsScreen() {
           </Text>
         </Pressable>
       </View>
-      {filteredBookings.length === 0 ? (
+      {loading ? (
+        <ScrollView className="px-3 mt-2" showsVerticalScrollIndicator={false}>
+          {[...Array(4)].map((_, idx) => (
+            <SkeletonCard key={idx} />
+          ))}
+        </ScrollView>
+      ) : filteredBookings.length === 0 ? (
         <EmptyState />
       ) : (
         <ScrollView className="px-3 mt-2" showsVerticalScrollIndicator={false}>
@@ -110,7 +174,11 @@ export default function BookingsScreen() {
               }
             >
               <Image
-                source={booking.image}
+                source={
+                  booking.image
+                    ? { uri: booking.image }
+                    : require("../../../assets/img/facials.png")
+                }
                 className="w-[100px] h-[100px] rounded-[8px] mr-2"
               />
               <View className="flex-1 justify-between">

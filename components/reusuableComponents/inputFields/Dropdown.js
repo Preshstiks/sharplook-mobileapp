@@ -15,6 +15,7 @@ export default function Dropdown({
   error,
   touched,
   options,
+  placeholder, // new prop
 }) {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -38,7 +39,7 @@ export default function Dropdown({
     error && touched ? "#FF0000" : isFocused ? "#EB278D" : "#F9BCDC";
 
   // Show label if focused or value is selected
-  const showLabel = label && (isFocused || value);
+  const showLabel = !!label;
 
   return (
     <View style={{ marginBottom: 16 }}>
@@ -64,7 +65,10 @@ export default function Dropdown({
               onBlur={() => setIsFocused(false)}
               dropdownIconColor="#EB278D"
             >
-              {/* Only show real options, no placeholder/indicator */}
+              {/* Placeholder option if provided */}
+              {placeholder && (
+                <Picker.Item label={placeholder} value="" color="#BEBEBE" />
+              )}
               {options &&
                 options.map((option) => (
                   <Picker.Item

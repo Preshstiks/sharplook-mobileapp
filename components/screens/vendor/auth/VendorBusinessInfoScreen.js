@@ -32,8 +32,9 @@ export default function VendorBusinessInfoScreen({ navigation }) {
       console.log("[DEBUG] handleSubmit response:", res);
       showToast.success(res.data.message);
 
-      navigation.navigate("Vendor", { screen: "AddLocation" });
+      navigation.navigate("AddLocation");
     } catch (error) {
+      console.log("[DEBUG] handleSubmit error:", error.response);
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         errorMsg =
@@ -91,7 +92,7 @@ export default function VendorBusinessInfoScreen({ navigation }) {
             bio: "",
             location: "",
             registerationNumber: "",
-            portfolioLink: "",
+            // portfolioLink: "",
           }}
           validationSchema={vendorBusinessInfoSchema}
           onSubmit={handleSubmitBus}
@@ -144,21 +145,21 @@ export default function VendorBusinessInfoScreen({ navigation }) {
                 touched={touched.location}
               />
               <AuthInput
-                label="Business Registration Number"
+                label="Business Registration Number (CAC)"
                 value={values.registerationNumber}
                 onChangeText={handleChange("registerationNumber")}
                 onBlur={handleBlur("registerationNumber")}
                 error={errors.registerationNumber}
                 touched={touched.registerationNumber}
               />
-              <AuthInput
+              {/* <AuthInput
                 label="Portfolio Link"
                 value={values.portfolioLink}
                 onChangeText={handleChange("portfolioLink")}
                 onBlur={handleBlur("portfolioLink")}
                 error={errors.portfolioLink}
                 touched={touched.portfolioLink}
-              />
+              /> */}
               {/* Button at bottom */}
               <View style={{ paddingTop: 20, paddingBottom: 30 }}>
                 <AuthButton

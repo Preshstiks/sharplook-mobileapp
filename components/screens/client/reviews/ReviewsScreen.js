@@ -1,35 +1,46 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
-import { Ionicons, FontAwesome } from "@expo/vector-icons";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 const reviews = [
   {
+    id: 1,
     name: "Funmilayo Kuti",
-    avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-    date: "13 Sep, 2020",
+    avatar: require("../../../../assets/img/blackman.jpg"), // Changed to real image
     rating: 4.8,
+    date: "13 Sep, 2020",
     text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pel ntesque malesuada eget vitae amet...",
   },
   {
+    id: 2,
     name: "Remi Kunke",
-    avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-    date: "13 Sep, 2020",
+    avatar: require("../../../../assets/img/nailtech.jpg"), // Example real image
     rating: 4.8,
+    date: "13 Sep, 2020",
     text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pel ntesque malesuada eget vitae amet...",
   },
   {
+    id: 3,
     name: "Esther Abike",
-    avatar: "https://randomuser.me/api/portraits/women/3.jpg",
-    date: "13 Sep, 2020",
+    avatar: require("../../../../assets/img/ped.jpg"), // Example real image
     rating: 4.8,
+    date: "13 Sep, 2020",
     text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pel ntesque malesuada eget vitae amet...",
   },
   {
+    id: 4,
     name: "Savanah Nguyen",
-    avatar: "https://randomuser.me/api/portraits/women/4.jpg",
-    date: "13 Sep, 2020",
+    avatar: require("../../../../assets/img/product1.jpg"), // Example real image
     rating: 4.8,
+    date: "13 Sep, 2020",
     text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pel ntesque malesuada eget vitae amet...",
   },
 ];
@@ -39,100 +50,130 @@ export default function ReviewsScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <View className="pt-12 pb-4 px-4 flex-row items-center justify-between bg-primary">
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
-          className="text-lg font-bold text-white"
-          style={{ fontFamily: "poppinsBold" }}
+          style={{ fontFamily: "poppinsMedium" }}
+          className="text-[16px] text-white"
         >
           Reviews
         </Text>
-        <View style={{ width: 22 }} />
+        <View style={{ width: 24 }} />
       </View>
+
       <ScrollView
-        className="flex-1 px-4 mt-4"
-        showsVerticalScrollIndicator={false}
+        className="px-4"
+        contentContainerStyle={{ paddingBottom: 32 }}
       >
         {/* Review Summary */}
-        <View className="flex-row items-center justify-between mb-4">
+        <View className="flex-row items-center justify-between my-6">
           <View>
             <Text
-              className="text-[15px] font-bold"
-              style={{ fontFamily: "poppinsBold" }}
+              className="text-[12px] text-faintDark"
+              style={{ fontFamily: "poppinsRegular" }}
             >
               245 Reviews
             </Text>
             <View className="flex-row items-center mt-1">
               <Text
-                className="text-[15px] font-bold mr-2"
-                style={{ fontFamily: "poppinsBold" }}
+                className="text-[12px] mt-1 mr-2"
+                style={{ fontFamily: "poppinsRegular" }}
               >
                 4.8
               </Text>
-              <FontAwesome name="star" size={16} color="#FFD700" />
-              <FontAwesome name="star" size={16} color="#FFD700" />
-              <FontAwesome name="star" size={16} color="#FFD700" />
-              <FontAwesome name="star" size={16} color="#FFD700" />
-              <FontAwesome name="star-half-empty" size={16} color="#FFD700" />
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Ionicons
+                  key={i}
+                  name={i <= 4 ? "star" : "star-outline"}
+                  size={13}
+                  color="#FFC107"
+                  className="mr-0.5"
+                />
+              ))}
             </View>
           </View>
           <TouchableOpacity
-            className="bg-white border-2 border-primary rounded-lg px-4 py-2 flex-row items-center"
+            className="bg-primary flex-row items-center px-4 py-[10px] rounded-lg"
             onPress={() => navigation.navigate("AddReviewScreen")}
           >
-            <Ionicons name="create-outline" size={18} color="#EB278D" />
+            <Ionicons
+              name="create-outline"
+              size={18}
+              color="#fff"
+              className="mr-1"
+            />
             <Text
-              className="ml-2 text-primary font-bold"
-              style={{ fontFamily: "poppinsBold" }}
+              className="text-white mt-1 text-[12px] ml-2"
+              style={{ fontFamily: "poppinsRegular" }}
             >
               Add Review
             </Text>
           </TouchableOpacity>
         </View>
         {/* Reviews List */}
-        {reviews.map((review, idx) => (
-          <View key={idx} className="flex-row items-start mb-6">
-            <Image
-              source={{ uri: review.avatar }}
-              className="w-10 h-10 rounded-full mr-3"
-            />
+        {reviews.map((review) => (
+          <View key={review.id} className="flex-row mb-6">
+            <View className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden mr-3 items-center justify-center">
+              {/* Use SVG or fallback to Image if SVG not supported */}
+              <Image
+                source={review.avatar}
+                style={{ width: 48, height: 48 }}
+                resizeMode="cover"
+              />
+            </View>
             <View className="flex-1">
               <View className="flex-row items-center justify-between">
                 <Text
-                  className="font-bold text-[15px]"
-                  style={{ fontFamily: "poppinsBold" }}
+                  className="text-[12px] font-semibold text-faintDark"
+                  style={{ fontFamily: "poppinsMedium" }}
                 >
                   {review.name}
                 </Text>
                 <View className="flex-row items-center">
                   <Text
-                    className="text-[14px] font-bold mr-1"
-                    style={{ fontFamily: "poppinsBold" }}
+                    className="text-[12px] mr-1"
+                    style={{ fontFamily: "poppinsRegular" }}
                   >
                     {review.rating}
                   </Text>
-                  <Text className="text-[12px] text-gray-500 mr-1">rating</Text>
-                  <FontAwesome name="star" size={14} color="#FFD700" />
-                  <FontAwesome name="star" size={14} color="#FFD700" />
-                  <FontAwesome name="star" size={14} color="#FFD700" />
-                  <FontAwesome name="star" size={14} color="#FFD700" />
-                  <FontAwesome
-                    name="star-half-empty"
-                    size={14}
-                    color="#FFD700"
-                  />
+                  <Text
+                    className="text-[10px] mr-1"
+                    style={{ fontFamily: "poppinsRegular" }}
+                  >
+                    rating
+                  </Text>
                 </View>
               </View>
-              <View className="flex-row items-center mt-1 mb-1">
-                <Ionicons name="calendar-outline" size={14} color="#A9A9A9" />
-                <Text className="ml-1 text-[12px] text-gray-500">
-                  {review.date}
-                </Text>
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center mb-1">
+                  <Ionicons
+                    name="time-outline"
+                    size={14}
+                    color="#888"
+                    className="mr-1"
+                  />
+                  <Text
+                    className="text-[10px] mt-1"
+                    style={{ fontFamily: "poppinsRegular" }}
+                  >
+                    {review.date}
+                  </Text>
+                </View>
+                <View className="flex-row items-center">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Ionicons
+                      key={i}
+                      name={i <= 4 ? "star" : "star-outline"}
+                      size={13}
+                      color="#FFC107"
+                    />
+                  ))}
+                </View>
               </View>
               <Text
-                className="text-[13px] text-black"
+                className="text-[10px] text-faintDark"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 {review.text}
@@ -144,3 +185,15 @@ export default function ReviewsScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: "#EB278D",
+    paddingTop: 50,
+    paddingBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+  },
+});

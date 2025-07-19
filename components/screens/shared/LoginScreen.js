@@ -16,15 +16,9 @@ import { useAuth } from "../../../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen({ navigation }) {
-  const [role, setRole] = useState("client"); // For demo, let user pick role
   const [rememberMe, setRememberMe] = useState(false);
-  const { setBarType } = useStatusBar();
-  const { setIsAuthenticated, login } = useAuth();
+  const { setLastAttemptedCredentials, login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    setBarType("secondary");
-  }, []);
 
   const handleLogin = async (values) => {
     setIsLoading(true);
@@ -33,16 +27,17 @@ export default function LoginScreen({ navigation }) {
       console.log("[DEBUG] handleLogin response:", response);
       const statusCode = response.data.statusCode || response.status;
       const userRole = response.data.user && response.data.user.role;
-      if (response.data.token) {
-        await login(response.data.token);
-      }
+      const token = response.data.token;
+
       if (statusCode === 200) {
         if (userRole === "CLIENT") {
+          if (token) {
+            await login(token, userRole);
+          }
           showToast.success(response.data.message);
           navigation.replace("Client");
-          setIsAuthenticated(true);
         } else {
-          showToast.error("Unauthorized role");
+          showToast.error("Please Login with a Client account!");
         }
         console.log("[DEBUG] handleLogin response:", userRole);
       }
@@ -50,7 +45,14 @@ export default function LoginScreen({ navigation }) {
       console.log("[DEBUG] handleLogin error:", error);
       if (error.response) {
         const message = error.response.data && error.response.data.message;
-        if (message === "Please set your location preference to continue.") {
+        if (message === "No Location") {
+          const token = error.response.data.token;
+          await AsyncStorage.setItem("token", token);
+          setLastAttemptedCredentials({
+            email: values.email,
+            password: values.password,
+          });
+          showToast.info(message);
           navigation.navigate("ClientAddLocation");
         } else {
           showToast.error(

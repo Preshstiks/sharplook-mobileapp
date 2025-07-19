@@ -15,11 +15,9 @@ import * as ImagePicker from "expo-image-picker";
 import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 import { HttpClient } from "../../../../api/HttpClient";
 import SuccessModal from "../../../Modal/SuccessModal";
-import {
-  addProductSchema,
-  addServiceSchema,
-} from "../../../../utils/validationSchemas";
+import { addServiceSchema } from "../../../../utils/validationSchemas";
 import Dropdown from "../../../reusuableComponents/inputFields/Dropdown";
+import { showToast } from "../../../ToastComponent/Toast";
 
 export default function AddServicesScreen({ navigation }) {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -37,14 +35,13 @@ export default function AddServicesScreen({ navigation }) {
     }
   };
   const SERVICE_OPTIONS = [
-    { label: "Nails", value: "NAILS" },
-    { label: "Barbing Saloon", value: "BARBING_SALOON" },
-    { label: "Makeup", value: "MAKEUP" },
-    { label: "Pedicure", value: "PEDICURE" },
-    { label: "Manicure", value: "MANICURE" },
-    { label: "Hair", value: "HAIR" },
-    { label: "Facials", value: "FACIALS" },
-    { label: "Massage", value: "MASSAGE" },
+    { label: "Nails", value: "Nails" },
+    { label: "Barbing Saloon", value: "Barbing Saloon" },
+    { label: "Makeup", value: "Makeup" },
+    { label: "Pedicure", value: "Pedicure" },
+    { label: "Manicure", value: "Manicure" },
+    { label: "Hair", value: "Hair" },
+    { label: "Massage", value: "Massage" },
   ];
   const handleAddProduct = async (values) => {
     setLoading(true);
@@ -52,15 +49,14 @@ export default function AddServicesScreen({ navigation }) {
     console.log("Selected image:", selectedImage);
     try {
       const formData = new FormData();
-      formData.append("productName", values.productName);
-      formData.append("price", values.price);
-      formData.append("qtyAvailable", values.qtyAvailable);
+      formData.append("serviceName", values.serviceName);
+      formData.append("servicePrice", values.servicePrice);
 
       if (selectedImage) {
         const filename = selectedImage.split("/").pop();
         const match = /\.(\w+)$/.exec(filename ?? "");
         const type = match ? `image/${match[1]}` : `image`;
-        formData.append("picture", {
+        formData.append("serviceImage", {
           uri: selectedImage,
           name: filename,
           type,
@@ -73,7 +69,7 @@ export default function AddServicesScreen({ navigation }) {
       }
 
       const res = await HttpClient.post(
-        "/products/vendor/addProducts",
+        "/vendorServices/addService",
         formData,
         {
           headers: {
@@ -88,7 +84,7 @@ export default function AddServicesScreen({ navigation }) {
         params: { screen: "My Services" },
       });
     } catch (error) {
-      console.log("AddProduct error:", error, error.response);
+      console.log("AddProduct error:", error, error.response.data);
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         errorMsg =
@@ -120,9 +116,9 @@ export default function AddServicesScreen({ navigation }) {
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <Formik
         initialValues={{
-          service: "",
-          price: "",
-          picture: "",
+          serviceName: "",
+          servicePrice: "",
+          serviceImage: "",
         }}
         validationSchema={addServiceSchema}
         onSubmit={handleAddProduct}
@@ -184,20 +180,20 @@ export default function AddServicesScreen({ navigation }) {
                     Make sure all information about the product is correct
                   </Text>
                   <Dropdown
-                    value={values.service}
+                    value={values.serviceName}
                     label="Service"
-                    onValueChange={(val) => setFieldValue("service", val)}
-                    error={errors.service}
-                    touched={touched.service}
+                    onValueChange={(val) => setFieldValue("serviceName", val)}
+                    error={errors.serviceName}
+                    touched={touched.serviceName}
                     options={SERVICE_OPTIONS}
                   />
                   <AuthInput
                     label="Price"
-                    value={values.price}
-                    onChangeText={handleChange("price")}
-                    onBlur={handleBlur("price")}
-                    error={errors.price}
-                    touched={touched.price}
+                    value={values.servicePrice}
+                    onChangeText={handleChange("servicePrice")}
+                    onBlur={handleBlur("servicePrice")}
+                    error={errors.servicePrice}
+                    touched={touched.servicePrice}
                   />
 
                   <TouchableOpacity
@@ -260,7 +256,7 @@ export default function AddServicesScreen({ navigation }) {
               {/* <Text>Formik values: {JSON.stringify(values)}</Text>
               <Text>Formik errors: {JSON.stringify(errors)}</Text> */}
               <AuthButton
-                title="Add Product"
+                title="Add Service"
                 isloading={loading}
                 loadingMsg="Adding..."
                 onPress={handleSubmit}
@@ -273,6 +269,7 @@ export default function AddServicesScreen({ navigation }) {
         onClose={handleProceed}
         visible={visible}
         message="Congratulations, your product was uploaded successfully!!!"
+        buttonText={false}
       />
     </View>
   );

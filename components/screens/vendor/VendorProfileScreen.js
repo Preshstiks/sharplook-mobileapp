@@ -7,7 +7,6 @@ import {
   View,
 } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
-import { useStatusBar } from "../../../context/StatusBarContext";
 import { useNavigation } from "@react-navigation/native";
 import BottomModal from "../../reusuableComponents/BottomModal";
 import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
@@ -15,17 +14,16 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 
 const VendorProfileScreen = () => {
-  const { setBarType } = useStatusBar();
   const navigation = useNavigation();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
-    setBarType("primary");
+    // setBarType("primary"); // This line is removed as per the edit hint.
   }, []);
 
-  const handleLogout = () => {
-    setShowLogoutModal(true);
+  const handleLogout = async () => {
+    await logout();
   };
 
   const handleClientSelect = () => {
@@ -69,10 +67,10 @@ const VendorProfileScreen = () => {
             </Text>
           </View>
         </View>
-        <View className="flex-row items-center mt-2">
+        <View className="flex-row w-[70%] mt-2">
           <Ionicons name="location-sharp" size={14} color="#fff" />
           <Text
-            className="text-white text-[12px] ml-1"
+            className="text-white text-center text-[12px] ml-1"
             style={{ fontFamily: "poppinsLight" }}
           >
             {user?.vendorOnboarding?.location}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,23 +8,16 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 import { AuthInput } from "../../../reusuableComponents/inputFields/AuthInput";
 import { Formik } from "formik";
 import Logo from "../../../../assets/img/logo/sharplooklogo.svg";
-import FBicon from "../../../../assets/img/logo/fbicon.svg";
-import Twittericon from "../../../../assets/img/logo/twittericon.svg";
-import Appleicon from "../../../../assets/img/logo/appleicon.svg";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
-import { useStatusBar } from "../../../../context/StatusBarContext";
 import { registerSchema } from "../../../../utils/validationSchemas";
 import Dropdown from "../../../reusuableComponents/inputFields/Dropdown";
 import * as DocumentPicker from "expo-document-picker";
 import { HttpClient } from "../../../../api/HttpClient";
 import { showToast } from "../../../ToastComponent/Toast";
-import { isAxiosError } from "axios";
-import { useAuth } from "../../../../context/AuthContext";
 
 const SERVICE_OPTIONS = [
   { label: "In-shop", value: "IN_SHOP" },
@@ -33,49 +26,40 @@ const SERVICE_OPTIONS = [
 
 export default function VendorRegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
-  const { setBarType } = useStatusBar();
-  const { setUserID } = useAuth();
-
-  useEffect(() => {
-    setBarType("secondary");
-  }, []);
 
   const handleSignup = async (values) => {
     setLoading(true);
-    console.log("[DEBUG] handleSignup called with values:", values);
+    console.log("handleSignup called with values:", values);
     try {
-      const res = await HttpClient.post("/auth/register", values);
-      console.log("[DEBUG] Registration response:", res);
-      if (res.data && res.data.data && res.data.data.id) {
-        setUserID(res.data.data.id);
-      }
-      showToast.success(res.data.message);
-      if (res.data.statusCode === 201) {
-        console.log(
-          "[DEBUG] Registration successful, sending OTP to:",
-          values.email
-        );
-        await HttpClient.post("/auth/send-otp", {
-          email: values.email,
+      const formData = new FormData();
+      formData.append("firstName", values.firstName);
+      formData.append("lastName", values.lastName);
+      formData.append("email", values.email);
+      formData.append("password", values.password);
+      formData.append("serviceType", values.serviceType);
+      formData.append("referredByCode", values.referredByCode || "");
+      formData.append("role", values.role);
+      formData.append("acceptedPersonalData", values.acceptedPersonalData);
+
+      if (values.identityImage && values.identityImage.uri) {
+        formData.append("identityImage", {
+          uri: values.identityImage.uri,
+          name: values.identityImage.name || "identity.jpg",
+          type: values.identityImage.mimeType || "image/jpeg",
         });
       }
+      const res = await HttpClient.post("/auth/register", formData);
+      showToast.success(res.data.message);
       navigation.navigate("VendorEmailVerification", { email: values.email });
     } catch (error) {
-      console.log("[DEBUG] Error during registration:", error);
-      if (isAxiosError(error)) {
-        if (error.response && error.response.data) {
-          const errorMessage =
-            error.response.data.message || "An unknown error occurred";
-          console.log("[DEBUG] Axios error message:", errorMessage);
-          showToast.error(errorMessage);
-        } else {
-          showToast.error("An unexpected error occurred. Please try again.");
-        }
+      if (error.response && error.response.data) {
+        const errorMessage = error.response.data.message;
+        showToast.error(errorMessage);
+      } else {
+        showToast.error("An unexpected error occurred. Please try again.");
       }
-      // Already logged error above
     } finally {
       setLoading(false);
-      console.log("[DEBUG] handleSignup finished, loading set to false");
     }
   };
 
@@ -120,9 +104,10 @@ export default function VendorRegisterScreen({ navigation }) {
               email: "",
               password: "",
               serviceType: "",
+              referredByCode: "",
               identityImage: null,
               role: "VENDOR",
-              acceptedPersonalData: true,
+              acceptedPersonalData: false,
             }}
             validationSchema={registerSchema}
             onSubmit={handleSignup}
@@ -188,10 +173,19 @@ export default function VendorRegisterScreen({ navigation }) {
                   touched={touched.confirmPassword}
                   secureTextEntry
                 />
+                <AuthInput
+                  label="Referral ID (optional)"
+                  value={values.referredByCode}
+                  onChangeText={handleChange("referredByCode")}
+                  onBlur={handleBlur("referredByCode")}
+                  error={errors.referredByCode}
+                  touched={touched.referredByCode}
+                />
                 {/* Service Type Dropdown */}
                 <Dropdown
                   value={values.serviceType}
                   label="Service Type"
+                  placeholder="Select Service Type"
                   onValueChange={(val) => setFieldValue("serviceType", val)}
                   error={errors.serviceType}
                   touched={touched.serviceType}
@@ -200,18 +194,28 @@ export default function VendorRegisterScreen({ navigation }) {
                 {/* Document Upload Box */}
                 <Pressable
                   onPress={async () => {
-                    const result = await DocumentPicker.getDocumentAsync({
-                      type: [
-                        "application/pdf",
-                        "image/jpeg",
-                        "image/jpg",
-                        "image/png",
-                      ],
-                      copyToCacheDirectory: true,
-                      multiple: false,
-                    });
-                    if (result.type === "success") {
-                      setFieldValue("identityImage", result);
+                    try {
+                      const result = await DocumentPicker.getDocumentAsync({
+                        type: [
+                          "application/pdf",
+                          "image/jpeg",
+                          "image/jpg",
+                          "image/png",
+                        ],
+                        copyToCacheDirectory: true,
+                        multiple: false,
+                      });
+                      if (
+                        !result.canceled &&
+                        result.assets &&
+                        result.assets.length > 0
+                      ) {
+                        const selectedFile = result.assets[0];
+                        console.log("[DEBUG] Selected file:", selectedFile);
+                        setFieldValue("identityImage", selectedFile);
+                      }
+                    } catch (error) {
+                      console.log("[DEBUG] Document picker error:", error);
                     }
                   }}
                   style={{
@@ -234,7 +238,9 @@ export default function VendorRegisterScreen({ navigation }) {
                     {values.identityImage?.name ||
                       "Upload any means of Identity"}
                   </Text>
-                  <MaterialIcons name="add" size={16} color="#201E1F" />
+                  {!values.identityImage?.name && (
+                    <MaterialIcons name="add" size={16} color="#201E1F" />
+                  )}
                 </Pressable>
                 <Text
                   style={{

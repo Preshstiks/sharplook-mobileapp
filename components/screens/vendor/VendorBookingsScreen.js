@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,8 +7,7 @@ import {
   TextInput,
   Image,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { useStatusBar } from "../../../context/StatusBarContext";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAuth } from "../../../context/AuthContext";
 import { HttpClient } from "../../../api/HttpClient";
@@ -121,28 +120,27 @@ function SkeletonLoader() {
 
 export default function VendorBookingsScreen() {
   const navigation = useNavigation();
-  const { setBarType } = useStatusBar();
   const [tab, setTab] = useState("ALL");
   const [search, setSearch] = useState("");
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState([]);
-
-  useEffect(() => {
-    setBarType("primary");
-    const fetchBookings = async () => {
-      setLoading(true);
-      try {
-        const res = await HttpClient.get("/bookings/getBookings");
-        setBookings(res.data?.data || []);
-      } catch (err) {
-        setBookings([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBookings();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchBookings = async () => {
+        setLoading(true);
+        try {
+          const res = await HttpClient.get("/bookings/getBookings");
+          setBookings(res.data?.data || []);
+        } catch (err) {
+          setBookings([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchBookings();
+    }, [])
+  );
 
   const filteredBookings = bookings.filter((b) => {
     if (tab === "ALL") return true;

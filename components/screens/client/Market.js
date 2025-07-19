@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,94 +7,189 @@ import {
   Image,
   FlatList,
   Dimensions,
+  Animated, // <-- Add Animated import
 } from "react-native";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import FilterBtn from "../../../assets/icon/filter.svg";
 import ChatIcon from "../../../assets/icon/chat.svg";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useStatusBar } from "../../../context/StatusBarContext";
-
-const products = [
-  {
-    id: 1,
-    title: "AC Power Supply",
-    desc: "Lorem ipsum dolor sit amet.",
-    vendor: "Mhildv Store",
-    price: 176000,
-    image: require("../../../assets/img/product1.jpg"),
-    rating: 4.5,
-    reviews: 335566,
-  },
-  {
-    id: 2,
-    title: "Set of Screwdrivers",
-    desc: "Lorem ipsum dolor sit amet.",
-    vendor: "Mhildv Store",
-    price: 176000,
-    image: require("../../../assets/img/product2.jpg"),
-    rating: 3.5,
-    reviews: 152344,
-  },
-  {
-    id: 3,
-    title: "Insulated Gloves",
-    desc: "Lorem ipsum dolor sit amet.",
-    vendor: "Mhildv Store",
-    price: 176000,
-    image: require("../../../assets/img/product3.jpg"),
-    rating: 5,
-    reviews: 523456,
-  },
-  {
-    id: 4,
-    title: "Power Analyzer",
-    desc: "Lorem ipsum dolor sit amet.",
-    vendor: "Mhildv Store",
-    price: 176000,
-    image: require("../../../assets/img/product4.jpg"),
-    rating: 4,
-    reviews: 45478,
-  },
-  {
-    id: 5,
-    title: "Oscilloscope Probe",
-    desc: "Lorem ipsum dolor sit amet.",
-    vendor: "Mhildv Store",
-    price: 176000,
-    image: require("../../../assets/img/product5.jpg"),
-    rating: 4.5,
-    reviews: 335566,
-  },
-  {
-    id: 6,
-    title: "Microcontroller Board",
-    desc: "Lorem ipsum dolor sit amet.",
-    vendor: "Mhildv Store",
-    price: 176000,
-    image: require("../../../assets/img/product6.jpg"),
-    rating: 3,
-    reviews: 27344,
-  },
-];
+import { showToast } from "../../ToastComponent/Toast";
+import { formatAmount } from "../../formatAmount";
+import { HttpClient } from "../../../api/HttpClient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
 
-export default function Market() {
-  const navigation = useNavigation();
-  const [search, setSearch] = useState("");
-  const { setBarType } = useStatusBar();
-  React.useEffect(() => {
-    setBarType("secondary");
+// SkeletonCard component for loading state
+const SkeletonCard = () => {
+  const shimmer = React.useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmer, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmer, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
   }, []);
 
+  return (
+    <Animated.View
+      style={{
+        width: CARD_WIDTH,
+        marginBottom: 18,
+        opacity: shimmer,
+      }}
+      className="bg-white rounded-2xl shadow-sm overflow-hidden mr-3"
+    >
+      <View
+        style={{
+          width: "100%",
+          height: 110,
+          backgroundColor: "#ececec",
+        }}
+      />
+      <View className="p-3">
+        <View
+          style={{
+            width: "70%",
+            height: 16,
+            backgroundColor: "#ececec",
+            borderRadius: 4,
+            marginBottom: 8,
+          }}
+        />
+        <View
+          style={{
+            width: "90%",
+            height: 10,
+            backgroundColor: "#ececec",
+            borderRadius: 4,
+            marginBottom: 8,
+          }}
+        />
+        <View
+          style={{
+            width: "60%",
+            height: 10,
+            backgroundColor: "#ececec",
+            borderRadius: 4,
+            marginBottom: 8,
+          }}
+        />
+        <View
+          style={{
+            width: "40%",
+            height: 13,
+            backgroundColor: "#ececec",
+            borderRadius: 4,
+            marginBottom: 8,
+          }}
+        />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: 4,
+          }}
+        >
+          {[...Array(5)].map((_, i) => (
+            <View
+              key={i}
+              style={{
+                width: 14,
+                height: 14,
+                backgroundColor: "#ececec",
+                borderRadius: 7,
+                marginRight: 2,
+              }}
+            />
+          ))}
+          <View
+            style={{
+              width: 20,
+              height: 10,
+              backgroundColor: "#ececec",
+              borderRadius: 4,
+              marginLeft: 4,
+            }}
+          />
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
+
+export default function Market() {
+  const navigation = useNavigation();
+  const { setBarType } = useStatusBar();
+  useEffect(() => {
+    setBarType("primary");
+  }, []);
+  const [search, setSearch] = useState("");
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const fetch = async () => {
+    setLoading(true);
+    const token = await AsyncStorage.getItem("token");
+    console.log("token", token);
+    try {
+      const res = await HttpClient.get("/products/getAllProducts");
+      setProducts(res.data.data || []);
+    } catch (error) {
+      const message = error.response.data.message || error.response.message;
+      if (error.response && error.response.data) {
+        showToast.error(message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  useFocusEffect(
+    useCallback(() => {
+      fetch();
+    }, [])
+  );
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const fetchProducts = async () => {
+  //       setLoading(true);
+  //       try {
+  //         const res = await HttpClient.get("/products/getVendorProducts");
+  //         console.log("API response:", res.data);
+  //         setProducts(res.data.data || []);
+  //       } catch (err) {
+  //         setProducts([]);
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     };
+  //     fetchProducts();
+  //   }, [])
+  // );
+  // console.log({ products });
   const renderProduct = ({ item }) => (
     <View
       style={{ width: CARD_WIDTH, marginBottom: 18 }}
       className="bg-white rounded-2xl shadow-sm overflow-hidden mr-3"
     >
       <Image
-        source={item.image}
+        source={
+          item.picture
+            ? { uri: item.picture }
+            : require("../../../assets/img/product1.jpg")
+        }
         style={{ width: "100%", height: 110 }}
         resizeMode="cover"
       />
@@ -103,17 +198,17 @@ export default function Market() {
           style={{ fontFamily: "latoBold" }}
           className="text-[16px] text-faintDark mb-1"
         >
-          {item.title}
+          {item.productName || item.title}
         </Text>
         <Text
           style={{ fontFamily: "latoRegular" }}
           className="text-[10px] text-[#A9A9A9] mb-1"
         >
-          {item.desc}
+          {item.description || item.desc}
         </Text>
         <View className="flex-row items-center justify-between">
           <Text style={{ fontFamily: "latoBold" }} className="text-[10px] my-2">
-            Vendor: {item.vendor}
+            Vendor: {item.vendorName || item.vendor || "-"}
           </Text>
           <MaterialIcons name="chat" size={20} color="#EB278D" />
         </View>
@@ -121,14 +216,16 @@ export default function Market() {
           style={{ fontFamily: "latoBold" }}
           className="text-[13px] text-faintDark mb-1"
         >
-          ₦ {item.price.toLocaleString()}
+          {formatAmount(item.price)}
         </Text>
         <View className="flex-row items-center justify-between mt-1">
           <View className="flex-row items-center">
             {[...Array(5)].map((_, i) => (
               <Ionicons
                 key={i}
-                name={i < Math.floor(item.rating) ? "star" : "star-outline"}
+                name={
+                  i < Math.floor(item.rating || 0) ? "star" : "star-outline"
+                }
                 size={14}
                 color="#FFC107"
               />
@@ -137,7 +234,7 @@ export default function Market() {
               style={{ fontFamily: "latoRegular" }}
               className="text-[10px] ml-1 text-[#A9A9A9]"
             >
-              {item.reviews.toLocaleString()}
+              {(item.reviews || 0).toLocaleString()}
             </Text>
           </View>
         </View>
@@ -180,7 +277,7 @@ export default function Market() {
           className="text-[16px] text-faintDark"
           style={{ fontFamily: "latoBold" }}
         >
-          52,082+ Items
+          {products.length.toLocaleString()} Items
         </Text>
         <TouchableOpacity
           onPress={() => navigation.navigate("Filter")}
@@ -196,15 +293,27 @@ export default function Market() {
         </TouchableOpacity>
       </View>
       {/* Product Grid */}
-      <FlatList
-        data={products}
-        renderItem={renderProduct}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
-      />
+      {loading ? (
+        <FlatList
+          data={Array.from({ length: 6 })}
+          renderItem={() => <SkeletonCard />}
+          keyExtractor={(_, idx) => idx.toString()}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: "space-between" }}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
+        />
+      ) : (
+        <FlatList
+          data={products}
+          renderItem={renderProduct}
+          keyExtractor={(item) => item.id?.toString() || item._id?.toString()}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: "space-between" }}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
+        />
+      )}
     </View>
   );
 }

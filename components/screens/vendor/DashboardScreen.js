@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { HttpClient } from "../../../api/HttpClient";
 import EmptySVG from "../../../assets/img/empty.svg";
 import { useAuth } from "../../../context/AuthContext";
 import { formatAmount } from "../../formatAmount";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Skeleton Loader Component
 function SkeletonLoader() {
@@ -185,50 +186,57 @@ export default function DashboardScreen({ navigation }) {
   const [products, setProducts] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [walletBalance, setWalletBalance] = useState(0);
   const { user } = useAuth();
+
   const toggleShowBalance = () => {
     setIsShowBalance(!isShowBalance);
   };
 
   console.log({ DETAILS: user });
-  // Fetch products and bookings
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [productsRes, bookingsRes] = await Promise.all([
-          HttpClient.get("/products/getVendorProducts"),
-          HttpClient.get("/bookings/getBookings"),
-        ]);
+  // Fetch products, bookings, and wallet balance
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        setLoading(true);
+        try {
+          const [productsRes, bookingsRes, walletRes] = await Promise.all([
+            HttpClient.get("/products/getVendorProducts"),
+            HttpClient.get("/bookings/getBookings"),
+            HttpClient.get("/wallet/walletDetails"),
+          ]);
 
-        // Map bookings: ensure each has id, name, date, time, service, price, avatar
-        const fetchedBookings = (bookingsRes.data?.data || []).map(
-          (b, idx) => ({
-            id: b.id || idx,
-            name: b.clientName || b.name || "Unknown",
-            date: b.date || b.bookingDate || "",
-            time: b.time || b.bookingTime || "",
-            service: b.service || b.serviceName || "",
-            price: b.price ? `₦${b.price}` : "",
-            avatar: b.avatar
-              ? { uri: b.avatar }
-              : require("../../../assets/img/blackman.jpg"), // fallback
-          })
-        );
-        setProducts(productsRes.data.data);
-        setBookings(fetchedBookings);
-      } catch (err) {
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+          // Map bookings: ensure each has id, name, date, time, service, price, avatar
+          const fetchedBookings = (bookingsRes.data?.data || []).map(
+            (b, idx) => ({
+              id: b.id || idx,
+              name: b.clientName || b.name || "Unknown",
+              date: b.date || b.bookingDate || "",
+              time: b.time || b.bookingTime || "",
+              service: b.service || b.serviceName || "",
+              price: b.price ? `₦${b.price}` : "",
+              avatar: b.avatar
+                ? { uri: b.avatar }
+                : require("../../../assets/img/blackman.jpg"), // fallback
+            })
+          );
+          setProducts(productsRes.data.data);
+          setBookings(fetchedBookings);
+          setWalletBalance(walletRes.data?.wallet?.balance || 0);
+        } catch (err) {
+          console.error("Error fetching data:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }, [])
+  );
 
   return (
     <ScrollView className="flex-1 bg-white">
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 pt-[60px] pb-4 bg-white">
+      <View className="flex-row items-center justify-between px-4 pt-[40px] pb-4 bg-white">
         <TouchableOpacity onPress={() => navigation.getParent()?.openDrawer()}>
           <MenuOpen width={30} height={30} />
         </TouchableOpacity>
@@ -292,23 +300,29 @@ export default function DashboardScreen({ navigation }) {
             </Text>
           </TouchableOpacity>
         </View>
-        {isShowBalance ? (
-          <Text
-            style={{ fontFamily: "poppinsBold" }}
-            className="text-white opacity-80 text-[24px]"
-          >
-            ₦146,500
-          </Text>
-        ) : (
-          <View className="flex-row gap-2 mb-4">
-            {[1, 2, 3, 4].map((i) => (
-              <View
-                key={i}
-                className="w-3 h-3 rounded-full bg-white opacity-80"
-              />
-            ))}
-          </View>
-        )}
+        {/* Balance/Dots area with fixed height to prevent card resize */}
+        <View style={{ height: 40, justifyContent: "center" }}>
+          {isShowBalance ? (
+            <Text
+              style={{ fontFamily: "poppinsBold" }}
+              className="text-white opacity-80 text-[24px]"
+            >
+              {formatAmount(walletBalance)}
+            </Text>
+          ) : (
+            <View
+              className="flex-row gap-2"
+              style={{ justifyContent: "start", alignItems: "center" }}
+            >
+              {[1, 2, 3, 4].map((i) => (
+                <View
+                  key={i}
+                  className="w-3 h-3 rounded-full bg-white opacity-80"
+                />
+              ))}
+            </View>
+          )}
+        </View>
         <View className="flex-row justify-between mt-2">
           <TouchableOpacity className="items-center flex-1" style={{ gap: 4 }}>
             <MaterialIcons name="file-download" size={28} color="white" />
@@ -319,7 +333,11 @@ export default function DashboardScreen({ navigation }) {
               Fund wallet
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity className="items-center flex-1" style={{ gap: 4 }}>
+          <TouchableOpacity
+            className="items-center flex-1"
+            style={{ gap: 4 }}
+            onPress={() => navigation.navigate("Withdraw")}
+          >
             <MaterialIcons name="file-upload" size={28} color="white" />
             <Text
               style={{ fontFamily: "latoRegular" }}
@@ -453,7 +471,11 @@ export default function DashboardScreen({ navigation }) {
                     >
                       {p.qtyAvailable} pieces remaining
                     </Text>
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate("EditProduct", { product: p })
+                      }
+                    >
                       <MaterialIcons
                         name="mode-edit"
                         size={24}

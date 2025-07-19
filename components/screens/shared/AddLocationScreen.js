@@ -18,6 +18,7 @@ import {
 } from "../../../utils/locationUtils";
 import { showToast } from "../../ToastComponent/Toast";
 import { HttpClient } from "../../../api/HttpClient";
+import { useAuth } from "../../../context/AuthContext";
 
 const { width, height } = Dimensions.get("window");
 
@@ -29,7 +30,12 @@ export default function ClientAddLocationScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [visible, setVisible] = useState(false);
-
+  const {
+    lastAttemptedCredentials,
+    clearLastAttemptedCredentials,
+    setIsAuthenticated,
+    login,
+  } = useAuth();
   // Sample locations data
   const sampleLocations = [
     { name: "Sagamu, Ogun State", lat: 6.8333, lng: 3.6333 },
@@ -86,7 +92,44 @@ export default function ClientAddLocationScreen({ navigation }) {
 
       console.log("API response:", response.data);
       showToast.success(response.data.message);
-      navigation.replace("Client");
+
+      if (
+        lastAttemptedCredentials &&
+        lastAttemptedCredentials.email &&
+        lastAttemptedCredentials.password
+      ) {
+        try {
+          const loginResponse = await HttpClient.post("/auth/login", {
+            email: lastAttemptedCredentials.email,
+            password: lastAttemptedCredentials.password,
+          });
+          console.log(loginResponse.data);
+          if (loginResponse.data.token) {
+            await login(loginResponse.data.token, "CLIENT");
+            setIsAuthenticated(true);
+            clearLastAttemptedCredentials();
+            navigation.replace("Client");
+            return;
+          } else {
+            showToast.error(
+              "Login failed after location update. Please try logging in again."
+            );
+            clearLastAttemptedCredentials();
+            navigation.replace("Login");
+            return;
+          }
+        } catch (loginError) {
+          showToast.error(
+            "Login failed after location update. Please try logging in again."
+          );
+          clearLastAttemptedCredentials();
+          navigation.replace("Login");
+          return;
+        }
+      } else {
+        // No credentials, so navigate directly
+        navigation.replace("Client");
+      }
     } catch (error) {
       console.error("API error:", error);
       if (error.response && error.response.data) {
@@ -131,8 +174,6 @@ export default function ClientAddLocationScreen({ navigation }) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Location</Text>
         <TouchableOpacity onPress={() => navigation.replace("Client")}>
-          {" "}
-          {/* Replace with your skip logic */}
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
       </View>

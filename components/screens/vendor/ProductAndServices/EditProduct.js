@@ -24,6 +24,8 @@ export default function EditProductScreen({ navigation, route }) {
   const [selectedImage, setSelectedImage] = useState(product?.picture || null);
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
+  const { showToast } = require("../../../ToastComponent/Toast"); // Add toast import
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -35,10 +37,10 @@ export default function EditProductScreen({ navigation, route }) {
       setSelectedImage(result.assets[0].uri);
     }
   };
-  const handleAddProduct = async (values) => {
+
+  // Use PUT to edit product
+  const handleEditProduct = async (values) => {
     setLoading(true);
-    console.log("handleAddProduct called with values:", values);
-    console.log("Selected image:", selectedImage);
     try {
       const formData = new FormData();
       formData.append("productName", values.productName);
@@ -56,13 +58,8 @@ export default function EditProductScreen({ navigation, route }) {
         });
       }
 
-      // Debug: log FormData keys and values
-      for (let pair of formData.entries()) {
-        console.log("FormData entry:", pair[0], pair[1]);
-      }
-
-      const res = await HttpClient.post(
-        "/products/vendor/addProducts",
+      const res = await HttpClient.put(
+        `/products/edit/${product.id}`,
         formData,
         {
           headers: {
@@ -70,14 +67,14 @@ export default function EditProductScreen({ navigation, route }) {
           },
         }
       );
-      console.log("handleAddProduct response:", res);
       setVisible(true);
-      navigation.navigate("Home", {
-        screen: "Dashboard",
-        params: { screen: "My Products" },
-      });
+      setTimeout(() => {
+        navigation.navigate("Home", {
+          screen: "Dashboard",
+          params: { screen: "My Products" },
+        });
+      }, 3000);
     } catch (error) {
-      console.log("AddProduct error:", error, error.response);
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         errorMsg =
@@ -90,6 +87,7 @@ export default function EditProductScreen({ navigation, route }) {
       setLoading(false);
     }
   };
+
   const handleProceed = () => {
     setVisible(false);
   };
@@ -117,7 +115,7 @@ export default function EditProductScreen({ navigation, route }) {
           picture: product?.picture || "",
         }}
         validationSchema={addProductSchema}
-        onSubmit={handleAddProduct}
+        onSubmit={handleEditProduct} // Use edit handler
       >
         {({
           handleChange,

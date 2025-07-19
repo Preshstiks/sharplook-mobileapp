@@ -13,35 +13,17 @@ import {
   mockVendors,
 } from "../../reusuableComponents/MockDataProvider";
 import { useRoute } from "@react-navigation/native";
-import { useStatusBar } from "../../../context/StatusBarContext";
 
 export default function CategoriesScreen() {
   const route = useRoute();
-  const { setBarType } = useStatusBar();
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
-  const initialCategoryName = route.params?.category;
-  const initialCategoryId =
-    mockCategories.find((cat) => cat.name === initialCategoryName)?.id ||
-    mockCategories[0]?.id;
-  const [selectedCategoryId, setSelectedCategoryId] =
-    useState(initialCategoryId);
+  const services = route.params?.services || [];
+  const category = route.params?.category || "";
   const [search, setSearch] = useState("");
 
-  // Find selected category name
-  const selectedCategory =
-    mockCategories.find((cat) => cat.id === selectedCategoryId)?.name || "";
-
-  // Filter vendors by category and search
-  const filteredVendors = mockVendors.filter((v) => {
-    const matchCategory = v.categoryId === selectedCategoryId;
-    const matchSearch = v.name.toLowerCase().includes(search.toLowerCase());
-    return matchCategory && matchSearch;
-  });
-
-  const vendorsNear = filteredVendors.filter((v) => v.distance <= 3);
-  const vendorsOnSharplook = filteredVendors.filter((v) => v.distance > 3);
+  // Filter services by search
+  const filteredServices = services.filter((service) =>
+    service.name?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <View className="flex-1 bg-white">
@@ -54,7 +36,7 @@ export default function CategoriesScreen() {
           className="text-white text-lg font-bold"
           style={{ fontFamily: "poppinsBold" }}
         >
-          Categories ({selectedCategory})
+          {category} Services
         </Text>
         <View style={{ width: 22 }} />
       </View>
@@ -64,7 +46,7 @@ export default function CategoriesScreen() {
           <Feather name="search" size={18} color="#BDBDBD" />
           <TextInput
             className="flex-1 ml-2 text-[14px]"
-            placeholder="Search Vendor"
+            placeholder={`Search ${category} Service`}
             value={search}
             onChangeText={setSearch}
             style={{ fontFamily: "latoRegular" }}
@@ -74,117 +56,54 @@ export default function CategoriesScreen() {
           <Feather name="sliders" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
-      {/* Category Buttons */}
-
       <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
-        {/* Vendors Near You */}
-        <Text
-          className="text-[15px] font-bold mt-2 mb-2"
-          style={{ fontFamily: "poppinsBold" }}
-        >
-          {selectedCategory} Vendors near you (3km away)
-        </Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="mb-4"
-        >
-          {vendorsNear.map((v) => (
-            <View
-              key={v.id}
-              className="w-[140px] mr-3 bg-white rounded-xl shadow-sm border border-[#F6F6F6] p-2"
-            >
-              <Image
-                source={v.image}
-                className="w-full h-[90px] rounded-lg"
-                resizeMode="cover"
-              />
-              <Text
-                className="mt-2 text-[13px] font-bold"
-                style={{ fontFamily: "poppinsBold" }}
-              >
-                {v.name}
-              </Text>
-              <View className="flex-row items-center mt-1 mb-1">
-                <Text
-                  className={`text-[10px] px-2 py-0.5 rounded-full ${v.type === "In-shop" ? "bg-primary" : "bg-pink-400"} text-white`}
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  {v.type}
-                </Text>
-              </View>
-              <View className="flex-row items-center mt-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <MaterialIcons
-                    key={i}
-                    name="star"
-                    size={14}
-                    color={i <= Math.round(v.rating) ? "#FFD700" : "#E0E0E0"}
-                  />
-                ))}
-                <Text className="ml-1 text-[12px] text-[#444]">
-                  {v.rating.toFixed(1)}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </ScrollView>
-        {/* Vendors on Sharplook */}
-        <Text
-          className="text-[15px] font-bold mt-2 mb-2"
-          style={{ fontFamily: "poppinsBold" }}
-        >
-          {selectedCategory} Vendors on Sharplook
-        </Text>
-        <View className="flex-row flex-wrap justify-between">
-          {vendorsOnSharplook.map((v) => (
-            <View
-              key={v.id}
-              className="w-[47%] mb-4 bg-white rounded-xl shadow-sm border border-[#F6F6F6] p-2"
-            >
-              <Image
-                source={v.image}
-                className="w-full h-[90px] rounded-lg"
-                resizeMode="cover"
-              />
-              <Text
-                className="mt-2 text-[13px] font-bold"
-                style={{ fontFamily: "poppinsBold" }}
-              >
-                {v.name}
-              </Text>
-              <View className="flex-row items-center mt-1 mb-1">
-                <Text
-                  className={`text-[10px] px-2 py-0.5 rounded-full ${v.type === "In-shop" ? "bg-primary" : "bg-pink-400"} text-white`}
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  {v.type}
-                </Text>
-              </View>
-              <View className="flex-row items-center mt-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <MaterialIcons
-                    key={i}
-                    name="star"
-                    size={14}
-                    color={i <= Math.round(v.rating) ? "#FFD700" : "#E0E0E0"}
-                  />
-                ))}
-                <Text className="ml-1 text-[12px] text-[#444]">
-                  {v.rating.toFixed(1)}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-        <TouchableOpacity className="items-center mt-2 mb-8">
+        {filteredServices.length === 0 ? (
           <Text
-            className="text-[13px] text-primary"
+            className="text-center mt-8 text-gray-400"
             style={{ fontFamily: "poppinsRegular" }}
           >
-            Load More
+            No services found for this category.
           </Text>
-        </TouchableOpacity>
+        ) : (
+          filteredServices.map((service) => (
+            <View
+              key={service.id}
+              className="w-full mb-4 bg-white rounded-xl shadow-sm border border-[#F6F6F6] p-2 flex-row items-center"
+            >
+              {service.picture && (
+                <Image
+                  source={{ uri: service.picture }}
+                  className="w-[80px] h-[80px] rounded-lg mr-3"
+                  resizeMode="cover"
+                />
+              )}
+              <View className="flex-1">
+                <Text
+                  className="text-[15px] font-bold"
+                  style={{ fontFamily: "poppinsBold" }}
+                >
+                  {service.name || service.serviceName}
+                </Text>
+                {service.description && (
+                  <Text
+                    className="text-[12px] text-gray-500 mt-1"
+                    style={{ fontFamily: "poppinsRegular" }}
+                  >
+                    {service.description}
+                  </Text>
+                )}
+                {service.price && (
+                  <Text
+                    className="text-[13px] text-primary mt-1"
+                    style={{ fontFamily: "poppinsMedium" }}
+                  >
+                    ₦{service.price}
+                  </Text>
+                )}
+              </View>
+            </View>
+          ))
+        )}
       </ScrollView>
     </View>
   );

@@ -3,6 +3,10 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { useNavigation } from "@react-navigation/native";
+import OutlineTextInput, {
+  OutlineTextAreaInput,
+} from "../../../reusuableComponents/inputFields/OutlineTextInput";
+import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 
 export default function AddReviewScreen() {
   const navigation = useNavigation();
@@ -13,83 +17,71 @@ export default function AddReviewScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <View className="pt-12 pb-4 px-4 flex-row items-center justify-between bg-primary">
+      <View
+        style={{
+          backgroundColor: "#EB278D",
+          paddingTop: 50,
+          paddingBottom: 16,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingHorizontal: 16,
+        }}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
-          className="text-lg font-bold text-white"
-          style={{ fontFamily: "poppinsBold" }}
+          style={{ fontFamily: "poppinsMedium" }}
+          className="text-[16px] text-white"
         >
           Add Review
         </Text>
-        <View style={{ width: 22 }} />
+        <View style={{ width: 24 }} />
       </View>
       <View className="flex-1 px-4 mt-6">
-        <Text
-          className="text-[15px] mb-2"
-          style={{ fontFamily: "poppinsRegular" }}
-        >
-          Name
-        </Text>
-        <TextInput
-          className="border border-pink-200 rounded-lg px-4 py-2 mb-4 text-[15px]"
+        <OutlineTextInput
+          label="Name"
           placeholder="Type your name"
           value={name}
           onChangeText={setName}
-          style={{ fontFamily: "poppinsRegular" }}
         />
-        <Text
-          className="text-[15px] mb-2"
-          style={{ fontFamily: "poppinsRegular" }}
-        >
-          How was your experience ?
-        </Text>
-        <TextInput
-          className="border border-pink-200 rounded-lg px-4 py-2 mb-4 text-[15px] min-h-[100px]"
+        <OutlineTextAreaInput
+          label="How was your experience?"
           placeholder="Describe your experience?"
           value={experience}
           onChangeText={setExperience}
-          multiline
-          numberOfLines={4}
-          style={{
-            fontFamily: "poppinsRegular",
-            minHeight: 100,
-            textAlignVertical: "top",
-          }}
         />
-        <Text
-          className="text-[15px] mb-2"
-          style={{ fontFamily: "poppinsRegular" }}
-        >
-          Star
-        </Text>
+
+        <View className="flex-row justify-between mt-2 items-center">
+          <Text className="text-[12px]" style={{ fontFamily: "poppinsMedium" }}>
+            Star
+          </Text>
+          <Text
+            className="text-[15px] text-primary ml-auto"
+            style={{ fontFamily: "poppinsBold" }}
+          >
+            {star.toFixed(1)}
+          </Text>
+        </View>
         <View className="flex-row items-center mb-8">
-          <Text className="text-[13px] text-gray-500 mr-2">0.0</Text>
+          <Text className="text-[12px] mr-2">1.0</Text>
           <Slider
             style={{ flex: 1, height: 40 }}
-            minimumValue={0}
+            minimumValue={1}
             maximumValue={5}
-            step={0.1}
+            step={1}
             minimumTrackTintColor="#EB278D"
             maximumTrackTintColor="#F6F6F6"
             thumbTintColor="#EB278D"
             value={star}
             onValueChange={setStar}
           />
-          <Text className="text-[13px] text-gray-500 ml-2">5.0</Text>
+          <Text className="text-[12px] ml-2">5.0</Text>
         </View>
-        <TouchableOpacity
-          className="bg-primary rounded-xl py-4 items-center mt-8"
-          onPress={() => {}}
-        >
-          <Text
-            className="text-white text-[17px] font-bold"
-            style={{ fontFamily: "poppinsBold" }}
-          >
-            Submit Review
-          </Text>
-        </TouchableOpacity>
+      </View>
+      <View className="px-4 mb-8">
+        <AuthButton title="Submit Review" />
       </View>
     </View>
   );

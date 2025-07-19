@@ -10,24 +10,21 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useStatusBar } from "../../../context/StatusBarContext";
-import OutlineTextInput from "../../reusuableComponents/inputFields/OutlineTextInput";
-import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import { vendorBusinessInfoSchema } from "../../../utils/validationSchemas";
 import { useAuth } from "../../../context/AuthContext";
 import { HttpClient } from "../../../api/HttpClient";
 import { showToast } from "../../ToastComponent/Toast";
-
+import OutlineTextInput from "../../reusuableComponents/inputFields/OutlineTextInput";
+import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 const StoreManagementScreen = () => {
-  const { setBarType } = useStatusBar();
   const navigation = useNavigation();
   const { user, setUser } = useAuth();
   const [loading, setLoading] = useState(false);
-
+  console.log({ user });
   useEffect(() => {
-    setBarType("primary");
+    // setBarType("primary"); // This line is removed as per the edit hint
   }, []);
 
   // Helper to get initial values from user object
@@ -47,7 +44,7 @@ const StoreManagementScreen = () => {
       user?.vendorOnboarding?.businessRegNumber ||
       user?.vendorOnboarding?.registerationNumber ||
       "",
-    portfolioLink: user?.vendorOnboarding?.portfolioLink || "",
+    // portfolioLink: user?.vendorOnboarding?.portfolioLink || "",
   };
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -60,11 +57,12 @@ const StoreManagementScreen = () => {
         registerationNumber: values.businessRegNumber,
         portfolioLink: values.portfolioLink,
       };
-      const res = await HttpClient.put("/vendor/complete-profile", payload);
+      const res = await HttpClient.put("/user/me", payload);
       showToast.success(res.data.message || "Profile updated successfully");
       // Optionally update user context
       if (res.data.user) setUser(res.data.user);
     } catch (error) {
+      console.log("[DEBUG] Error updating store profile:", error.response);
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         errorMsg =
@@ -209,7 +207,7 @@ const StoreManagementScreen = () => {
                   error={errors.registerationNumber}
                   touched={touched.registerationNumber}
                 />
-                <OutlineTextInput
+                {/* <OutlineTextInput
                   label="Portfolio Link"
                   value={values.portfolioLink}
                   onChangeText={handleChange("portfolioLink")}
@@ -217,7 +215,7 @@ const StoreManagementScreen = () => {
                   placeholder="Type here"
                   error={errors.portfolioLink}
                   touched={touched.portfolioLink}
-                />
+                /> */}
                 <AuthButton
                   title="Save Changes"
                   isloading={loading || isSubmitting}

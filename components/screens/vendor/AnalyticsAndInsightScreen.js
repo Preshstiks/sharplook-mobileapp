@@ -223,6 +223,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
                   />
                 </View>
                 <TouchableOpacity
+                  className="bg-primary"
                   style={styles.doneButton}
                   onPress={handleDone}
                 >
@@ -451,6 +452,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   pickerTitle: {
+    paddingBottom: 60,
     fontSize: 18,
     fontWeight: "600",
     color: "#333",
@@ -469,7 +471,6 @@ const styles = StyleSheet.create({
     // This will be overridden by inline styles in the component
   },
   doneButton: {
-    backgroundColor: "#007AFF",
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 8,

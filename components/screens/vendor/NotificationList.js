@@ -1,95 +1,147 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
   SectionList,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { useStatusBar } from "../../../context/StatusBarContext";
-
-const notifications = [
-  {
-    title: "Today",
-    data: [
-      {
-        id: 1,
-        icon: <MaterialIcons name="cancel" size={28} color="#FF0000" />,
-        title:
-          "Your payment was not successful and has been refunded to your wallet",
-        time: "5 min ago",
-        details:
-          "Your payment was not successful and has been refunded to your wallet.",
-      },
-      {
-        id: 2,
-        icon: <Ionicons name="ribbon-outline" size={28} color="#EB278D" />,
-        title:
-          "Team Green just booked an appointment with you, please either accept or reject",
-        time: "5 min ago",
-        details:
-          "Team Green just booked an appointment with you, please either accept or reject the booking on time.",
-        heading: "Appointment Booking",
-      },
-      {
-        id: 3,
-        icon: <Ionicons name="ribbon-outline" size={28} color="#EB278D" />,
-        title:
-          "You have scheduled an appointment with Heritage Spa and Beauty Services",
-        time: "5 min ago",
-        details:
-          "You have scheduled an appointment with Heritage Spa and Beauty Services.",
-      },
-    ],
-  },
-  {
-    title: "Yesterday",
-    data: [
-      {
-        id: 4,
-        icon: <Ionicons name="ribbon-outline" size={28} color="#EB278D" />,
-        title: "Your payment has been received and now in escrow",
-        time: "5 min ago",
-        details: "Your payment has been received and now in escrow.",
-      },
-      {
-        id: 5,
-        icon: <Ionicons name="ribbon-outline" size={28} color="#EB278D" />,
-        title: "Your order has been delivered",
-        time: "5 min ago",
-        details: "Your order has been delivered.",
-      },
-    ],
-  },
-  {
-    title: "5 days ago",
-    data: [
-      {
-        id: 6,
-        icon: <Ionicons name="ribbon-outline" size={28} color="#EB278D" />,
-        title: "Your order has been shipped to your delivery address",
-        time: "5 min ago",
-        details: "Your order has been shipped to your delivery address.",
-      },
-      {
-        id: 7,
-        icon: <Ionicons name="ribbon-outline" size={28} color="#EB278D" />,
-        title: "Congratulations you just got.....",
-        time: "5 min ago",
-        details: "Congratulations you just got.....",
-      },
-    ],
-  },
-];
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { HttpClient } from "../../../api/HttpClient";
+import EmptySVG from "../../../assets/img/empty.svg";
 
 export default function NotificationList() {
   const navigation = useNavigation();
-  const { setBarType } = useStatusBar();
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchNotifications = async () => {
+        setLoading(true);
+        try {
+          const res = await HttpClient.get("/notifications/getNotifications");
+          setNotifications(res.data?.data || []);
+          console.log(res.data);
+        } catch (error) {
+          setNotifications([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchNotifications();
+    }, [])
+  );
+
+  if (loading) {
+    // Skeleton loader for notifications (no section headers)
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#FFFAFD",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: "#EB278D",
+            paddingTop: 60,
+            paddingBottom: 16,
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{ color: "#fff", fontSize: 16, fontFamily: "poppinsMedium" }}
+          >
+            Notifications
+          </Text>
+        </View>
+        <View style={{ paddingHorizontal: 0, paddingTop: 16 }}>
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <View key={i} style={styles.notificationItem}>
+              <View style={styles.iconContainer}>
+                <View
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 14,
+                    backgroundColor: "#e0e0e0",
+                  }}
+                />
+              </View>
+              <View style={{ flex: 1, justifyContent: "center" }}>
+                <View
+                  style={{
+                    height: 14,
+                    width: "80%",
+                    backgroundColor: "#e0e0e0",
+                    borderRadius: 4,
+                    marginBottom: 6,
+                  }}
+                />
+              </View>
+              <View
+                style={{
+                  height: 10,
+                  width: 40,
+                  backgroundColor: "#e0e0e0",
+                  borderRadius: 4,
+                  alignSelf: "center",
+                }}
+              />
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  // Empty state for no notifications
+
+  if (!loading && (!notifications || notifications.length === 0)) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
+        <View
+          style={{
+            backgroundColor: "#EB278D",
+            paddingTop: 60,
+            paddingBottom: 16,
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{ color: "#fff", fontSize: 16, fontFamily: "poppinsMedium" }}
+          >
+            Notifications
+          </Text>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 32,
+            marginTop: -30, // Adjust this value to move content up and compensate for header
+          }}
+        >
+          <EmptySVG width={120} height={120} />
+          <Text
+            className="text-faintDark"
+            style={{
+              fontFamily: "poppinsRegular",
+              fontSize: 14,
+              marginTop: 16,
+              textAlign: "center",
+            }}
+          >
+            Oops! You have no notification
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
       <View
@@ -108,7 +160,9 @@ export default function NotificationList() {
       </View>
       <SectionList
         sections={notifications}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) =>
+          item.id?.toString?.() || Math.random().toString()
+        }
         renderSectionHeader={({ section: { title } }) => (
           <Text
             style={{
@@ -130,7 +184,18 @@ export default function NotificationList() {
               })
             }
           >
-            <View style={styles.iconContainer}>{item.icon}</View>
+            <View style={styles.iconContainer}>
+              {/* Render icon if present, fallback to default */}
+              {item.icon ? (
+                item.icon
+              ) : (
+                <Ionicons
+                  name="notifications-outline"
+                  size={28}
+                  color="#EB278D"
+                />
+              )}
+            </View>
             <View style={{ flex: 1 }}>
               <Text
                 className="text-[14px] opacity-60"

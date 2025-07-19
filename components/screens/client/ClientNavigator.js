@@ -20,7 +20,6 @@ import SettingsScreen from "./SettingsScreen";
 import HelpSupportScreen from "./HelpSupportScreen";
 import LegalScreen from "./LegalScreen";
 import PrivacyPolicyScreen from "./PrivacyPolicyScreen";
-import ReviewsScreen from "./reviews/ReviewsScreen";
 import AddReviewScreen from "./reviews/AddReviewScreen";
 import OtherScreen from "./OtherScreen";
 import WhatInformationWeCollectScreen from "./privacypolicy/WhatInformationWeCollectScreen";
@@ -52,6 +51,8 @@ import BookingsScreen from "./BookingsScreen";
 import ProfileScreen from "./ProfileScreen";
 import ReferAndEarnScreen from "./ReferAndEarnScreen";
 import WalletScreen from "./WalletScreen";
+import ReviewsScreen from "./reviews/ReviewsScreen";
+import OfferPriceScreen from "./OfferPriceScreen";
 // Removed: import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
 
 const Drawer = createDrawerNavigator();
@@ -146,6 +147,7 @@ export default function ClientNavigator() {
         component={VendorProfileScreen}
         options={{ drawerItemStyle: { display: "none" } }}
       />
+
       <Drawer.Screen
         name="Filter"
         component={FilterScreen}
@@ -339,6 +341,11 @@ export default function ClientNavigator() {
       <Drawer.Screen
         name="EditProfileScreen"
         component={EditProfileScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+      <Drawer.Screen
+        name="OfferPriceScreen"
+        component={OfferPriceScreen}
         options={{ drawerItemStyle: { display: "none" } }}
       />
     </Drawer.Navigator>

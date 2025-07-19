@@ -67,6 +67,9 @@ export default function MyProductsScreen({ navigation }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const { showToast } = require("../../ToastComponent/Toast");
+
   useFocusEffect(
     useCallback(() => {
       const fetchProducts = async () => {
@@ -83,7 +86,36 @@ export default function MyProductsScreen({ navigation }) {
       fetchProducts();
     }, [])
   );
+
+  // Delete product handler
+  const handleDeleteProduct = async () => {
+    if (!productToDelete) return;
+    try {
+      setLoading(true);
+      await HttpClient.delete(`/products/delete/${productToDelete}`);
+      showToast.success("Product deleted successfully");
+      setShowModal(false);
+      setProductToDelete(null);
+      // Refresh products
+      const res = await HttpClient.get("/products/getVendorProducts");
+      setProducts(res.data.data);
+    } catch (error) {
+      console.log(error.response);
+      let errorMsg = "An error occurred. Please try again.";
+      if (error.response && error.response.data) {
+        errorMsg =
+          error.response.data.message || JSON.stringify(error.response.data);
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      showToast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   console.log({ products });
+  console.log({ productToDelete });
   return (
     <ScrollView className="flex-1 bg-white">
       <View
@@ -153,7 +185,12 @@ export default function MyProductsScreen({ navigation }) {
                           {formatAmount(p.price)}
                         </Text>
                       </View>
-                      <TouchableOpacity onPress={() => setShowModal(true)}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowModal(true);
+                          setProductToDelete(p.id);
+                        }}
+                      >
                         <AntDesign name="delete" size={14} color="#E53935" />
                       </TouchableOpacity>
                     </View>
@@ -187,7 +224,10 @@ export default function MyProductsScreen({ navigation }) {
       </View>
       <BottomModal
         isVisible={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false);
+          setProductToDelete(null);
+        }}
         showCloseBtn={true}
       >
         <View className="mb-8 mt-2">
@@ -199,7 +239,10 @@ export default function MyProductsScreen({ navigation }) {
           </Text>
         </View>
         <View className="space-y-4 pb-10 mt-2">
-          <TouchableOpacity className="mt-2 rounded-[12px] mb-4 h-[52px] flex flex-row items-center w-full bg-[#ff0000] justify-center">
+          <TouchableOpacity
+            className="mt-2 rounded-[12px] mb-4 h-[52px] flex flex-row items-center w-full bg-[#ff0000] justify-center"
+            onPress={handleDeleteProduct}
+          >
             <Text
               style={{ fontFamily: "poppinsMedium" }}
               className="text-center text-[13px] text-white"
@@ -207,7 +250,13 @@ export default function MyProductsScreen({ navigation }) {
               Yes
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity className="mt-2 rounded-[12px] mb-4 border h-[52px] flex flex-row items-center w-full border-[#ff0000] justify-center">
+          <TouchableOpacity
+            className="mt-2 rounded-[12px] mb-4 border h-[52px] flex flex-row items-center w-full border-[#ff0000] justify-center"
+            onPress={() => {
+              setShowModal(false);
+              setProductToDelete(null);
+            }}
+          >
             <Text
               style={{ fontFamily: "poppinsMedium" }}
               className="text-center text-[13px] text-[#ff0000]"

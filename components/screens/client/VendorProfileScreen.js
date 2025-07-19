@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -23,6 +23,7 @@ import Service4 from "../../../assets/img/service4.svg";
 import BottomModal from "../../reusuableComponents/BottomModal";
 import { useState } from "react";
 import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
+import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 
 const specialists = [
   { name: "Ayomide", role: "Esthetician", Img: Specialist1 },
@@ -39,8 +40,17 @@ const products = [
 
 const { width } = Dimensions.get("window");
 
-export default function VendorProfileScreen({ navigation }) {
+export default function VendorProfileScreen({ navigation, route }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  // Access the vendor data passed from HomeScreen
+  const vendorData = route.params?.vendorData;
+  const vendorId = route.params?.vendorId;
+
+  useEffect(() => {
+    console.log("Vendor Data:", vendorData);
+    console.log("Vendor ID:", vendorId);
+  }, [vendorData, vendorId]);
   const handleDebitCardPayment = () => {
     setShowPaymentModal(false);
     navigation.navigate("DebitCardScreen");
@@ -76,26 +86,43 @@ export default function VendorProfileScreen({ navigation }) {
               className="text-faintDark text-[16px]"
               style={{ fontFamily: "poppinsMedium" }}
             >
-              Heritage Spa and Beauty Services
+              {vendorData?.businessName || "Heritage Spa and Beauty Services"}
             </Text>
             <View style={styles.reviewRow} className="mt-2">
               <Text
                 className="text-[#201E1F] text-[12px]"
                 style={{ fontFamily: "poppinsRegular" }}
               >
-                4.0 Reviews
+                {vendorData?.rating?.toFixed(1) || "4.0"} Reviews
               </Text>
               <View style={{ flexDirection: "row", marginLeft: 8 }}>
-                {[1, 2, 3, 4].map((i) => (
-                  <Ionicons key={i} name="star" size={20} color="#FFC107" />
+                {[...Array(5)].map((_, i) => (
+                  <Ionicons
+                    key={i}
+                    name={
+                      i < Math.round(vendorData?.rating || 4)
+                        ? "star"
+                        : "star-outline"
+                    }
+                    size={20}
+                    color="#FFC107"
+                  />
                 ))}
-                <Ionicons name="star-outline" size={20} color="#FFC107" />
               </View>
             </View>
           </View>
           <View className="p-2 bg-primary rounded-[4px]">
-            <Text className="text-white text-[12px]">In-shop</Text>
+            <Text className="text-white text-[12px]">
+              {vendorData?.specialties?.[0] || "In-shop"}
+            </Text>
           </View>
+        </View>
+        {/* See Reviews CTA */}
+        <View className="mx-4 mt-3">
+          <AuthButton
+            title="See Reviews"
+            onPress={() => navigation.navigate("ReviewsScreen")}
+          />
         </View>
         {/* About Us */}
         <View style={styles.sectionWrap}>

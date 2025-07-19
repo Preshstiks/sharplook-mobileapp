@@ -68,13 +68,7 @@ export default function EmailVerificationScreenSignup({ navigation, route }) {
       if (!text && idx > 0) inputs.current[idx - 1].focus();
     }
   };
-  const handleProceed = () => {
-    setVisible(false);
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Login" }],
-    });
-  };
+
   const handleVerify = async (values) => {
     setLoading(true);
     try {

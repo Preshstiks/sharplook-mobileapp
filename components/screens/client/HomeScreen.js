@@ -40,10 +40,10 @@ import HomeImg1 from "../../../assets/img/home1.svg";
 import HomeImg2 from "../../../assets/img/home2.svg";
 import HomeImg3 from "../../../assets/img/home3.svg";
 import HomeImg4 from "../../../assets/img/home4.svg";
-import { useStatusBar } from "../../../context/StatusBarContext";
 import { useAuth } from "../../../context/AuthContext";
 import { HttpClient } from "../../../api/HttpClient";
 import DefaultAvatar from "../../../assets/icon/avatar.png";
+import { useStatusBar } from "../../../context/StatusBarContext";
 const categories = [
   {
     label: "Nails",
@@ -137,18 +137,22 @@ function SkeletonBox({ width, height, style }) {
 
 export default function HomeScreen() {
   const navigation = useNavigation();
-  const [isSearchBarActive, setIsSearchBarActive] = useState(false);
   const { setBarType } = useStatusBar();
+  const [isSearchBarActive, setIsSearchBarActive] = useState(false);
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [topVendors, setTopVendors] = useState([]);
   const [loadingVendors, setLoadingVendors] = useState(true);
+  const [allServices, setAllServices] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(true);
   const toggleSearchBar = () => {
     setIsSearchBarActive(!isSearchBarActive);
   };
   const user = useAuth();
   useEffect(() => {
-    setBarType("secondary");
+    setBarType("primary");
+  }, []);
+  useEffect(() => {
     const fetchRecommendedProducts = async () => {
       setLoadingProducts(true);
       try {
@@ -171,8 +175,21 @@ export default function HomeScreen() {
         setLoadingVendors(false);
       }
     };
+    const fetchAllServices = async () => {
+      setLoadingServices(true);
+      try {
+        const res = await HttpClient.get("/client/services");
+        console.log("API response:", res.data);
+        setAllServices(res.data.data); // Adjust if your API response structure differs
+      } catch (error) {
+        console.log("Error fetching all services:", error);
+      } finally {
+        setLoadingServices(false);
+      }
+    };
     fetchRecommendedProducts();
     fetchTopVendors();
+    fetchAllServices();
   }, []);
 
   console.log({ topVendors });
@@ -303,8 +320,13 @@ export default function HomeScreen() {
                   className="items-center flex-1"
                   onPress={() => {
                     if (cat.label !== "Other") {
+                      // Filter services by category
+                      const filteredServices = allServices.filter(
+                        (service) => service.category === cat.label
+                      );
                       navigation.navigate("Categories", {
                         category: cat.label,
+                        services: filteredServices,
                       });
                     } else {
                       navigation.navigate("OtherScreen");
@@ -363,6 +385,7 @@ export default function HomeScreen() {
                     onPress={() =>
                       navigation.navigate("VendorProfileScreen", {
                         vendorId: vendor.id,
+                        vendorData: vendor, // Pass the full vendor object
                       })
                     }
                     key={vendor.id || idx}
@@ -422,6 +445,7 @@ export default function HomeScreen() {
                 ))}
               </ScrollView>
             )}
+
             {/* Recommended Products */}
             <View className="flex-row items-center justify-between mt-8 px-5">
               <Text

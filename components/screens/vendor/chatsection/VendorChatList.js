@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useStatusBar } from "../../../../context/StatusBarContext";
 
 const chats = [
   {
@@ -52,10 +51,6 @@ const chats = [
 
 export default function VendorChatListScreen() {
   const navigation = useNavigation();
-  const { setBarType } = useStatusBar();
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8FB]">
       <View className="bg-primary pb-6 pt-[50px] items-center">

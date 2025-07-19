@@ -83,7 +83,12 @@ export default function AddLocationScreen({ navigation }) {
     }
   }, [currentLocation]);
 
-  const { clearUserID } = useAuth();
+  const {
+    lastAttemptedCredentials,
+    login,
+    clearLastAttemptedCredentials,
+    setIsAuthenticated,
+  } = useAuth();
 
   // Function to update service radius via API
   const updateServiceRadius = async (
@@ -102,7 +107,48 @@ export default function AddLocationScreen({ navigation }) {
 
       console.log("API response:", response.data);
       showToast.success(response.data.message);
-      navigation.replace("Vendor", { screen: "Dashboard" });
+      console.log(lastAttemptedCredentials);
+      // If we have saved credentials, attempt login
+      if (
+        lastAttemptedCredentials &&
+        lastAttemptedCredentials.email &&
+        lastAttemptedCredentials.password
+      ) {
+        try {
+          const loginResponse = await HttpClient.post("/auth/login", {
+            email: lastAttemptedCredentials.email,
+            password: lastAttemptedCredentials.password,
+          });
+          console.log(loginResponse.data);
+          if (loginResponse.data.token) {
+            await login(loginResponse.data.token, "VENDOR");
+            setIsAuthenticated(true);
+            clearLastAttemptedCredentials();
+            // Only navigate after login is successful
+            navigation.replace("Vendor", { screen: "Dashboard" });
+            // navigation.replace("Home", { screen: "Dashboard" });
+            return;
+          } else {
+            // Login did not return a token, treat as failure
+            showToast.error(
+              "Login failed after location update. Please try logging in again."
+            );
+            clearLastAttemptedCredentials();
+            navigation.replace("VendorLogin");
+            return;
+          }
+        } catch (loginError) {
+          showToast.error(
+            "Login failed after location update. Please try logging in again."
+          );
+          clearLastAttemptedCredentials();
+          navigation.replace("VendorLogin");
+          return;
+        }
+      } else {
+        // No credentials, so navigate directly
+        navigation.replace("Vendor", { screen: "Dashboard" });
+      }
     } catch (error) {
       console.error("API error:", error);
       if (error.response && error.response.data) {
@@ -147,8 +193,6 @@ export default function AddLocationScreen({ navigation }) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Location</Text>
         <TouchableOpacity onPress={() => navigation.replace("Home")}>
-          {" "}
-          {/* Replace with your skip logic */}
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
       </View>

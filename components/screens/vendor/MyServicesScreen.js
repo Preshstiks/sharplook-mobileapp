@@ -6,6 +6,7 @@ import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { HttpClient } from "../../../api/HttpClient";
 import EmptySVG from "../../../assets/img/empty.svg";
 import { formatAmount } from "../../formatAmount";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function SkeletonLoader() {
   return (
@@ -64,46 +65,31 @@ function SkeletonLoader() {
 }
 
 export default function MyServicesScreen({ navigation }) {
-  // Dummy data for services
-  const dummyServices = [
-    {
-      id: 1,
-      productName: "Classic Manicure",
-      price: 5000,
-      qtyAvailable: 10,
-      picture:
-        "https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg",
-    },
-    {
-      id: 2,
-      productName: "Deluxe Pedicure",
-      price: 7000,
-      qtyAvailable: 7,
-      picture:
-        "https://images.pexels.com/photos/3993448/pexels-photo-3993448.jpeg",
-    },
-    {
-      id: 3,
-      productName: "Facial Treatment",
-      price: 12000,
-      qtyAvailable: 5,
-      picture:
-        "https://images.pexels.com/photos/3993447/pexels-photo-3993447.jpeg",
-    },
-    {
-      id: 4,
-      productName: "Hair Styling",
-      price: 8000,
-      qtyAvailable: 12,
-      picture:
-        "https://images.pexels.com/photos/3993446/pexels-photo-3993446.jpeg",
-    },
-  ];
-  const [products] = useState(dummyServices);
-  const [loading] = useState(false);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Remove useFocusEffect and API call
-  console.log({ products });
+  useFocusEffect(
+    useCallback(() => {
+      const fetchServices = async () => {
+        setLoading(true);
+        try {
+          const res = await HttpClient.get("/vendorServices/my-services");
+          setServices(res.data?.data || []);
+          console.log("API response:", res.data);
+          const token = await AsyncStorage.getItem("token");
+          console.log("token", token);
+        } catch (err) {
+          console.log("DEBUG: Error fetching services:", err.response.data);
+          setServices([]);
+          // console.log("Error fetching services:", err?.response || err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchServices();
+    }, [])
+  );
+  console.log({ services });
   return (
     <ScrollView className="flex-1 bg-white">
       <View
@@ -134,8 +120,15 @@ export default function MyServicesScreen({ navigation }) {
         />
         {loading ? (
           <SkeletonLoader />
-        ) : products.length === 0 ? (
-          <View className="items-center justify-center py-8">
+        ) : services.length === 0 ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 300,
+            }}
+          >
             <EmptySVG width={120} height={120} />
             <Text
               className="text-[14px] text-gray-400 mt-2"
@@ -146,13 +139,13 @@ export default function MyServicesScreen({ navigation }) {
           </View>
         ) : (
           <View className="flex-row flex-wrap mt-10 justify-between">
-            {products.map((p) => (
+            {services.map((s) => (
               <View
-                key={p.id}
+                key={s.id}
                 className="bg-white rounded-[12px] w-[48%] mb-4 shadow border border-pinklight"
               >
                 <Image
-                  source={{ uri: p.picture }}
+                  source={{ uri: s.serviceImage }}
                   className="w-full h-[110px] rounded-t-[12px] mb-2"
                   style={{ resizeMode: "cover" }}
                 />
@@ -161,15 +154,20 @@ export default function MyServicesScreen({ navigation }) {
                     className="text-[14px]"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
-                    {p.productName}
+                    {s.serviceName}
                   </Text>
                   <Text
                     className="text-primary text-[14px]"
                     style={{ fontFamily: "latoBold" }}
                   >
-                    {formatAmount(p.price)}
+                    {formatAmount(s.servicePrice)}
                   </Text>
-                  <TouchableOpacity className="bg-primary py-2 rounded-[8px] mt-3">
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate("EditService", { service: s })
+                    }
+                    className="bg-primary py-2 rounded-[8px] mt-3"
+                  >
                     <Text
                       style={{ fontFamily: "poppinsRegular" }}
                       className="text-[11px] text-center text-white"

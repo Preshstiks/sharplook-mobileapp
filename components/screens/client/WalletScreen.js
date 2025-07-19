@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,35 +12,55 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-
-const mockTransactions = [
-  {
-    id: 1,
-    name: "Heritage Spa and Beauty Services",
-    type: "Facials",
-    date: "February 02, 2024",
-    time: "11:50",
-    amount: 2100,
-    avatar: require("../../../assets/icon/avatar.png"),
-  },
-  ...Array(7).fill({
-    id: 2,
-    name: "Makeup Brush",
-    type: "Product",
-    date: "February 02, 2024",
-    time: "11:50",
-    amount: 2100,
-    avatar: require("../../../assets/icon/avatar.png"),
-  }),
-];
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { HttpClient } from "../../../api/HttpClient";
 
 export default function WalletScreen() {
   const navigation = useNavigation();
   const [isShowBalance, setIsShowBalance] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const toggleShowBalance = () => {
     setIsShowBalance(!isShowBalance);
   };
+  useFocusEffect(
+    useCallback(() => {
+      const fetchTransactions = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const res = await HttpClient.get("/wallet/transactions");
+          setTransactions(res.data?.data || []);
+        } catch (err) {
+          setTransactions([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchTransactions();
+    }, [])
+  );
+
+  // Skeleton loader for transaction card
+  const SkeletonCard = () => (
+    <View className="flex-row items-center mb-4" style={{ opacity: 0.7 }}>
+      <View style={styles.skeletonAvatar} />
+      <View style={{ flex: 1, marginLeft: 12 }}>
+        <View style={styles.skeletonLineShort} />
+        <View style={{ flexDirection: "row", marginTop: 6 }}>
+          <View style={styles.skeletonLineTiny} />
+          <View style={[styles.skeletonLineTiny, { marginLeft: 8 }]} />
+        </View>
+      </View>
+      <View style={{ alignItems: "flex-end", marginLeft: 12 }}>
+        <View style={styles.skeletonLineTiny} />
+        <View style={styles.skeletonLineShort} />
+      </View>
+    </View>
+  );
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -130,53 +150,64 @@ export default function WalletScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-          {mockTransactions.map((tx, idx) => (
-            <View key={idx} className="flex-row items-center mb-4">
-              <Image
-                source={tx.avatar}
-                className="w-10 h-10 rounded-full mr-3"
-              />
-              <View className="flex-1">
-                <Text
-                  className="text-[12px]"
-                  style={{ fontFamily: "poppinsMedium" }}
-                >
-                  {tx.name}
-                </Text>
-                <View className="flex-row mt-1 items-center">
+          {loading ? (
+            // Show 5 skeleton cards while loading
+            Array.from({ length: 5 }).map((_, idx) => (
+              <SkeletonCard key={idx} />
+            ))
+          ) : transactions.length === 0 ? (
+            <Text style={{ fontFamily: "poppinsRegular", color: "#888" }}>
+              No transactions found.
+            </Text>
+          ) : (
+            transactions.map((tx, idx) => (
+              <View key={tx.id || idx} className="flex-row items-center mb-4">
+                <Image
+                  source={require("../../../assets/icon/avatar.png")}
+                  className="w-10 h-10 rounded-full mr-3"
+                />
+                <View className="flex-1">
                   <Text
-                    className="text-[10px] text-faintDark mr-2"
+                    className="text-[12px]"
+                    style={{ fontFamily: "poppinsMedium" }}
+                  >
+                    {tx.name || tx.description || "Transaction"}
+                  </Text>
+                  <View className="flex-row mt-1 items-center">
+                    <Text
+                      className="text-[10px] text-faintDark mr-2"
+                      style={{ fontFamily: "poppinsRegular" }}
+                    >
+                      {tx.date || "--"}
+                    </Text>
+                    <Text
+                      className="text-[10px] text-faintDark"
+                      style={{ fontFamily: "poppinsRegular" }}
+                    >
+                      {tx.time || "--"}
+                    </Text>
+                  </View>
+                </View>
+                <View className="items-end">
+                  <Text
+                    className="text-[10px] text-faintDark mb-1"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
-                    {tx.date}
+                    {tx.type || "-"}
                   </Text>
                   <Text
-                    className="text-[10px] text-faintDark"
-                    style={{ fontFamily: "poppinsRegular" }}
+                    className="text-primary text-[12px]"
+                    style={{ fontFamily: "latoBold" }}
                   >
-                    {tx.time}
+                    ₦
+                    {(tx.amount || 0).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
                   </Text>
                 </View>
               </View>
-              <View className="items-end">
-                <Text
-                  className="text-[10px] text-faintDark mb-1"
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  {tx.type}
-                </Text>
-                <Text
-                  className="text-primary text-[12px]"
-                  style={{ fontFamily: "latoBold" }}
-                >
-                  ₦
-                  {tx.amount.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })}
-                </Text>
-              </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
       </ScrollView>
     </View>
@@ -206,5 +237,26 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
     marginLeft: -28,
+  },
+  // Skeleton styles
+  skeletonAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#E5E7EB",
+  },
+  skeletonLineShort: {
+    width: 90,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#E5E7EB",
+    marginTop: 4,
+  },
+  skeletonLineTiny: {
+    width: 40,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#E5E7EB",
+    marginTop: 4,
   },
 });

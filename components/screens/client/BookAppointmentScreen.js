@@ -14,7 +14,6 @@ import Specialist3 from "../../../assets/img/sharon.svg";
 import Specialist4 from "../../../assets/img/priti.svg";
 import { Calendar } from "react-native-calendars";
 import { AuthInput } from "../../reusuableComponents/inputFields/AuthInput";
-import { useStatusBar } from "../../../context/StatusBarContext";
 const specialists = [
   { name: "Ayomide", Img: Specialist1 },
   { name: "Alex", Img: Specialist2 },
@@ -29,10 +28,6 @@ const dates = Array.from({ length: 31 }, (_, i) => i + 1);
 export default function BookAppointmentScreen() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { setBarType } = useStatusBar();
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
   const { service } = route.params || {};
   const today = new Date();
   const todayString = today.toISOString().split("T")[0];

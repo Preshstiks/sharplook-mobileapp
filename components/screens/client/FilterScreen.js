@@ -15,7 +15,6 @@ import Slider from "@react-native-community/slider";
 import { WebView } from "react-native-webview";
 import * as Location from "expo-location";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
-import { useStatusBar } from "../../../context/StatusBarContext";
 
 const { width, height } = Dimensions.get("window");
 
@@ -24,11 +23,6 @@ export default function FilterScreen({ navigation }) {
   const [selectedRating, setSelectedRating] = useState(5);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const webviewRef = useRef(null);
-  const { setBarType } = useStatusBar();
-
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
 
   // Function to get current location and send to WebView
   const handleUseCurrentLocation = async () => {

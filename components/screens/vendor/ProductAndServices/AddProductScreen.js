@@ -71,10 +71,10 @@ export default function AddProductScreen({ navigation }) {
       );
       console.log("handleAddProduct response:", res);
       setVisible(true);
-      navigation.navigate("Home", {
-        screen: "Dashboard",
-        params: { screen: "My Products" },
-      });
+      // navigation.navigate("Home", {
+      //   screen: "Dashboard",
+      //   params: { screen: "My Products" },
+      // });
     } catch (error) {
       console.log("AddProduct error:", error, error.response);
       let errorMsg = "An error occurred. Please try again.";
@@ -89,15 +89,16 @@ export default function AddProductScreen({ navigation }) {
       setLoading(false);
     }
   };
-  const handleProceed = () => {
-    setVisible(false);
-  };
 
   useEffect(() => {
     let timer;
     if (visible) {
       timer = setTimeout(() => {
         setVisible(false);
+        navigation.navigate("Home", {
+          screen: "Dashboard",
+          params: { screen: "My Products" },
+        });
       }, 3000);
     }
     return () => {
@@ -182,6 +183,7 @@ export default function AddProductScreen({ navigation }) {
                   <AuthInput
                     label="Price"
                     value={values.price}
+                    keyboardType="numeric"
                     onChangeText={handleChange("price")}
                     onBlur={handleBlur("price")}
                     error={errors.price}
@@ -190,6 +192,7 @@ export default function AddProductScreen({ navigation }) {
                   <AuthInput
                     label="Quantity Available"
                     value={values.qtyAvailable}
+                    keyboardType="numeric"
                     onChangeText={handleChange("qtyAvailable")}
                     onBlur={handleBlur("qtyAvailable")}
                     error={errors.qtyAvailable}
@@ -266,9 +269,9 @@ export default function AddProductScreen({ navigation }) {
         )}
       </Formik>
       <SuccessModal
-        onClose={handleProceed}
         visible={visible}
         message="Congratulations, your product was uploaded successfully!!!"
+        buttonText={false}
       />
     </View>
   );

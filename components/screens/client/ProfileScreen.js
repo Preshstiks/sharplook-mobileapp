@@ -6,26 +6,25 @@ import {
   View,
 } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import { useStatusBar } from "../../../context/StatusBarContext";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import BottomModal from "../../reusuableComponents/BottomModal";
 import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
+import { useStatusBar } from "../../../context/StatusBarContext";
 
 const ProfileScreen = () => {
-  const { setBarType } = useStatusBar();
   const navigation = useNavigation();
-  const { user } = useAuth();
+  const { setBarType } = useStatusBar();
+  const { user, logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-
   useEffect(() => {
     setBarType("primary");
   }, []);
 
-  const handleLogout = () => {
-    setShowLogoutModal(true);
+  const handleLogout = async () => {
+    await logout();
   };
 
   const handleClientSelect = () => {
@@ -129,23 +128,7 @@ const ProfileScreen = () => {
           </Text>
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
         </TouchableOpacity>
-        {/* Privacy Policy (as a sub-item or separate button) */}
-        {/* <TouchableOpacity
-          className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
-          onPress={() => navigation.navigate("PrivacyPolicyScreen")}
-        >
-          <View className="bg-primary p-2 rounded-full mr-4">
-            <Ionicons name="information-circle" size={24} color="#fff" />
-          </View>
-          <Text
-            className="flex-1 text-[14px] text-faintDark"
-            style={{ fontFamily: "poppinsRegular" }}
-          >
-            Privacy Policy
-          </Text>
-          <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
-        </TouchableOpacity> */}
-        {/* Logout */}
+
         <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
           onPress={handleLogout}
@@ -173,28 +156,6 @@ const ProfileScreen = () => {
           </Text>
         </TouchableOpacity>
       </View>
-
-      {/* Logout Modal */}
-      <BottomModal
-        isVisible={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        backgroundcolor="#FCFCFC"
-      >
-        <View className="pt-10">
-          <OutlineButton
-            title="Are you a Client?"
-            onPress={handleClientSelect}
-            icon={<AntDesign name="user" size={20} color="#EB278D" />}
-            iconPosition="left"
-          />
-          <OutlineButton
-            title="Are you a Vendor?"
-            onPress={handleVendorSelect}
-            icon={<MaterialIcons name="storefront" size={20} color="#EB278D" />}
-            iconPosition="left"
-          />
-        </View>
-      </BottomModal>
     </SafeAreaView>
   );
 };

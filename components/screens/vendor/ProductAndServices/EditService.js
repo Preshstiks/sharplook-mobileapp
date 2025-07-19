@@ -20,9 +20,13 @@ import {
   addServiceSchema,
 } from "../../../../utils/validationSchemas";
 import Dropdown from "../../../reusuableComponents/inputFields/Dropdown";
+import { showToast } from "../../../ToastComponent/Toast";
 
-export default function EditServicesScreen({ navigation }) {
-  const [selectedImage, setSelectedImage] = useState(null);
+export default function EditServicesScreen({ navigation, route }) {
+  const service = route?.params?.service;
+  const [selectedImage, setSelectedImage] = useState(
+    service?.serviceImage || null
+  );
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
   const pickImage = async () => {
@@ -37,30 +41,28 @@ export default function EditServicesScreen({ navigation }) {
     }
   };
   const SERVICE_OPTIONS = [
-    { label: "Nails", value: "NAILS" },
-    { label: "Barbing Saloon", value: "BARBING_SALOON" },
-    { label: "Makeup", value: "MAKEUP" },
-    { label: "Pedicure", value: "PEDICURE" },
-    { label: "Manicure", value: "MANICURE" },
-    { label: "Hair", value: "HAIR" },
-    { label: "Facials", value: "FACIALS" },
-    { label: "Massage", value: "MASSAGE" },
+    { label: "Nails", value: "Nails" },
+    { label: "Barbing Saloon", value: "Barbing Saloon" },
+    { label: "Makeup", value: "Makeup" },
+    { label: "Pedicure", value: "Pedicure" },
+    { label: "Manicure", value: "Manicure" },
+    { label: "Hair", value: "Hair" },
+    { label: "Massage", value: "Massage" },
   ];
-  const handleAddProduct = async (values) => {
+  const handleAddService = async (values) => {
     setLoading(true);
     console.log("handleAddProduct called with values:", values);
     console.log("Selected image:", selectedImage);
     try {
       const formData = new FormData();
-      formData.append("productName", values.productName);
-      formData.append("price", values.price);
-      formData.append("qtyAvailable", values.qtyAvailable);
+      formData.append("serviceName", values.serviceName);
+      formData.append("servicePrice", values.servicePrice);
 
       if (selectedImage) {
         const filename = selectedImage.split("/").pop();
         const match = /\.(\w+)$/.exec(filename ?? "");
         const type = match ? `image/${match[1]}` : `image`;
-        formData.append("picture", {
+        formData.append("serviceImage", {
           uri: selectedImage,
           name: filename,
           type,
@@ -72,8 +74,8 @@ export default function EditServicesScreen({ navigation }) {
         console.log("FormData entry:", pair[0], pair[1]);
       }
 
-      const res = await HttpClient.post(
-        "/products/vendor/addProducts",
+      const res = await HttpClient.put(
+        `/vendorServices/edit/${service.id}`,
         formData,
         {
           headers: {
@@ -83,11 +85,14 @@ export default function EditServicesScreen({ navigation }) {
       );
       console.log("handleAddProduct response:", res);
       setVisible(true);
-      navigation.navigate("Home", {
-        screen: "Dashboard",
-        params: { screen: "My Services" },
-      });
+      setTimeout(() => {
+        navigation.navigate("Home", {
+          screen: "Dashboard",
+          params: { screen: "My Services" },
+        });
+      }, 3000);
     } catch (error) {
+      console.log("AddService error:", error);
       console.log("AddProduct error:", error, error.response);
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
@@ -100,9 +105,6 @@ export default function EditServicesScreen({ navigation }) {
     } finally {
       setLoading(false);
     }
-  };
-  const handleProceed = () => {
-    setVisible(false);
   };
 
   useEffect(() => {
@@ -120,12 +122,14 @@ export default function EditServicesScreen({ navigation }) {
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <Formik
         initialValues={{
-          service: "",
-          price: "",
-          picture: "",
+          serviceName: service?.serviceName || "",
+          servicePrice: service?.servicePrice
+            ? String(service.servicePrice)
+            : "",
+          serviceImage: service?.serviceImage || "",
         }}
         validationSchema={addServiceSchema}
-        onSubmit={handleAddProduct}
+        onSubmit={handleAddService}
       >
         {({
           handleChange,
@@ -184,20 +188,20 @@ export default function EditServicesScreen({ navigation }) {
                     Make sure all information about the product is correct
                   </Text>
                   <Dropdown
-                    value={values.service}
+                    value={values.serviceName}
                     label="Service"
-                    onValueChange={(val) => setFieldValue("service", val)}
-                    error={errors.service}
-                    touched={touched.service}
+                    onValueChange={(val) => setFieldValue("serviceName", val)}
+                    error={errors.serviceName}
+                    touched={touched.serviceName}
                     options={SERVICE_OPTIONS}
                   />
                   <AuthInput
                     label="Price"
-                    value={values.price}
-                    onChangeText={handleChange("price")}
-                    onBlur={handleBlur("price")}
-                    error={errors.price}
-                    touched={touched.price}
+                    value={values.servicePrice}
+                    onChangeText={handleChange("servicePrice")}
+                    onBlur={handleBlur("servicePrice")}
+                    error={errors.servicePrice}
+                    touched={touched.servicePrice}
                   />
 
                   <TouchableOpacity
@@ -260,9 +264,9 @@ export default function EditServicesScreen({ navigation }) {
               {/* <Text>Formik values: {JSON.stringify(values)}</Text>
               <Text>Formik errors: {JSON.stringify(errors)}</Text> */}
               <AuthButton
-                title="Add Product"
+                title="Save"
                 isloading={loading}
-                loadingMsg="Adding..."
+                loadingMsg="Saving"
                 onPress={handleSubmit}
               />
             </View>
@@ -270,9 +274,9 @@ export default function EditServicesScreen({ navigation }) {
         )}
       </Formik>
       <SuccessModal
-        onClose={handleProceed}
         visible={visible}
-        message="Congratulations, your product was uploaded successfully!!!"
+        buttonText={false}
+        message="Congratulations, your service was edited successfully!!!"
       />
     </View>
   );

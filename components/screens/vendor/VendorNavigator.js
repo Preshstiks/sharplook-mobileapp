@@ -53,6 +53,8 @@ import JurisdictionSpecificScreen from "./vendorprivacypolicy/JurisdictionSpecif
 import AddProductScreen from "./ProductAndServices/AddProductScreen";
 import AddServicesScreen from "./ProductAndServices/AddServicesScreen";
 import EditProductScreen from "./ProductAndServices/EditProduct";
+import WithdrawScreen from "./WithdrawScreen";
+import EditServicesScreen from "./ProductAndServices/EditService";
 
 // import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
 
@@ -168,6 +170,11 @@ export default function VendorNavigator() {
       <Stack.Screen
         name="EditProduct"
         component={EditProductScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="EditService"
+        component={EditServicesScreen}
         options={{ headerShown: false }}
       />
 
@@ -523,6 +530,11 @@ export default function VendorNavigator() {
           // />
           <JurisdictionSpecificScreen {...props} />
         )}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Withdraw"
+        component={WithdrawScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

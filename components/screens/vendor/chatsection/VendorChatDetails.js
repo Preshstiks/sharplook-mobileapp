@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useStatusBar } from "../../../../context/StatusBarContext";
 
 // Hardcoded chat data
 const hardcodedChat = {
@@ -93,11 +92,6 @@ export default function VendorChatDetail() {
       setInput("");
     }
   };
-
-  const { setBarType } = useStatusBar();
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(

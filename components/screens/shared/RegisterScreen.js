@@ -17,19 +17,12 @@ import Twittericon from "../../../assets/img/logo/twittericon.svg";
 import Appleicon from "../../../assets/img/logo/appleicon.svg";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
-import { useStatusBar } from "../../../context/StatusBarContext";
 import { clientRegisterSchema } from "../../../utils/validationSchemas";
 import { showToast } from "../../ToastComponent/Toast";
 import { HttpClient } from "../../../api/HttpClient";
 import { isAxiosError } from "axios";
 export default function RegisterScreen({ navigation }) {
-  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { setBarType } = useStatusBar();
-
-  useEffect(() => {
-    setBarType("secondary");
-  }, []);
 
   const handleSignup = async (values) => {
     setLoading(true);
@@ -39,29 +32,14 @@ export default function RegisterScreen({ navigation }) {
 
       showToast.success(res.data.message);
       if (res.data.statusCode === 201) {
-        if (process.env.NODE_ENV === "development") {
-          console.log("[Register] Sending OTP to:", payload.email);
-        }
-        const otpRes = await HttpClient.post("/auth/send-otp", {
-          email: values.email,
-        });
-        if (process.env.NODE_ENV === "development") {
-          console.log("[Register] OTP response:", otpRes);
-        }
       }
       navigation.navigate("EmailVerificationSignup", { email: values.email });
     } catch (error) {
-      console.log("[Register] Error response:", error.response);
-
-      console.log("[Register] Error message:", error.message);
-      if (isAxiosError(error)) {
-        if (error.response && error.response.data) {
-          const errorMessage =
-            error.response.data.message || "An unknown error occurred";
-          showToast.error(errorMessage);
-        } else {
-          showToast.error("An unexpected error occurred. Please try again.");
-        }
+      if (error.response && error.response.data) {
+        const errorMessage = error.response.data.message;
+        showToast.error(errorMessage);
+      } else {
+        showToast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -107,7 +85,7 @@ export default function RegisterScreen({ navigation }) {
               email: "",
               password: "",
               role: "CLIENT",
-              acceptedPersonalData: true,
+              acceptedPersonalData: false,
             }}
             validationSchema={clientRegisterSchema}
             onSubmit={handleSignup}

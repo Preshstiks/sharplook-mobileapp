@@ -13,7 +13,6 @@ import OpenMenuBtn from "../../../assets/icon/opennav.svg";
 import OpenChatBtn from "../../../assets/icon/chat.svg";
 import Logo from "../../../assets/img/logo/bglogo.svg";
 import FilterBtn from "../../../assets/icon/filter.svg";
-import { useStatusBar } from "../../../context/StatusBarContext";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import HomeImg1 from "../../../assets/img/home1.svg";
 import HomeImg2 from "../../../assets/img/home2.svg";
@@ -21,10 +20,7 @@ import HomeImg3 from "../../../assets/img/home3.svg";
 import HomeImg4 from "../../../assets/img/home4.svg";
 
 export default function Search({ navigation }) {
-  const { setBarType } = useStatusBar();
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
+  useEffect(() => {}, []);
 
   return (
     <SafeAreaView className="flex-1 bg-secondary">

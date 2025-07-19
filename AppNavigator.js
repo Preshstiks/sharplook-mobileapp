@@ -23,12 +23,15 @@ import VerifyWithPhoneOTP from "./components/screens/shared/VerifyWithPhoneOTP";
 import EmailVerificationForgotPassword from "./components/screens/shared/EmailVerificationForgotPassword";
 import CategoriesScreen from "./components/screens/client/CategoriesScreen";
 import EmailVerificationScreenSignup from "./components/screens/shared/EmailVerificationScreenSIgnup";
+import { useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./components/reusuableComponents/ProtectedRoute";
+import AddLocationScreen from "./components/screens/vendor/auth/AddLocationScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
+  const { isAuthenticated, userType, isLoading } = useAuth();
   const fontsLoaded = useCustomFonts();
-
   if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -40,87 +43,131 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Splash">
-        <Stack.Screen
-          name="Splash"
-          component={SplashScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Onboarding"
-          component={OnboardingScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ title: "Login", headerShown: false }}
-        />
-        <Stack.Screen
-          name="ClientAddLocation"
-          component={ClientAddLocationScreen}
-          options={{ title: "ClientAddLocation", headerShown: false }}
-        />
-        <Stack.Screen
-          name="ClientVerifyPhoneNumber"
-          component={ClientVerifyPhoneNumber}
-          options={{ title: "ClientVerifyPhoneNumber", headerShown: false }}
-        />
-        <Stack.Screen
-          name="VerifyWithPhoneOTP"
-          component={VerifyWithPhoneOTP}
-          options={{ title: "VerifyWithPhoneOTP", headerShown: false }}
-        />
-        <Stack.Screen
-          name="ClientEmailVerificationForgotPassword"
-          component={EmailVerificationForgotPassword}
-          options={{ title: "VerifyWithPhoneOTP", headerShown: false }}
-        />
+        {isAuthenticated ? (
+          <>
+            {userType === "CLIENT" ? (
+              <>
+                <Stack.Screen name="Client" options={{ headerShown: false }}>
+                  {() => (
+                    <ProtectedRoute allowedUserTypes={["CLIENT"]}>
+                      <ClientNavigator />
+                    </ProtectedRoute>
+                  )}
+                </Stack.Screen>
+                <Stack.Screen
+                  name="Categories"
+                  options={{ headerShown: false }}
+                >
+                  {() => (
+                    <ProtectedRoute allowedUserTypes={["CLIENT"]}>
+                      <CategoriesScreen />
+                    </ProtectedRoute>
+                  )}
+                </Stack.Screen>
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="Vendor" options={{ headerShown: false }}>
+                  {() => (
+                    <ProtectedRoute allowedUserTypes={["VENDOR"]}>
+                      <VendorNavigator />
+                    </ProtectedRoute>
+                  )}
+                </Stack.Screen>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <Stack.Screen
+              name="Splash"
+              component={SplashScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Onboarding"
+              component={OnboardingScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Login"
+              component={LoginScreen}
+              options={{ title: "Login", headerShown: false }}
+            />
+            <Stack.Screen
+              name="ClientAddLocation"
+              component={ClientAddLocationScreen}
+              options={{ title: "ClientAddLocation", headerShown: false }}
+            />
+            <Stack.Screen
+              name="ClientVerifyPhoneNumber"
+              component={ClientVerifyPhoneNumber}
+              options={{ title: "ClientVerifyPhoneNumber", headerShown: false }}
+            />
+            <Stack.Screen
+              name="VerifyWithPhoneOTP"
+              component={VerifyWithPhoneOTP}
+              options={{ title: "VerifyWithPhoneOTP", headerShown: false }}
+            />
+            <Stack.Screen
+              name="ClientEmailVerificationForgotPassword"
+              component={EmailVerificationForgotPassword}
+              options={{ title: "VerifyWithPhoneOTP", headerShown: false }}
+            />
 
-        <Stack.Screen
-          name="VendorLogin"
-          component={VendorLoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="VendorRegister"
-          component={VendorRegisterScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="VendorEmailVerification"
-          component={VendorEmailVerificationScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="VendorBusinessInfo"
-          component={VendorBusinessInfoScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Register"
-          component={RegisterScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ForgotPassword"
-          component={ForgotPasswordScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="EmailVerification"
-          component={EmailVerificationScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="EmailVerificationSignup"
-          component={EmailVerificationScreenSignup}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ResetPassword"
-          component={ResetPasswordScreen}
-          options={{ headerShown: false }}
-        />
+            <Stack.Screen
+              name="VendorLogin"
+              component={VendorLoginScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="VendorRegister"
+              component={VendorRegisterScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="VendorEmailVerification"
+              component={VendorEmailVerificationScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="VendorBusinessInfo"
+              component={VendorBusinessInfoScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="AddLocation"
+              component={AddLocationScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Register"
+              component={RegisterScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="EmailVerification"
+              component={EmailVerificationScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="EmailVerificationSignup"
+              component={EmailVerificationScreenSignup}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ResetPassword"
+              component={ResetPasswordScreen}
+              options={{ headerShown: false }}
+            />
+          </>
+        )}
+        {/* 
         <Stack.Screen
           name="Client"
           component={ClientNavigator}
@@ -131,16 +178,12 @@ export default function AppNavigator() {
           component={VendorNavigator}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="Admin"
-          component={AdminNavigator}
-          options={{ headerShown: false }}
-        />
+
         <Stack.Screen
           name="Categories"
           component={CategoriesScreen}
           options={{ headerShown: false }}
-        />
+        /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );

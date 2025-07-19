@@ -82,9 +82,9 @@ export const vendorBusinessInfoSchema = Yup.object().shape({
   registerationNumber: Yup.string().required(
     "Business registration number is required"
   ),
-  portfolioLink: Yup.string()
-    .url("Portfolio link must be a valid URL")
-    .notRequired(),
+  // portfolioLink: Yup.string()
+  //   .url("Portfolio link must be a valid URL")
+  //   .notRequired(),
 });
 
 export const addProductSchema = Yup.object().shape({
@@ -94,7 +94,7 @@ export const addProductSchema = Yup.object().shape({
   picture: Yup.mixed().nullable(),
 });
 export const addServiceSchema = Yup.object().shape({
-  service: Yup.string().required("Service is required"),
-  price: Yup.string().required("Price is required"),
-  picture: Yup.mixed().nullable(),
+  serviceName: Yup.string().required("Service is required"),
+  servicePrice: Yup.string().required("Price is required"),
+  serviceImage: Yup.mixed().nullable(),
 });

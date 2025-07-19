@@ -5,7 +5,7 @@ const StatusBarContext = createContext();
 export const useStatusBar = () => useContext(StatusBarContext);
 
 export const StatusBarProvider = ({ children }) => {
-  const [barType, setBarType] = useState("secondary"); // default to secondary
+  const [barType, setBarType] = useState("primary"); // default to secondary
 
   return (
     <StatusBarContext.Provider value={{ barType, setBarType }}>
