@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useAuth } from "../../../context/AuthContext";
+import { io } from "socket.io-client";
 
 const chats = [
   {
@@ -51,6 +53,23 @@ const chats = [
 
 export default function ChatListScreen() {
   const navigation = useNavigation();
+  const { userId } = useAuth();
+  const socketRef = useRef(null);
+
+  useEffect(() => {
+    if (userId) {
+      socketRef.current = io("https://sharplook-backend.onrender.com", {
+        query: { userId },
+        transports: ["websocket"],
+      });
+    }
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [userId]);
+
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8FB]">
       <View className="bg-primary py-6 items-center">

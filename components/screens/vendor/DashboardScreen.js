@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -181,6 +181,88 @@ function SkeletonLoader() {
   );
 }
 
+// Recent Bookings Skeleton Loader
+function RecentBookingsSkeletonLoader() {
+  const shimmerAnim = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, {
+          toValue: 1,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0.3,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [shimmerAnim]);
+
+  const animatedStyle = {
+    opacity: shimmerAnim,
+    backgroundColor: "#e0e0e0",
+  };
+
+  return (
+    <View>
+      {[1, 2, 3].map((_, i) => (
+        <View
+          key={i}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 16,
+          }}
+        >
+          {/* Avatar */}
+          <Animated.View
+            style={[
+              { width: 40, height: 40, borderRadius: 20, marginRight: 12 },
+              animatedStyle,
+            ]}
+          />
+          {/* Name and Date/Time */}
+          <View style={{ flex: 1 }}>
+            <Animated.View
+              style={[
+                { width: "60%", height: 14, borderRadius: 7, marginBottom: 6 },
+                animatedStyle,
+              ]}
+            />
+            <Animated.View
+              style={[
+                { width: "40%", height: 12, borderRadius: 6 },
+                animatedStyle,
+              ]}
+            />
+          </View>
+          {/* Service and Price */}
+          <View style={{ alignItems: "flex-end" }}>
+            <Animated.View
+              style={[
+                { width: 60, height: 12, borderRadius: 6, marginBottom: 4 },
+                animatedStyle,
+              ]}
+            />
+            <Animated.View
+              style={[
+                { width: 40, height: 14, borderRadius: 7 },
+                animatedStyle,
+              ]}
+            />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export default function DashboardScreen({ navigation }) {
   const [isShowBalance, setIsShowBalance] = useState(false);
   const [products, setProducts] = useState([]);
@@ -262,15 +344,17 @@ export default function DashboardScreen({ navigation }) {
             Welcome {user?.vendorOnboarding?.businessName}!
           </Text>
         </View>
-        <Image
-          source={
-            user?.avatar
-              ? { uri: user.avatar }
-              : require("../../../assets/icon/avatar.png")
-          }
-          style={{ width: 40, height: 40, resizeMode: "cover" }}
-          className="rounded-full mb-2 border border-lightgray"
-        />
+        <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+          <Image
+            source={
+              user?.avatar
+                ? { uri: user.avatar }
+                : require("../../../assets/icon/avatar.png")
+            }
+            style={{ width: 40, height: 40, resizeMode: "cover" }}
+            className="rounded-full mb-2 border border-lightgray"
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Balance Card */}
@@ -365,7 +449,7 @@ export default function DashboardScreen({ navigation }) {
           </TouchableOpacity>
         </View>
         {loading ? (
-          <SkeletonLoader />
+          <RecentBookingsSkeletonLoader />
         ) : bookings.length === 0 ? (
           <View className="items-center justify-center py-8">
             <EmptySVG width={120} height={120} />
@@ -448,16 +532,16 @@ export default function DashboardScreen({ navigation }) {
                     className="w-[220px] h-[202px] rounded-[4px] mb-2"
                     style={{ resizeMode: "cover" }}
                   />
-                  <View className="flex-row justify-between items-center mb-1">
+                  <View className="flex-row justify-between mb-1">
                     <Text
-                      className="text-[14px]"
+                      className="text-[14px] w-[70%]"
                       style={{ fontFamily: "poppinsRegular" }}
                     >
                       {p.productName}
                     </Text>
                     {p.price ? (
                       <Text
-                        className="text-primary text-[12px]"
+                        className="text-primary mt-1 text-[12px]"
                         style={{ fontFamily: "poppinsRegular" }}
                       >
                         {formatAmount(p.price)}

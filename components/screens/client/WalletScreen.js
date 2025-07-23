@@ -110,6 +110,7 @@ export default function WalletScreen() {
           )}
           <View className="flex-row justify-between mt-2">
             <TouchableOpacity
+              onPress={() => navigation.navigate("FundClientWallet")}
               className="items-center flex-1"
               style={{ gap: 4 }}
             >
@@ -122,6 +123,7 @@ export default function WalletScreen() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
+              onPress={() => navigation.navigate("ClientWithdrawScreen")}
               className="items-center flex-1"
               style={{ gap: 4 }}
             >

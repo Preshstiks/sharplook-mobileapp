@@ -110,7 +110,7 @@ function ReviewSkeleton() {
   );
 }
 
-export default function ReviewsScreen() {
+export default function ProductReviewsScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const vendor = route.params?.vendor;
@@ -125,7 +125,7 @@ export default function ReviewsScreen() {
         setError(null);
         try {
           const res = await HttpClient.post(`/reviews/getAllReviews`, {
-            type: "VENDOR",
+            type: "PRODUCT",
             vendorId,
           });
           setReviews(res.data?.data || []);

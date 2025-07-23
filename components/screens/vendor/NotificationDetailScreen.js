@@ -2,11 +2,45 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { showToast } from "../../ToastComponent/Toast";
+import { HttpClient } from "../../../api/HttpClient";
 
 export default function NotificationDetailScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { notification } = route.params;
+
+  // Handles booking status update (accept/reject)
+  const handleSubmit = async (status) => {
+    try {
+      // Extract booking ID from notification. Adjust as needed.
+      const bookingId =
+        notification?.bookingId ||
+        notification?.id ||
+        notification?.details?.bookingId;
+      if (!bookingId) {
+        showToast.error("Booking ID not found.");
+        return;
+      }
+      const res = await HttpClient.patch(`/bookings/${bookingId}/status`, {
+        status,
+      });
+      showToast.success(res.data.message || `Booking ${status.toLowerCase()}.`);
+      navigation.goBack();
+    } catch (error) {
+      let msg = `Failed to ${status.toLowerCase()} booking.`;
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        msg = error.response.data.message;
+      } else if (error.message) {
+        msg = error.message;
+      }
+      showToast.error(msg);
+    }
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
@@ -43,7 +77,10 @@ export default function NotificationDetailScreen() {
       {/* Accept/Reject Buttons */}
       {notification.heading === "Appointment Booking" && (
         <View style={styles.buttonRow}>
-          <TouchableOpacity className="bg-primary text-white w-[48%] py-4 px-4 rounded-[12px]">
+          <TouchableOpacity
+            className="bg-primary text-white w-[48%] py-4 px-4 rounded-[12px]"
+            onPress={() => handleSubmit("ACCEPTED")}
+          >
             <Text
               className="text-[14px] text-white text-center"
               style={{ fontFamily: "poppinsMedium" }}
@@ -51,7 +88,10 @@ export default function NotificationDetailScreen() {
               Accept
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity className="border border-primary text-white w-[48%] py-4 px-4 rounded-[12px]">
+          <TouchableOpacity
+            className="border border-primary text-white w-[48%] py-4 px-4 rounded-[12px]"
+            onPress={() => handleSubmit("REJECTED")}
+          >
             <Text
               className="text-[14px] text-primary text-center"
               style={{ fontFamily: "poppinsMedium" }}

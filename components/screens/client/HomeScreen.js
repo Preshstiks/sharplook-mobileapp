@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Pressable,
   Animated,
   Easing,
+  TouchableWithoutFeedback,
 } from "react-native";
 import {
   Entypo,
@@ -23,7 +24,8 @@ import EmptySVG from "../../../assets/img/empty.svg";
 import MakeupPromo from "../../../assets/img/makeuppromo.png";
 import Refer from "../../../assets/img/refer.png";
 import Feather from "@expo/vector-icons/Feather";
-import { useNavigation } from "@react-navigation/native";
+import { useCart } from "../../../context/CartContext";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Menu from "../../../assets/icon/homemenubtn.svg";
 import OptionsIcon from "../../../assets/icon/options.svg";
 import NailIcon from "../../../assets/icon/nail.svg";
@@ -44,6 +46,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { HttpClient } from "../../../api/HttpClient";
 import DefaultAvatar from "../../../assets/icon/avatar.png";
 import { useStatusBar } from "../../../context/StatusBarContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const categories = [
   {
     label: "Nails",
@@ -139,64 +142,88 @@ export default function HomeScreen() {
   const navigation = useNavigation();
   const { setBarType } = useStatusBar();
   const [isSearchBarActive, setIsSearchBarActive] = useState(false);
+  const [searchInput, setSearchInput] = useState(""); // <-- new state
+  const [filteredVendors, setFilteredVendors] = useState([]); // <-- new state
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [topVendors, setTopVendors] = useState([]);
   const [loadingVendors, setLoadingVendors] = useState(true);
   const [allServices, setAllServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
+  const searchInputRef = React.useRef(null); // <-- add ref
   const toggleSearchBar = () => {
     setIsSearchBarActive(!isSearchBarActive);
+    setSearchInput(""); // Reset search input when toggling
+    setFilteredVendors([]); // Reset filtered vendors
   };
   const user = useAuth();
+  const { cartItems, fetchCart } = useCart();
   useEffect(() => {
     setBarType("primary");
   }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchCart();
+      const fetchRecommendedProducts = async () => {
+        setLoadingProducts(true);
+        try {
+          const res = await HttpClient.get("/user/products/top-selling");
+          setRecommendedProducts(res.data.data);
+        } catch (error) {
+          console.log("Error fetching recommended products:", error);
+        } finally {
+          setLoadingProducts(false);
+        }
+      };
+      const fetchTopVendors = async () => {
+        const token = await AsyncStorage.getItem("token");
+        console.log("token", token);
+        setLoadingVendors(true);
+        try {
+          const res = await HttpClient.get("/user/topVendors");
+          setTopVendors(res.data.data);
+        } catch (error) {
+          console.log("Error fetching top vendors:", error);
+        } finally {
+          setLoadingVendors(false);
+        }
+      };
+      const fetchAllServices = async () => {
+        setLoadingServices(true);
+        try {
+          const res = await HttpClient.get("/client/services");
+          console.log("API response:", res.data);
+          setAllServices(res.data.data); // Adjust if your API response structure differs
+        } catch (error) {
+          console.log("Error fetching all services:", error.response);
+          console.log("Error fetching all services data:", error.response.data);
+        } finally {
+          setLoadingServices(false);
+        }
+      };
+      fetchRecommendedProducts();
+      fetchTopVendors();
+      fetchAllServices();
+    }, [fetchCart])
+  );
+
   useEffect(() => {
-    const fetchRecommendedProducts = async () => {
-      setLoadingProducts(true);
-      try {
-        const res = await HttpClient.get("/user/products/top-selling");
-        setRecommendedProducts(res.data.data);
-      } catch (error) {
-        console.log("Error fetching recommended products:", error);
-      } finally {
-        setLoadingProducts(false);
-      }
-    };
-    const fetchTopVendors = async () => {
-      setLoadingVendors(true);
-      try {
-        const res = await HttpClient.get("/user/topVendors");
-        setTopVendors(res.data.data);
-      } catch (error) {
-        console.log("Error fetching top vendors:", error);
-      } finally {
-        setLoadingVendors(false);
-      }
-    };
-    const fetchAllServices = async () => {
-      setLoadingServices(true);
-      try {
-        const res = await HttpClient.get("/client/services");
-        console.log("API response:", res.data);
-        setAllServices(res.data.data); // Adjust if your API response structure differs
-      } catch (error) {
-        console.log("Error fetching all services:", error);
-      } finally {
-        setLoadingServices(false);
-      }
-    };
-    fetchRecommendedProducts();
-    fetchTopVendors();
-    fetchAllServices();
-  }, []);
+    if (searchInput.trim() === "") {
+      setFilteredVendors([]);
+    } else {
+      const filtered = topVendors.filter((vendor) => {
+        const name = vendor?.vendorOnboarding?.businessName || "";
+        return name.toLowerCase().includes(searchInput.toLowerCase());
+      });
+      setFilteredVendors(filtered);
+    }
+  }, [searchInput, topVendors]);
 
   console.log({ topVendors });
   const currentUser = user.user;
   return (
-    <View className="flex-1 bg-secondary">
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <View className="flex-1 bg-secondary" style={{ position: "relative" }}>
+      <ScrollView showsVerticalScrollIndicator={false} style={{ zIndex: 20 }}>
         {/* Header */}
         <View className="px-5 pt-[40px] items-center justify-between flex-row">
           <View>
@@ -228,9 +255,13 @@ export default function HomeScreen() {
               onPress={() => navigation.navigate("CartScreen")}
             >
               <Feather name="shopping-cart" size={24} color="#EB278D" />
-              <View className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary items-center justify-center">
-                <Text className="text-[8px] text-white font-medium">2</Text>
-              </View>
+              {cartItems.length > 0 && (
+                <View className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary items-center justify-center">
+                  <Text className="text-[8px] text-white font-medium">
+                    {cartItems.length}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.openDrawer()}>
               <Menu width={30} height={30} />
@@ -252,11 +283,14 @@ export default function HomeScreen() {
               )}
             </Pressable>
             <TextInput
+              ref={searchInputRef} // <-- attach ref
               className="ml-2 text-xs pb-4 pt-5 placeholder:text-faintDark2"
               placeholder="Search Shop or Vendor"
               cursorColor="#EB278D"
               style={{ fontFamily: "poppinsRegular" }}
               onFocus={() => setIsSearchBarActive(true)}
+              value={searchInput}
+              onChangeText={setSearchInput}
             />
           </View>
 
@@ -264,52 +298,83 @@ export default function HomeScreen() {
             <FilterBtn width={35} height={35} color="#fff" />
           </TouchableOpacity>
         </View>
-        {/* Categories */}
+        {/* Categories or Search Results */}
         {isSearchBarActive ? (
           <ScrollView className="mt-8 px-4 space-y-4">
-            {[
-              {
-                id: 1,
-                title: "Swedish Massage by Ayo",
-                image: HomeImg1,
-              },
-              {
-                id: 2,
-                title: "Matoty Facials",
-                image: HomeImg2,
-              },
-              {
-                id: 3,
-                title: "Salt Body Scrub",
-                image: HomeImg3,
-              },
-              {
-                id: 4,
-                title: "Hot Stone Therapy",
-                image: HomeImg4,
-              },
-            ].map((service) => {
-              return (
+            {/* If searchInput is empty, show nothing. If not, show filtered vendors. */}
+            {searchInput.trim() === "" ? null : filteredVendors.length === 0 ? (
+              <View className="items-center justify-center py-8">
+                <EmptySVG width={120} height={120} />
+                <Text
+                  className="text-[14px] text-gray-400 mt-2"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  No vendors found
+                </Text>
+              </View>
+            ) : (
+              filteredVendors.map((vendor, idx) => (
                 <Pressable
-                  key={service.id}
-                  onPress={() => navigation.navigate("VendorProfileScreen")}
+                  key={vendor.id || idx}
+                  onPress={() =>
+                    navigation.navigate("VendorProfileScreen", {
+                      vendorData: vendor,
+                    })
+                  }
                   className="bg-[#FCDFEE] mb-6 rounded-2xl overflow-hidden shadow-md"
                   style={{ elevation: 2 }}
                 >
                   <View style={{ height: 150, width: "100%" }}>
-                    <service.image width="100%" height={150} />
+                    <Image
+                      source={
+                        vendor.avatar ? { uri: vendor.avatar } : DefaultAvatar
+                      }
+                      style={{ width: "100%", height: 150 }}
+                      resizeMode="cover"
+                    />
                   </View>
                   <View className="p-4">
                     <Text
                       className="text-base font-medium text-faintDark"
                       style={{ fontFamily: "poppinsRegular" }}
                     >
-                      {service.title}
+                      {vendor?.vendorOnboarding?.businessName}
                     </Text>
+                    <View className="bg-primary rounded-[4px] my-1 px-3 self-start">
+                      <Text
+                        style={{ fontFamily: "poppinsRegular" }}
+                        className="text-[8px] mt-1 text-white"
+                      >
+                        {vendor?.vendorOnboarding?.serviceType ===
+                        "HOME_SERVICE"
+                          ? "Home Service"
+                          : "In-shop"}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center mt-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Ionicons
+                          key={i}
+                          name={
+                            i < Math.round(vendor.rating)
+                              ? "star"
+                              : "star-outline"
+                          }
+                          size={16}
+                          color="#FFC107"
+                        />
+                      ))}
+                      <Text
+                        style={{ fontFamily: "poppinsRegular" }}
+                        className="text-[12px] text-fadedDark mt-1 ml-1"
+                      >
+                        {vendor.rating?.toFixed(1)}
+                      </Text>
+                    </View>
                   </View>
                 </Pressable>
-              );
-            })}
+              ))
+            )}
           </ScrollView>
         ) : (
           <View>
@@ -322,14 +387,14 @@ export default function HomeScreen() {
                     if (cat.label !== "Other") {
                       // Filter services by category
                       const filteredServices = allServices.filter(
-                        (service) => service.category === cat.label
+                        (service) => service.serviceName === cat.label
                       );
                       navigation.navigate("Categories", {
                         category: cat.label,
                         services: filteredServices,
                       });
                     } else {
-                      navigation.navigate("OtherScreen");
+                      navigation.navigate("OtherScreen", { allServices });
                     }
                   }}
                 >
@@ -384,8 +449,7 @@ export default function HomeScreen() {
                   <Pressable
                     onPress={() =>
                       navigation.navigate("VendorProfileScreen", {
-                        vendorId: vendor.id,
-                        vendorData: vendor, // Pass the full vendor object
+                        vendorData: vendor, // Only pass vendorData
                       })
                     }
                     key={vendor.id || idx}
@@ -408,18 +472,19 @@ export default function HomeScreen() {
                         style={{ fontFamily: "poppinsRegular" }}
                         className="text-[12px] text-fadedDark mt-0.5"
                       >
-                        {vendor.businessName
-                          ? vendor.businessName
-                          : "SharpLook Salon"}
+                        {vendor?.vendorOnboarding.businessName}
                       </Text>
-                      <Text
-                        style={{ fontFamily: "poppinsRegular" }}
-                        className="text-[10px] opacity-60 text-fadedDark"
-                      >
-                        {vendor.specialties && vendor.specialties.length > 0
-                          ? vendor.specialties[0]
-                          : "Specialist"}
-                      </Text>
+                      <View className="bg-primary rounded-[4px] my-1 px-3 self-start">
+                        <Text
+                          style={{ fontFamily: "poppinsRegular" }}
+                          className="text-[8px] mt-1 text-white"
+                        >
+                          {vendor?.vendorOnboarding.serviceType ===
+                          "HOME_SERVICE"
+                            ? "Home Service"
+                            : "In-shop"}
+                        </Text>
+                      </View>
                       <View className="flex-row items-center mt-0.5">
                         {[...Array(5)].map((_, i) => (
                           <Ionicons
@@ -580,6 +645,27 @@ export default function HomeScreen() {
           </View>
         )}
       </ScrollView>
+      {/* Overlay to close search bar when clicking outside */}
+      {isSearchBarActive && (
+        <Pressable
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 30,
+          }}
+          onPress={() => {
+            setIsSearchBarActive(false);
+            setSearchInput("");
+            setFilteredVendors([]);
+            if (searchInputRef.current) {
+              searchInputRef.current.blur();
+            }
+          }}
+        />
+      )}
     </View>
   );
 }

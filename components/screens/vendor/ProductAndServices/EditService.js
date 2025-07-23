@@ -21,6 +21,7 @@ import {
 } from "../../../../utils/validationSchemas";
 import Dropdown from "../../../reusuableComponents/inputFields/Dropdown";
 import { showToast } from "../../../ToastComponent/Toast";
+import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
 
 export default function EditServicesScreen({ navigation, route }) {
   const service = route?.params?.service;
@@ -56,6 +57,7 @@ export default function EditServicesScreen({ navigation, route }) {
     try {
       const formData = new FormData();
       formData.append("serviceName", values.serviceName);
+      formData.append("description", values.description);
       formData.append("servicePrice", values.servicePrice);
 
       if (selectedImage) {
@@ -123,6 +125,7 @@ export default function EditServicesScreen({ navigation, route }) {
       <Formik
         initialValues={{
           serviceName: service?.serviceName || "",
+          description: service?.description || "",
           servicePrice: service?.servicePrice
             ? String(service.servicePrice)
             : "",
@@ -196,8 +199,17 @@ export default function EditServicesScreen({ navigation, route }) {
                     options={SERVICE_OPTIONS}
                   />
                   <AuthInput
+                    label="Service Description"
+                    value={values.description}
+                    onChangeText={handleChange("description")}
+                    onBlur={handleBlur("description")}
+                    error={errors.description}
+                    touched={touched.description}
+                  />
+                  <AuthInput
                     label="Price"
                     value={values.servicePrice}
+                    keyboardType="numeric"
                     onChangeText={handleChange("servicePrice")}
                     onBlur={handleBlur("servicePrice")}
                     error={errors.servicePrice}
@@ -278,6 +290,7 @@ export default function EditServicesScreen({ navigation, route }) {
         buttonText={false}
         message="Congratulations, your service was edited successfully!!!"
       />
+      <LoaderOverlay visible={loading} />
     </View>
   );
 }

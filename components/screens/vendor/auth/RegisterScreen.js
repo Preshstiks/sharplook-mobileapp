@@ -18,6 +18,7 @@ import Dropdown from "../../../reusuableComponents/inputFields/Dropdown";
 import * as DocumentPicker from "expo-document-picker";
 import { HttpClient } from "../../../../api/HttpClient";
 import { showToast } from "../../../ToastComponent/Toast";
+import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
 
 const SERVICE_OPTIONS = [
   { label: "In-shop", value: "IN_SHOP" },
@@ -48,12 +49,17 @@ export default function VendorRegisterScreen({ navigation }) {
           type: values.identityImage.mimeType || "image/jpeg",
         });
       }
-      const res = await HttpClient.post("/auth/register", formData);
+      const res = await HttpClient.post("/auth/register-vendor", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       showToast.success(res.data.message);
       navigation.navigate("VendorEmailVerification", { email: values.email });
     } catch (error) {
+      console.log("Debug: error", error.response);
       if (error.response && error.response.data) {
-        const errorMessage = error.response.data.message;
+        const errorMessage = error.response.data.error;
         showToast.error(errorMessage);
       } else {
         showToast.error("An unexpected error occurred. Please try again.");
@@ -133,7 +139,6 @@ export default function VendorRegisterScreen({ navigation }) {
                       touched={touched.firstName}
                     />
                   </View>
-
                   <View className="flex-1">
                     <AuthInput
                       label="Last Name"
@@ -283,6 +288,7 @@ export default function VendorRegisterScreen({ navigation }) {
                     </Text>
                   </View>
                 </View>
+
                 <AuthButton
                   title="Create Account"
                   loadingMsg="Creating"
@@ -312,6 +318,7 @@ export default function VendorRegisterScreen({ navigation }) {
           </Formik>
         </View>
       </ScrollView>
+      <LoaderOverlay visible={loading} />
     </KeyboardAvoidingView>
   );
 }

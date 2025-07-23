@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,54 +7,166 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ChatIcon from "../../../assets/icon/chat.svg";
 import WhiteChatIcon from "../../../assets/icon/whitechat.svg";
 import SpaImg from "../../../assets/img/vendorprof.svg";
-import Specialist1 from "../../../assets/img/ayo.svg";
-import Specialist2 from "../../../assets/img/alex.svg";
-import Specialist3 from "../../../assets/img/sharon.svg";
-import Specialist4 from "../../../assets/img/priti.svg";
-import Service1 from "../../../assets/img/service1.svg";
-import Service2 from "../../../assets/img/service2.svg";
-import Service3 from "../../../assets/img/service3.svg";
-import Service4 from "../../../assets/img/service4.svg";
 import BottomModal from "../../reusuableComponents/BottomModal";
 import { useState } from "react";
 import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
-
-const specialists = [
-  { name: "Ayomide", role: "Esthetician", Img: Specialist1 },
-  { name: "Alex", role: "Hair Stylist", Img: Specialist2 },
-  { name: "Sharon", role: "Brow Technician", Img: Specialist3 },
-  { name: "Priti", role: "Masseur", Img: Specialist4 },
-  { name: "Segun", role: "Barber", Img: Specialist4 },
-];
-const products = [
-  { name: "Make-Up Brush", price: "₦6000", Img: Service1 },
-  { name: "Body Scrub", price: "₦10000", Img: Service2 },
-  { name: "Waxing Liquid", price: "₦8000", Img: Service3 },
-];
+import { formatAmount } from "../../../components/formatAmount";
+import { CTAbtn } from "../../reusuableComponents/buttons/CTAbtn";
+import ServiceDetailsModal from "./ServiceDetailsModal";
+import ProductDetailsModal from "./ProductDetailsModal";
+import { useCart } from "../../../context/CartContext";
+import { HttpClient } from "../../../api/HttpClient"; // Added missing import
+import { showToast } from "../../ToastComponent/Toast";
+import VendorProfileProductDetails from "./VendorProfileProductDetails";
+import VendorProfileServiceDetails from "./VendorProfileServiceDetails";
 
 const { width } = Dimensions.get("window");
 
 export default function VendorProfileScreen({ navigation, route }) {
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-
-  // Access the vendor data passed from HomeScreen
   const vendorData = route.params?.vendorData;
-  const vendorId = route.params?.vendorId;
+  const { cartItems, fetchCart, loading: cartLoading } = useCart();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisibleProduct, setModalVisibleProduct] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [addingToCart, setAddingToCart] = useState({});
 
-  useEffect(() => {
-    console.log("Vendor Data:", vendorData);
-    console.log("Vendor ID:", vendorId);
-  }, [vendorData, vendorId]);
   const handleDebitCardPayment = () => {
     setShowPaymentModal(false);
     navigation.navigate("DebitCardScreen");
   };
+
+  const vendorServiceType = vendorData?.vendorOnboarding?.serviceType;
+  const cartProductIds = cartItems.map(
+    (item) =>
+      item.product?.id ||
+      item.product?._id ||
+      item.productId ||
+      item.id ||
+      item._id
+  );
+
+  const handleServicePress = (service) => {
+    setSelectedService(service);
+    setModalVisible(true);
+  };
+
+  const handleProductPress = (product) => {
+    setSelectedProduct(product);
+    setModalVisibleProduct(true);
+  };
+
+  const handleAddToCart = async (product) => {
+    const productId = product.id || product._id;
+    setAddingToCart((prev) => ({ ...prev, [productId]: true }));
+
+    try {
+      const res = await HttpClient.post("/client/addProductTocart", {
+        productId: productId,
+      });
+      showToast.success(res.data.message);
+      await fetchCart(); // Refresh cart after adding
+    } catch (error) {
+      console.log("Error adding to cart:", error.response);
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.message ||
+        "Failed to add to cart.";
+      showToast.error(message);
+    } finally {
+      setAddingToCart((prev) => {
+        const { [productId]: removed, ...rest } = prev;
+        return rest;
+      });
+    }
+  };
+
+  const handleAddToCartFromModal = async (product, quantity) => {
+    for (let i = 0; i < quantity; i++) {
+      await handleAddToCart(product);
+    }
+    setModalVisibleProduct(false); // Fixed: was setModalVisible
+  };
+  console.log({ vendorData });
+
+  // Complete renderProduct function
+  const renderProduct = (item, index) => {
+    const productId = item.id || item._id;
+    const isInCart = cartProductIds.includes(productId);
+    const isAdding = addingToCart[productId];
+
+    return (
+      <Pressable
+        onPress={() => handleProductPress(item)}
+        key={index}
+        style={{ width: 160, marginRight: 16 }}
+      >
+        <View
+          style={{
+            borderRadius: 4,
+            overflow: "hidden",
+            backgroundColor: "#fff",
+            height: 120,
+            width: "100%",
+          }}
+        >
+          <Image
+            source={{ uri: item.picture }}
+            style={{ width: "100%", height: 120, resizeMode: "cover" }}
+          />
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 10,
+          }}
+        >
+          <Text
+            style={{ fontFamily: "poppinsRegular" }}
+            className="text-[12px] w-[70%]"
+          >
+            {item.productName}
+          </Text>
+          <Text
+            style={{ fontFamily: "poppinsRegular" }}
+            className="text-[12px] text-primary w-[30%]"
+          >
+            {formatAmount(item.price)}
+          </Text>
+        </View>
+        <TouchableOpacity
+          disabled={isAdding || isInCart}
+          className={`py-2 rounded-[8px] mt-3 items-center ${
+            isAdding ? "opacity-50" : ""
+          } ${isInCart ? "border border-primary bg-white" : "bg-primary"}`}
+          onPress={() => handleAddToCart(item)}
+        >
+          <Text
+            style={{
+              color: isInCart ? "#EB278D" : "#fff",
+              fontFamily: "poppinsRegular",
+              fontSize: 12,
+            }}
+            className="text-center"
+          >
+            {isAdding ? "Adding..." : isInCart ? "In Cart" : "Add to Cart"}
+          </Text>
+        </TouchableOpacity>
+      </Pressable>
+    );
+  };
+
+  console.log({ vendorData });
+
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }} className="pb-[60px]">
       {/* Header */}
@@ -86,56 +198,83 @@ export default function VendorProfileScreen({ navigation, route }) {
               className="text-faintDark text-[16px]"
               style={{ fontFamily: "poppinsMedium" }}
             >
-              {vendorData?.businessName || "Heritage Spa and Beauty Services"}
+              {vendorData?.vendorOnboarding?.businessName}
             </Text>
-            <View style={styles.reviewRow} className="mt-2">
-              <Text
-                className="text-[#201E1F] text-[12px]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                {vendorData?.rating?.toFixed(1) || "4.0"} Reviews
-              </Text>
-              <View style={{ flexDirection: "row", marginLeft: 8 }}>
-                {[...Array(5)].map((_, i) => (
-                  <Ionicons
-                    key={i}
-                    name={
-                      i < Math.round(vendorData?.rating || 4)
-                        ? "star"
-                        : "star-outline"
-                    }
-                    size={20}
-                    color="#FFC107"
-                  />
-                ))}
+            <View className="flex-row justify-between items-center">
+              <View style={styles.reviewRow} className="mt-2">
+                <Text
+                  className="text-[#201E1F] text-[12px]"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  {vendorData?.rating?.toFixed(1) || "0.0"} Reviews
+                </Text>
+                <View style={{ flexDirection: "row", marginLeft: 8 }}>
+                  {[...Array(5)].map((_, i) => (
+                    <Ionicons
+                      key={i}
+                      name={
+                        i < Math.round(vendorData?.rating || 0)
+                          ? "star"
+                          : "star-outline"
+                      }
+                      size={20}
+                      color="#FFC107"
+                    />
+                  ))}
+                </View>
+              </View>
+              <View className="p-2 bg-primary mt-1 self-start rounded-[4px]">
+                <Text className="text-white text-[12px]">
+                  {vendorData?.vendorOnboarding?.serviceType === "HOME_SERVICE"
+                    ? "Home Service"
+                    : "In-shop"}
+                </Text>
               </View>
             </View>
-          </View>
-          <View className="p-2 bg-primary rounded-[4px]">
-            <Text className="text-white text-[12px]">
-              {vendorData?.specialties?.[0] || "In-shop"}
-            </Text>
           </View>
         </View>
         {/* See Reviews CTA */}
         <View className="mx-4 mt-3">
           <AuthButton
             title="See Reviews"
-            onPress={() => navigation.navigate("ReviewsScreen")}
+            onPress={() => {
+              const firstServiceId = vendorData?.vendorServices;
+              navigation.navigate("ReviewsScreen", {
+                vendor: firstServiceId,
+              });
+            }}
           />
         </View>
         {/* About Us */}
         <View style={styles.sectionWrap}>
-          <Text style={{ fontFamily: "poppinsMedium" }} className="text-[16px]">
-            About Us
-          </Text>
+          <View className="flex-row items-center justify-between">
+            <Text
+              style={{ fontFamily: "poppinsMedium" }}
+              className="text-[16px]"
+            >
+              About Us
+            </Text>
+            <TouchableOpacity
+              className="border border-primary rounded-lg py-2 px-4 flex-row items-center"
+              onPress={() =>
+                navigation.navigate("VendorPortfolioScreen", {
+                  vendorId: vendorData?.id,
+                })
+              }
+            >
+              <Text
+                style={{ fontFamily: "poppinsRegular" }}
+                className="text-primary text-[12px] mt-1"
+              >
+                Portfolio
+              </Text>
+            </TouchableOpacity>
+          </View>
           <Text
             style={{ fontFamily: "poppinsRegular" }}
             className="text-[12px] mt-3"
           >
-            Heritage Spa and Beauty Services is a small, serene spot offering
-            expert beauty care and relaxing spa treatments to help you look and
-            feel your best.
+            {vendorData?.vendorOnboarding?.bio}
           </Text>
         </View>
         {/* Availability */}
@@ -173,36 +312,6 @@ export default function VendorProfileScreen({ navigation, route }) {
           </View>
         </View>
         <View className="h-[1px] bg-[#0000001A] mx-4" />
-        <View style={styles.sectionWrap}>
-          <Text style={{ fontFamily: "poppinsMedium" }} className="text-[16px]">
-            Our Specialist
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginTop: 12 }}
-          >
-            {specialists.map((sp, idx) => (
-              <View key={idx} style={styles.specialistWrap}>
-                <View style={styles.specialistImgWrap}>
-                  <sp.Img width={60} height={60} />
-                </View>
-                <Text
-                  style={{ fontFamily: "poppinsSemiBold" }}
-                  className="text-[12px] text-fadedDark"
-                >
-                  {sp.name}
-                </Text>
-                <Text
-                  style={{ fontFamily: "poppinsRegular" }}
-                  className="text-[10px] text-center text-fadedDark"
-                >
-                  {sp.role}
-                </Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
 
         <View className="h-[1px] bg-[#0000001A] mx-4" />
 
@@ -218,29 +327,9 @@ export default function VendorProfileScreen({ navigation, route }) {
               marginTop: 16,
             }}
           >
-            {[
-              {
-                name: "Massage",
-                price: "₦65,999",
-                img: Service1,
-              },
-              {
-                name: "Pedicure",
-                price: "₦65,999",
-                img: Service2,
-              },
-              {
-                name: "Waxing",
-                price: "₦5,999",
-                img: Service3,
-              },
-              {
-                name: "Facials",
-                price: "₦65,999",
-                img: Service4,
-              },
-            ].map((service, idx) => (
-              <View
+            {vendorData?.vendorServices.map((service, idx) => (
+              <Pressable
+                onPress={() => handleServicePress(service)}
                 key={idx}
                 style={{ width: (width - 48) / 2, marginBottom: 20 }}
               >
@@ -253,10 +342,9 @@ export default function VendorProfileScreen({ navigation, route }) {
                     width: "100%",
                   }}
                 >
-                  <service.img
-                    width="100%"
-                    height="100%"
-                    preserveAspectRatio="xMidYMid slice"
+                  <Image
+                    source={{ uri: service.serviceImage }}
+                    style={{ width: "100%", height: 120, resizeMode: "cover" }}
                   />
                 </View>
                 <View
@@ -271,38 +359,32 @@ export default function VendorProfileScreen({ navigation, route }) {
                     style={{ fontFamily: "poppinsRegular" }}
                     className="text-[12px]"
                   >
-                    {service.name}
+                    {service.serviceName}
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
                     className="text-[12px] text-primary"
                   >
-                    {service.price}
+                    {formatAmount(service.servicePrice)}
                   </Text>
                 </View>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "#EB278D",
-                    borderRadius: 8,
-                    marginTop: 10,
-                    paddingVertical: 12,
-                    alignItems: "center",
+                <CTAbtn
+                  title="Book Now"
+                  onPress={() => {
+                    if (vendorServiceType === "HOME_SERVICE") {
+                      navigation.navigate("BookingHomeServiceAppointScreen", {
+                        service,
+                        vendorData,
+                      });
+                    } else {
+                      navigation.navigate("BookAppointmentScreen", {
+                        service,
+                        vendorData,
+                      });
+                    }
                   }}
-                  onPress={() =>
-                    navigation.navigate("BookAppointmentScreen", { service })
-                  }
-                >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontFamily: "poppinsRegular",
-                      fontSize: 12,
-                    }}
-                  >
-                    Book Now
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                />
+              </Pressable>
             ))}
           </View>
         </View>
@@ -316,66 +398,9 @@ export default function VendorProfileScreen({ navigation, route }) {
             showsHorizontalScrollIndicator={false}
             style={{ marginTop: 12 }}
           >
-            {products.map((pr, idx) => (
-              <View key={idx} style={{ width: 160, marginRight: 16 }}>
-                <View
-                  style={{
-                    borderRadius: 4,
-                    overflow: "hidden",
-                    backgroundColor: "#fff",
-                    height: 120,
-                    width: "100%",
-                  }}
-                >
-                  <pr.Img
-                    width="100%"
-                    height="100%"
-                    preserveAspectRatio="xMidYMid slice"
-                  />
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: 10,
-                  }}
-                >
-                  <Text
-                    style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[12px]"
-                  >
-                    {pr.name}
-                  </Text>
-                  <Text
-                    style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[12px] text-primary"
-                  >
-                    {pr.price}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "#EB278D",
-                    borderRadius: 8,
-                    marginTop: 10,
-                    paddingVertical: 12,
-                    alignItems: "center",
-                  }}
-                  onPress={() => setShowPaymentModal(true)}
-                >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontFamily: "poppinsRegular",
-                      fontSize: 12,
-                    }}
-                  >
-                    Add to Cart
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+            {vendorData?.products.map((product, idx) =>
+              renderProduct(product, idx)
+            )}
           </ScrollView>
         </View>
       </ScrollView>
@@ -412,6 +437,19 @@ export default function VendorProfileScreen({ navigation, route }) {
           />
         </View>
       </BottomModal>
+      <VendorProfileProductDetails
+        visible={modalVisibleProduct}
+        onClose={() => setModalVisibleProduct(false)}
+        product={selectedProduct}
+        vendorData={vendorData} // Pass the entire vendor object
+        onAddToCart={handleAddToCartFromModal}
+      />
+      <VendorProfileServiceDetails
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        service={selectedService}
+        vendorData={vendorData} // Add this prop
+      />
     </View>
   );
 }

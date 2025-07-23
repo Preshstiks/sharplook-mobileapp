@@ -1,12 +1,13 @@
 import React, { useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { HttpClient } from "../../../api/HttpClient";
 import EmptySVG from "../../../assets/img/empty.svg";
 import { formatAmount } from "../../formatAmount";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import BottomModal from "../../reusuableComponents/BottomModal";
 
 function SkeletonLoader() {
   return (
@@ -67,7 +68,8 @@ function SkeletonLoader() {
 export default function MyServicesScreen({ navigation }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [serviceToDelete, setServiceToDelete] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   useFocusEffect(
     useCallback(() => {
       const fetchServices = async () => {
@@ -89,6 +91,31 @@ export default function MyServicesScreen({ navigation }) {
       fetchServices();
     }, [])
   );
+  const handleDeleteProduct = async () => {
+    if (!serviceToDelete) return;
+    try {
+      setLoading(true);
+      await HttpClient.delete(`/vendorServices/my-services/${productToDelete}`);
+      showToast.success("Service deleted successfully");
+      setShowModal(false);
+      setServiceToDelete(null);
+      // Refresh products
+      const res = await HttpClient.get("/vendorServices/my-services");
+      setServices(res.data.data);
+    } catch (error) {
+      console.log(error.response);
+      let errorMsg = "An error occurred. Please try again.";
+      if (error.response && error.response.data) {
+        errorMsg =
+          error.response.data.message || JSON.stringify(error.response.data);
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      showToast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
   console.log({ services });
   return (
     <ScrollView className="flex-1 bg-white">
@@ -156,12 +183,22 @@ export default function MyServicesScreen({ navigation }) {
                   >
                     {s.serviceName}
                   </Text>
-                  <Text
-                    className="text-primary text-[14px]"
-                    style={{ fontFamily: "latoBold" }}
-                  >
-                    {formatAmount(s.servicePrice)}
-                  </Text>
+                  <View className="flex-row mt-1 items-center justify-between">
+                    <Text
+                      className="text-primary text-[14px]"
+                      style={{ fontFamily: "latoBold" }}
+                    >
+                      {formatAmount(s.servicePrice)}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShowModal(true);
+                        setServiceToDelete(s.id);
+                      }}
+                    >
+                      <AntDesign name="delete" size={14} color="#E53935" />
+                    </TouchableOpacity>
+                  </View>
                   <TouchableOpacity
                     onPress={() =>
                       navigation.navigate("EditService", { service: s })
@@ -181,6 +218,50 @@ export default function MyServicesScreen({ navigation }) {
           </View>
         )}
       </View>
+      <BottomModal
+        isVisible={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setServiceToDelete(null);
+        }}
+        showCloseBtn={true}
+      >
+        <View className="mb-8 mt-2">
+          <Text
+            className="text-[16px] text-center text-fadedDark"
+            style={{ fontFamily: "latoBold" }}
+          >
+            Are you sure you want to delete this Product?
+          </Text>
+        </View>
+        <View className="space-y-4 pb-10 mt-2">
+          <TouchableOpacity
+            className="mt-2 rounded-[12px] mb-4 h-[52px] flex flex-row items-center w-full bg-[#ff0000] justify-center"
+            onPress={handleDeleteProduct}
+          >
+            <Text
+              style={{ fontFamily: "poppinsMedium" }}
+              className="text-center text-[13px] text-white"
+            >
+              Yes
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="mt-2 rounded-[12px] mb-4 border h-[52px] flex flex-row items-center w-full border-[#ff0000] justify-center"
+            onPress={() => {
+              setShowModal(false);
+              setServiceToDelete(null);
+            }}
+          >
+            <Text
+              style={{ fontFamily: "poppinsMedium" }}
+              className="text-center text-[13px] text-[#ff0000]"
+            >
+              No
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </BottomModal>
     </ScrollView>
   );
 }

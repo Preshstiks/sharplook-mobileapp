@@ -149,7 +149,7 @@ export default function VendorBookingsScreen() {
 
   const totalBookings = bookings.length;
   const totalAmount = bookings.reduce((sum, b) => sum + b.amount, 0);
-
+  console.log({ bookings });
   return (
     <View className="flex-1 bg-white">
       {/* Header */}

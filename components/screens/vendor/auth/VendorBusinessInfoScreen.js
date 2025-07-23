@@ -15,6 +15,7 @@ import { vendorBusinessInfoSchema } from "../../../../utils/validationSchemas";
 import { showToast } from "../../../ToastComponent/Toast";
 import { HttpClient } from "../../../../api/HttpClient";
 import { useAuth } from "../../../../context/AuthContext";
+import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
 export default function VendorBusinessInfoScreen({ navigation }) {
   const { setBarType } = useStatusBar();
   const { userId, setUser, setIsAuthenticated } = useAuth();
@@ -173,6 +174,7 @@ export default function VendorBusinessInfoScreen({ navigation }) {
           )}
         </Formik>
       </View>
+      <LoaderOverlay visible={loading} />
     </View>
   );
 }

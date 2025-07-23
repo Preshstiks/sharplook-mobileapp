@@ -18,6 +18,7 @@ import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 import { HttpClient } from "../../../../api/HttpClient";
 import SuccessModal from "../../../Modal/SuccessModal";
 import { addProductSchema } from "../../../../utils/validationSchemas";
+import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
 
 export default function AddProductScreen({ navigation }) {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -41,6 +42,7 @@ export default function AddProductScreen({ navigation }) {
     try {
       const formData = new FormData();
       formData.append("productName", values.productName);
+      formData.append("description", values.description);
       formData.append("price", values.price);
       formData.append("qtyAvailable", values.qtyAvailable);
 
@@ -71,10 +73,6 @@ export default function AddProductScreen({ navigation }) {
       );
       console.log("handleAddProduct response:", res);
       setVisible(true);
-      // navigation.navigate("Home", {
-      //   screen: "Dashboard",
-      //   params: { screen: "My Products" },
-      // });
     } catch (error) {
       console.log("AddProduct error:", error, error.response);
       let errorMsg = "An error occurred. Please try again.";
@@ -110,6 +108,7 @@ export default function AddProductScreen({ navigation }) {
       <Formik
         initialValues={{
           productName: "",
+          description: "",
           price: "",
           qtyAvailable: "",
           picture: "",
@@ -179,6 +178,14 @@ export default function AddProductScreen({ navigation }) {
                     onBlur={handleBlur("productName")}
                     error={errors.productName}
                     touched={touched.productName}
+                  />
+                  <AuthInput
+                    label="Product Description"
+                    value={values.description}
+                    onChangeText={handleChange("description")}
+                    onBlur={handleBlur("description")}
+                    error={errors.description}
+                    touched={touched.description}
                   />
                   <AuthInput
                     label="Price"
@@ -261,7 +268,7 @@ export default function AddProductScreen({ navigation }) {
               <AuthButton
                 title="Add Product"
                 isloading={loading}
-                loadingMsg="Adding..."
+                loadingMsg="Adding"
                 onPress={handleSubmit}
               />
             </View>
@@ -273,6 +280,7 @@ export default function AddProductScreen({ navigation }) {
         message="Congratulations, your product was uploaded successfully!!!"
         buttonText={false}
       />
+      <LoaderOverlay visible={loading} />
     </View>
   );
 }

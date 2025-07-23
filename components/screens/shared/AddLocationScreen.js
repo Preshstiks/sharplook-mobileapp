@@ -19,6 +19,7 @@ import {
 import { showToast } from "../../ToastComponent/Toast";
 import { HttpClient } from "../../../api/HttpClient";
 import { useAuth } from "../../../context/AuthContext";
+import LoaderOverlay from "../../reusuableComponents/LoaderOverlay";
 
 const { width, height } = Dimensions.get("window");
 
@@ -188,12 +189,23 @@ export default function ClientAddLocationScreen({ navigation }) {
       </View>
 
       {/* Map */}
-      <View style={{ flex: 1 }}>
-        <WebView
-          ref={webviewRef}
-          originWhitelist={["*"]}
-          source={{
-            html: `
+
+      <View
+        style={{
+          height: 300,
+          marginVertical: 16,
+          borderRadius: 12,
+          overflow: "hidden",
+          borderWidth: 1,
+          borderColor: "#E9E9E9",
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          <WebView
+            ref={webviewRef}
+            originWhitelist={["*"]}
+            source={{
+              html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -242,13 +254,13 @@ export default function ClientAddLocationScreen({ navigation }) {
           </body>
         </html>
       `,
-          }}
-          style={{ flex: 1 }}
-          javaScriptEnabled
-          domStorageEnabled
-        />
+            }}
+            style={{ flex: 1 }}
+            javaScriptEnabled
+            domStorageEnabled
+          />
+        </View>
       </View>
-
       {/* Bottom Sheet */}
       <View style={styles.bottomSheet}>
         <ScrollView>
@@ -283,6 +295,7 @@ export default function ClientAddLocationScreen({ navigation }) {
           ))}
         </ScrollView>
       </View>
+      <LoaderOverlay visible={isLoading} />
     </View>
   );
 }

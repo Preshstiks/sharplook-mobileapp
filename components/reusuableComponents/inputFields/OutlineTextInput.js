@@ -9,6 +9,8 @@ export default function OutlineTextInput({
   keyboardType = "default",
   style,
   label,
+  error,
+  touched,
   ...props
 }) {
   const [isFocused, setIsFocused] = useState(false);
@@ -33,11 +35,12 @@ export default function OutlineTextInput({
           { fontFamily: "poppinsRegular", textAlignVertical: "top" },
           style,
         ]}
-        className={`border px-4 py-4 text-[12px] rounded-[12px] ${isFocused ? "border-primary" : "border-[#F9BCDC]"}`}
+        className={`border px-4 py-4 text-[12px] rounded-[12px] ${isFocused ? "border-primary" : error && touched ? "border-[#FF0000]" : "border-[#F9BCDC]"}`}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         {...props}
       />
+      {error && touched && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 }
@@ -50,6 +53,8 @@ export function OutlineTextAreaInput({
   label,
   numberOfLines = 4,
   minHeight = 100,
+  error,
+  touched,
   ...props
 }) {
   const [isFocused, setIsFocused] = useState(false);
@@ -70,7 +75,7 @@ export function OutlineTextAreaInput({
         placeholderTextColor="#C4C4C4"
         multiline
         numberOfLines={numberOfLines}
-        className={`border px-4 text-[12px] py-4 rounded-[12px] ${isFocused ? "border-primary" : "border-[#F9BCDC]"}`}
+        className={`border px-4 text-[12px] py-4 rounded-[12px] ${isFocused ? "border-primary" : error && touched ? "border-[#FF0000]" : "border-[#F9BCDC]"}`}
         style={[
           { fontFamily: "poppinsRegular", minHeight, textAlignVertical: "top" },
           style,
@@ -79,6 +84,7 @@ export function OutlineTextAreaInput({
         onBlur={() => setIsFocused(false)}
         {...props}
       />
+      {error && touched && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 }
@@ -104,5 +110,12 @@ const styles = StyleSheet.create({
     color: "#201E1F",
     marginBottom: 2,
     marginTop: 6,
+  },
+  errorText: {
+    color: "#FF0000",
+    fontSize: 12,
+    fontFamily: "poppinsRegular",
+    marginTop: 4,
+    marginLeft: 12,
   },
 });

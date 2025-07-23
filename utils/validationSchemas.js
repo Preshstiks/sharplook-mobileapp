@@ -89,12 +89,46 @@ export const vendorBusinessInfoSchema = Yup.object().shape({
 
 export const addProductSchema = Yup.object().shape({
   productName: Yup.string().required("Product name is required"),
+  description: Yup.string().required("Description is required"),
   price: Yup.string().required("Price is required"),
   qtyAvailable: Yup.string().required("Quantity is required"),
   picture: Yup.mixed().nullable(),
 });
 export const addServiceSchema = Yup.object().shape({
   serviceName: Yup.string().required("Service is required"),
+  description: Yup.string().required("Description is required"),
   servicePrice: Yup.string().required("Price is required"),
   serviceImage: Yup.mixed().nullable(),
+});
+
+export const fundWalletSchema = Yup.object().shape({
+  amount: Yup.number()
+    .typeError("Amount must be a number")
+    .positive("Amount must be greater than zero")
+    .required("Amount is required"),
+});
+
+export const reviewValidationSchema = Yup.object().shape({
+  comment: Yup.string()
+    .trim()
+    .required("Experience description is required")
+    .min(10, "Please provide a more detailed experience")
+    .max(500, "Experience description is too long")
+    .when("star", {
+      is: (star) => star <= 2,
+      then: (schema) =>
+        schema.min(
+          20,
+          "For low ratings, please provide detailed feedback (at least 20 characters)"
+        ),
+      otherwise: (schema) => schema,
+    }),
+
+  rating: Yup.number()
+    .required("Rating is required")
+    .oneOf([1, 2, 3, 4, 5], "Rating must be between 1 and 5 stars"),
+});
+export const inshopvalidationSchema = Yup.object().shape({
+  time: Yup.string().required("Time is required"),
+  paymentMethod: Yup.string().required("Select a payment method"),
 });

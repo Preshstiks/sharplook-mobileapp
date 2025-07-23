@@ -6,16 +6,91 @@ import {
   Pressable,
   ScrollView,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Vendor from "../../../assets/img/blackman.jpg";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
+import { HttpClient } from "../../../api/HttpClient";
+import * as ImagePicker from "expo-image-picker";
+import { Feather, AntDesign } from "@expo/vector-icons";
+import { Formik } from "formik";
+import * as Yup from "yup";
+import BottomModal from "../../reusuableComponents/BottomModal";
+import { useState } from "react";
+import { OutlineTextAreaInput } from "../../reusuableComponents/inputFields/OutlineTextInput";
+
 export default function BookingDetailScreen() {
   const route = useRoute();
   const navigation = useNavigation();
+  const [isloadingComplete, setIsloadingComplete] = useState(false);
   const { booking } = route.params || {};
+  // /api/v1/bookings/:bookingId/complete/client
+  // /api/v1/bookings/:bookingId/complete/vendor
+  console.log;
+  const handleCompleteBooking = async () => {
+    setIsloadingComplete(true);
+    try {
+      const res = await HttpClient.post(
+        `/bookings/${booking?.id}/complete/client`
+      );
+      showToast.success(res.data.message);
+    } catch (error) {
+      console.log(error.response);
+    } finally {
+      setIsloadingComplete(false);
+    }
+  };
+
+  const [showDisputeModal, setShowDisputeModal] = React.useState(false);
+  const [isSubmittingDispute, setIsSubmittingDispute] = React.useState(false);
+
+  // Dispute form validation schema
+  const disputeSchema = Yup.object().shape({
+    reason: Yup.string().required("Please provide a reason for the dispute."),
+    image: Yup.mixed()
+      .test("fileType", "Only JPEG images are allowed.", (value) => {
+        if (!value) return true;
+        return value.endsWith(".jpg") || value.endsWith(".jpeg");
+      })
+      .test("fileSize", "Image must be less than 5MB.", async (value) => {
+        if (!value) return true;
+        // We can't check file size reliably in RN, so skip or handle in backend
+        return true;
+      }),
+  });
+
+  const handleDisputeSubmit = async (values, { resetForm }) => {
+    setIsSubmittingDispute(true);
+    try {
+      await HttpClient.post("/disputes/raiseDispute", {
+        bookingId: booking?.id,
+        reason: values.reason,
+        image: values.image,
+      });
+      // Optionally show a toast or feedback here
+      setShowDisputeModal(false);
+      resetForm();
+    } catch (error) {
+      // Optionally show error toast or feedback
+      console.log(error);
+    } finally {
+      setIsSubmittingDispute(false);
+    }
+  };
+
+  const pickImage = async (setFieldValue) => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setFieldValue("image", result.assets[0].uri);
+    }
+  };
 
   return (
     <View className="flex-1 pb-[60px] bg-secondary">
@@ -223,9 +298,112 @@ export default function BookingDetailScreen() {
         </View>
         {/* Action Buttons */}
 
-        <AuthButton title="Booking Completed" isloading={false} />
-        <OutlineButton title="Dispute Booking" />
+        <AuthButton
+          title="Booking Completed"
+          loadingMsg="Completing"
+          isloading={isloadingComplete}
+          onPress={handleCompleteBooking}
+        />
+        <OutlineButton
+          title="Dispute Booking"
+          onPress={() => setShowDisputeModal(true)}
+        />
       </ScrollView>
+      {/* Dispute Modal (local, not shared) */}
+      <BottomModal
+        isVisible={showDisputeModal}
+        onClose={() => setShowDisputeModal(false)}
+        showCloseBtn
+        backgroundcolor="#fff"
+      >
+        <Formik
+          initialValues={{ reason: "", image: null }}
+          validationSchema={disputeSchema}
+          onSubmit={handleDisputeSubmit}
+        >
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+            setFieldValue,
+            resetForm,
+          }) => (
+            <View className="w-full px-2">
+              <Text
+                className="text-[16px] mt-2 mb-1"
+                style={{ fontFamily: "latoBold" }}
+              >
+                Dispute
+              </Text>
+              <Text
+                className="text-[14px] text-[#888]  mb-4"
+                style={{ fontFamily: "latoRegular" }}
+              >
+                Why are you disputing the booking?
+              </Text>
+
+              <OutlineTextAreaInput
+                value={values.reason}
+                onChangeText={handleChange("reason")}
+                placeholder="Type here"
+                minHeight={80}
+              />
+
+              <TouchableOpacity
+                className="border border-dashed border-[#EB278D] rounded-lg py-[10px] px-4 flex-row items-center mb-2 mt-2 w-full justify-center"
+                onPress={() => pickImage(setFieldValue)}
+              >
+                <Text
+                  className="text-[12px] text-center mr-2"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  Upload a picture evidence
+                </Text>
+                <Feather name="plus" size={16} color="#000" />
+              </TouchableOpacity>
+              {values.image && (
+                <View className="mb-2 items-center">
+                  <Image
+                    source={{ uri: values.image }}
+                    style={{ width: 120, height: 120, borderRadius: 8 }}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setFieldValue("image", null)}
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      backgroundColor: "#fff",
+                      borderRadius: 16,
+                      padding: 4,
+                    }}
+                  >
+                    <AntDesign name="delete" size={18} color="#E53935" />
+                  </TouchableOpacity>
+                </View>
+              )}
+              <Text
+                style={{ fontFamily: "poppinsRegular" }}
+                className="text-[10px] text-[#888] mb-2"
+              >
+                Acceptable document type is Jpeg only and it should not be more
+                than 5MB
+              </Text>
+
+              <AuthButton
+                title="Submit"
+                onPress={handleSubmit}
+                loadingMsg="Submitting"
+                isloading={isSubmittingDispute}
+                disabled={isSubmittingDispute}
+              />
+            </View>
+          )}
+        </Formik>
+      </BottomModal>
     </View>
   );
 }

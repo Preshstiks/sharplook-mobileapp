@@ -14,6 +14,8 @@ import { emailVerificationSchema } from "../../../../utils/validationSchemas";
 import { isAxiosError } from "axios";
 import { showToast } from "../../../ToastComponent/Toast";
 import { HttpClient } from "../../../../api/HttpClient";
+import { UIActivityIndicator } from "react-native-indicators";
+import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
 
 export default function VendorEmailVerificationScreen({ navigation, route }) {
   const [code, setCode] = useState(["", "", "", ""]);
@@ -193,6 +195,7 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
           </>
         )}
       </Formik>
+      <LoaderOverlay visible={verifying} />
     </View>
   );
 }

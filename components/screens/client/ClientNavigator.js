@@ -53,6 +53,16 @@ import ReferAndEarnScreen from "./ReferAndEarnScreen";
 import WalletScreen from "./WalletScreen";
 import ReviewsScreen from "./reviews/ReviewsScreen";
 import OfferPriceScreen from "./OfferPriceScreen";
+import VendorPortfolioScreen from "./VendorPortfolioScreen";
+import ClientWithdrawScreen from "./ClientWithdrawScreen";
+import FundClientWalletScreen from "./FundClientWallet";
+import BookingHomeServiceAppointScreen from "./bookingHomeserviceappointscreen";
+import PaystackWebViewScreen from "./PaystackWebViewScreen";
+import AddProductReviewScreen from "./reviews/AddProductReview";
+import AddServiceReviewScreen from "./reviews/AddServiceReview";
+import ServiceReviewsScreen from "./reviews/ServiceReview";
+import ProductReviewsScreen from "./reviews/ProductReview";
+import AcceptedOfferDetailScreen from "./AcceptedOfferDetailScreen";
 // Removed: import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
 
 const Drawer = createDrawerNavigator();
@@ -147,6 +157,11 @@ export default function ClientNavigator() {
         component={VendorProfileScreen}
         options={{ drawerItemStyle: { display: "none" } }}
       />
+      <Drawer.Screen
+        name="VendorPortfolioScreen"
+        component={VendorPortfolioScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
 
       <Drawer.Screen
         name="Filter"
@@ -213,6 +228,27 @@ export default function ClientNavigator() {
         component={AddReviewScreen}
         options={{ drawerItemStyle: { display: "none" } }}
       />
+      <Drawer.Screen
+        name="AddProductReviewScreen"
+        component={AddProductReviewScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+      <Drawer.Screen
+        name="AddServiceReviewScreen"
+        component={AddServiceReviewScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+      <Drawer.Screen
+        name="ServiceReviewScreen"
+        component={ServiceReviewsScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+      <Drawer.Screen
+        name="ProductReviewScreen"
+        component={ProductReviewsScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+
       <Drawer.Screen
         name="OtherScreen"
         component={OtherScreen}
@@ -284,6 +320,16 @@ export default function ClientNavigator() {
         options={{ drawerItemStyle: { display: "none" } }}
       />
       <Drawer.Screen
+        name="ClientWithdrawScreen"
+        component={ClientWithdrawScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+      <Drawer.Screen
+        name="FundClientWallet"
+        component={FundClientWalletScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+      <Drawer.Screen
         name="TermsOfUseAcceptingTheTermsScreen"
         component={TermsOfUseAcceptingTheTermsScreen}
         options={{ drawerItemStyle: { display: "none" } }}
@@ -346,6 +392,21 @@ export default function ClientNavigator() {
       <Drawer.Screen
         name="OfferPriceScreen"
         component={OfferPriceScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+      <Drawer.Screen
+        name="BookingHomeServiceAppointScreen"
+        component={BookingHomeServiceAppointScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+      <Drawer.Screen
+        name="PaystackWebViewScreen"
+        component={PaystackWebViewScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+      <Drawer.Screen
+        name="AcceptedOfferDetailScreen"
+        component={AcceptedOfferDetailScreen}
         options={{ drawerItemStyle: { display: "none" } }}
       />
     </Drawer.Navigator>

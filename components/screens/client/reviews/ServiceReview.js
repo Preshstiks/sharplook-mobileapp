@@ -110,13 +110,14 @@ function ReviewSkeleton() {
   );
 }
 
-export default function ReviewsScreen() {
+export default function ServiceReviewsScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const vendor = route.params?.vendor;
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const serviceId = vendor?.[0].id;
   const vendorId = vendor?.[0].userId;
   useFocusEffect(
     useCallback(() => {
@@ -125,8 +126,9 @@ export default function ReviewsScreen() {
         setError(null);
         try {
           const res = await HttpClient.post(`/reviews/getAllReviews`, {
-            type: "VENDOR",
+            type: "SERVICE",
             vendorId,
+            serviceId,
           });
           setReviews(res.data?.data || []);
           console.log(res.data);
@@ -207,7 +209,12 @@ export default function ReviewsScreen() {
           </View>
           <TouchableOpacity
             className="bg-primary flex-row items-center px-4 py-[10px] rounded-lg"
-            onPress={() => navigation.navigate("AddReviewScreen", { vendorId })}
+            onPress={() =>
+              navigation.navigate("AddServiceReviewScreen", {
+                vendorId,
+                serviceId,
+              })
+            }
           >
             <Ionicons
               name="create-outline"

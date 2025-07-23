@@ -107,30 +107,29 @@ export default function OfferPriceScreen() {
           </Text>
           <TouchableOpacity
             onPress={pickImage}
-            className="border-2 border-dashed border-[#EBEBEA] rounded-[12px] items-center justify-center"
-            style={{ height: 200 }}
+            className="border-2 border-dashed border-[#F9BCDC] rounded-lg h-[140px] items-center justify-center"
           >
             {selectedImage ? (
               <Image
                 source={{ uri: selectedImage }}
-                className="w-full h-[200px] rounded-lg mb-2"
+                className="w-full h-full rounded-lg"
               />
             ) : (
-              <>
-                <Ionicons name="image-outline" size={32} color="#9CA3AF" />
+              <View className="items-center justify-center">
+                <Ionicons name="image-outline" size={40} color="#8C8D8B" />
                 <Text
+                  className="text-[#8C8D8B] text-[12px] mt-2"
                   style={{ fontFamily: "poppinsRegular" }}
-                  className="text-[12px] text-center text-[#8C8D8B] mb-1"
                 >
                   Click to upload
                 </Text>
                 <Text
                   style={{ fontFamily: "poppinsRegular" }}
-                  className="text-[10px] text-[#8C8D8B] text-center"
+                  className="text-[#8C8D8B] text-[10px]"
                 >
                   PNG, JPG, GIF up to 5MB
                 </Text>
-              </>
+              </View>
             )}
           </TouchableOpacity>
         </View>

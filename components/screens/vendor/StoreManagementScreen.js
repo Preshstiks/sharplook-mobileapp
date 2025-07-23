@@ -57,7 +57,13 @@ const StoreManagementScreen = () => {
         registerationNumber: values.businessRegNumber,
         portfolioLink: values.portfolioLink,
       };
-      const res = await HttpClient.put("/user/me", payload);
+      const res = await HttpClient.put("/user/me", {
+        businessName: values.businessName,
+        bio: values.businessDescription,
+        location: values.businessAddress,
+        registerationNumber: values.businessRegNumber,
+        portfolioLink: values.portfolioLink,
+      });
       showToast.success(res.data.message || "Profile updated successfully");
       // Optionally update user context
       if (res.data.user) setUser(res.data.user);
@@ -99,24 +105,25 @@ const StoreManagementScreen = () => {
           className="text-white text-[16px] text-center"
           style={{ fontFamily: "poppinsMedium" }}
         >
-          {user?.vendorOnboarding?.businessName ||
-            "Heritage Spa and Beauty Services"}
+          {user?.vendorOnboarding?.businessName}
         </Text>
         <View className="flex-row items-center mt-2">
           <View className="bg-white px-3 py-1 rounded-lg flex-row items-center mr-2">
             <View className="w-2 h-2 rounded-full bg-[#ED2584] mr-2" />
             <Text
-              className="text-[12px] text-[#ED2584]"
+              className="text-[12px] mt-1 text-[#ED2584]"
               style={{ fontFamily: "poppinsMedium" }}
             >
-              In-shop
+              {user?.vendorOnboarding?.serviceType === "HOME_SERVICE"
+                ? "Home Service"
+                : "In-shop"}
             </Text>
           </View>
         </View>
-        <View className="flex-row items-center mt-2">
+        <View className="flex-row mt-2">
           <Ionicons name="location-sharp" size={14} color="#fff" />
           <Text
-            className="text-white text-[12px] ml-1"
+            className="text-white w-[70%] text-center text-[12px] ml-1"
             style={{ fontFamily: "poppinsLight" }}
           >
             {user?.vendorOnboarding?.location}

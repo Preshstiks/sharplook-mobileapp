@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,15 @@ import {
   Modal,
   StyleSheet,
   Dimensions,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LineChart } from "react-native-gifted-charts";
+import { HttpClient } from "../../../api/HttpClient";
+import { useFocusEffect } from "@react-navigation/native";
+import { useAuth } from "../../../context/AuthContext";
+import { EmptyData } from "../../reusuableComponents/EmptyData";
+import { formatAmount } from "../../formatAmount";
 
 const months = [
   "January",
@@ -29,11 +35,45 @@ const years = Array.from({ length: 11 }, (_, i) => 2020 + i); // 2020-2030
 
 export default function AnalyticsAndInsightScreen({ navigation }) {
   const [showPicker, setShowPicker] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState(1); // 1 = January
-  const [selectedYear, setSelectedYear] = useState(2024);
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(
+    currentDate.getMonth() + 1
+  ); // getMonth() is 0-indexed
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
 
-  const [tempMonth, setTempMonth] = useState(selectedMonth);
-  const [tempYear, setTempYear] = useState(selectedYear);
+  const [loading, setLoading] = useState(true);
+  const [analytics, setAnalytics] = useState(null);
+  const [tempMonth, setTempMonth] = useState(currentDate.getMonth() + 1);
+  const [tempYear, setTempYear] = useState(currentDate.getFullYear());
+
+  const { user } = useAuth();
+  const vendorId = user.id;
+
+  // Skeleton animation
+  const shimmerAnim = new Animated.Value(0);
+
+  useEffect(() => {
+    const startShimmer = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(shimmerAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(shimmerAnim, {
+            toValue: 0,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    };
+
+    if (loading) {
+      startShimmer();
+    }
+  }, [loading, shimmerAnim]);
 
   const handleOpenPicker = () => {
     setTempMonth(selectedMonth);
@@ -47,23 +87,135 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
     setShowPicker(false);
   };
 
-  const data = [
-    { value: 20, label: "1" },
-    { value: 45, label: "2" },
-    { value: 28, label: "3" },
-    { value: 80, label: "4" },
-    { value: 99, label: "5" },
-    { value: 43, label: "6" },
-    { value: 50, label: "7" },
-    { value: 85, label: "8" },
-    { value: 30, label: "9" },
-    { value: 70, label: "10" },
-  ];
+  const prepareChartData = () => {
+    if (!analytics?.recentEarnings || analytics.recentEarnings.length === 0) {
+      // Return default/empty data when no earnings
+      return [
+        { value: 0, label: "" },
+        { value: 0, label: "" },
+        { value: 0, label: "" },
+        { value: 0, label: "" },
+        { value: 0, label: "" },
+        { value: 0, label: "" },
+      ];
+    }
 
+    // Group earnings by day/week/month depending on your needs
+    const chartData = analytics.recentEarnings.map((earning, index) => ({
+      value: earning.amount / 1000, // Convert to thousands for better chart display
+      label: "",
+    }));
+
+    // If you want to show daily totals for the last 10 days
+    return chartData.slice(0, 10); // Limit to 10 data points
+  };
+
+  // Alternative: If your API returns daily/monthly revenue data
+  const prepareChartDataFromRevenue = () => {
+    if (!analytics?.dailyRevenue || analytics.dailyRevenue.length === 0) {
+      return Array.from({ length: 10 }, (_, i) => ({
+        value: 0,
+        label: (i + 1).toString(),
+      }));
+    }
+
+    return analytics.dailyRevenue.map((day, index) => ({
+      value: day.revenue / 1000,
+      label: day.day || (index + 1).toString(),
+    }));
+  };
   const windowWidth = Dimensions.get("window").width;
   const pickerItemHeight = 40;
   const visibleItems = 5;
   const pickerHeight = pickerItemHeight * visibleItems;
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchAnalytics = async () => {
+        try {
+          setLoading(true);
+          const response = await HttpClient.get(
+            `/vendor/analytics/${vendorId}`
+          );
+          setAnalytics(response.data.data);
+        } catch (error) {
+          console.error("Failed to fetch analytics:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchAnalytics();
+    }, [])
+  );
+
+  console.log({ analytics });
+
+  // Skeleton Loader Component
+  const SkeletonBox = ({ width, height, style }) => {
+    const animatedOpacity = shimmerAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.3, 0.7],
+    });
+
+    return (
+      <Animated.View
+        style={[
+          {
+            width,
+            height,
+            backgroundColor: "#E1E9EE",
+            borderRadius: 8,
+            opacity: animatedOpacity,
+          },
+          style,
+        ]}
+      />
+    );
+  };
+  const TransactionSummarySkeleton = () => (
+    <View className="flex-row mb-6">
+      <View
+        className="flex-1 bg-gray-200 rounded-xl mr-2 py-4 items-center"
+        style={{ backgroundColor: "#F3F4F6" }}
+      >
+        <SkeletonBox width={80} height={12} style={{ marginBottom: 8 }} />
+        <SkeletonBox width={30} height={24} />
+      </View>
+      <View
+        className="flex-1 bg-gray-200 rounded-xl mr-2 py-4 items-center"
+        style={{ backgroundColor: "#F3F4F6" }}
+      >
+        <SkeletonBox width={80} height={12} style={{ marginBottom: 8 }} />
+        <SkeletonBox width={40} height={24} />
+      </View>
+      <View
+        className="flex-1 bg-gray-200 rounded-xl py-4 items-center"
+        style={{ backgroundColor: "#F3F4F6" }}
+      >
+        <SkeletonBox width={90} height={12} style={{ marginBottom: 8 }} />
+        <SkeletonBox width={20} height={24} />
+      </View>
+    </View>
+  );
+
+  const RecentEarningsSkeleton = () => (
+    <View className="mb-4">
+      {[...Array(4)].map((_, index) => (
+        <View key={index} className="flex-row items-center mb-3">
+          <SkeletonBox width={20} height={20} style={{ borderRadius: 10 }} />
+          <View className="ml-2 flex-1">
+            <SkeletonBox width={60} height={14} style={{ marginBottom: 4 }} />
+            <SkeletonBox width={80} height={12} />
+          </View>
+          <View className="items-end">
+            <SkeletonBox width={90} height={14} style={{ marginBottom: 4 }} />
+            <SkeletonBox width={70} height={12} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
 
   return (
     <View className="flex-1 bg-[#FFFAFD]">
@@ -236,11 +388,11 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
             className="text-[18px] text-[#ED2584] mb-2"
             style={{ fontFamily: "latoBold" }}
           >
-            ₦210,000.00
+            {formatAmount(analytics?.totalRevenue)}
           </Text>
 
           <LineChart
-            data={data}
+            data={loading ? [] : prepareChartData()}
             width={300}
             height={120}
             color="#ED2584"
@@ -264,6 +416,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
             animationDuration={1000}
           />
         </View>
+
         {/* Transaction Summary */}
         <Text
           className="text-[16px] mb-2"
@@ -271,50 +424,57 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
         >
           Transaction Summary
         </Text>
-        <View className="flex-row mb-6">
-          <View className="flex-1 bg-[#ED2584] rounded-xl mr-2 py-4 items-center">
-            <Text
-              className="text-white text-[12px] mb-1"
-              style={{ fontFamily: "poppinsRegular" }}
-            >
-              New Booking
-            </Text>
-            <Text
-              className="text-white text-[20px]"
-              style={{ fontFamily: "latoBold" }}
-            >
-              3
-            </Text>
+
+        {/* Show skeleton or actual content based on loading state */}
+        {loading ? (
+          <TransactionSummarySkeleton />
+        ) : (
+          <View className="flex-row mb-6">
+            <View className="flex-1 bg-[#ED2584] rounded-xl mr-2 py-4 items-center">
+              <Text
+                className="text-white text-[12px] mb-1"
+                style={{ fontFamily: "poppinsRegular" }}
+              >
+                New Booking
+              </Text>
+              <Text
+                className="text-white text-[20px]"
+                style={{ fontFamily: "latoBold" }}
+              >
+                {analytics?.newBookingsCount}
+              </Text>
+            </View>
+            <View className="flex-1 bg-[#ED2584] rounded-xl mr-2 py-4 items-center">
+              <Text
+                className="text-white text-[12px] mb-1"
+                style={{ fontFamily: "poppinsRegular" }}
+              >
+                Product Sold
+              </Text>
+              <Text
+                className="text-white text-[20px]"
+                style={{ fontFamily: "latoBold" }}
+              >
+                {analytics?.totalUnitsSold}
+              </Text>
+            </View>
+            <View className="flex-1 bg-[#ED2584] rounded-xl py-4 items-center">
+              <Text
+                className="text-white text-[12px] mb-1"
+                style={{ fontFamily: "poppinsRegular" }}
+              >
+                Complain/Return
+              </Text>
+              <Text
+                className="text-white text-[20px]"
+                style={{ fontFamily: "latoBold" }}
+              >
+                {analytics?.disputesCount}
+              </Text>
+            </View>
           </View>
-          <View className="flex-1 bg-[#ED2584] rounded-xl mr-2 py-4 items-center">
-            <Text
-              className="text-white text-[12px] mb-1"
-              style={{ fontFamily: "poppinsRegular" }}
-            >
-              Product Sold
-            </Text>
-            <Text
-              className="text-white text-[20px]"
-              style={{ fontFamily: "latoBold" }}
-            >
-              120
-            </Text>
-          </View>
-          <View className="flex-1 bg-[#ED2584] rounded-xl py-4 items-center">
-            <Text
-              className="text-white text-[12px] mb-1"
-              style={{ fontFamily: "poppinsRegular" }}
-            >
-              Complain/Return
-            </Text>
-            <Text
-              className="text-white text-[20px]"
-              style={{ fontFamily: "latoBold" }}
-            >
-              3
-            </Text>
-          </View>
-        </View>
+        )}
+
         {/* Recent Earnings */}
         <Text
           className="text-[16px] mb-2"
@@ -322,109 +482,141 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
         >
           Recent Earnings
         </Text>
-        <View className="mb-4">
-          {/* Earning Item */}
-          <View className="flex-row items-center mb-3">
-            <Ionicons name="checkmark-circle" size={20} color="#ED2584" />
-            <View className="ml-2 flex-1">
-              <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
-                #35674
-              </Text>
-              <Text
-                className="text-[12px] text-[#00000099]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                Raji Balikis
-              </Text>
+
+        {/* Show skeleton or actual content for Recent Earnings */}
+        {loading ? (
+          <RecentEarningsSkeleton />
+        ) : analytics.recentEarnings.length === 0 ? (
+          <EmptyData msg="No recent earnings." />
+        ) : (
+          <View className="mb-4">
+            {/* Earning Item */}
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="checkmark-circle" size={20} color="#ED2584" />
+              <View className="ml-2 flex-1">
+                <Text
+                  className="text-[14px]"
+                  style={{ fontFamily: "latoBold" }}
+                >
+                  #35674
+                </Text>
+                <Text
+                  className="text-[12px] text-[#00000099]"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  Raji Balikis
+                </Text>
+              </View>
+              <View className="items-end">
+                <Text
+                  className="text-[14px]"
+                  style={{ fontFamily: "latoBold" }}
+                >
+                  ₦210,000.00
+                </Text>
+                <Text
+                  className="text-[12px] text-[#00000099]"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  30 mins ago
+                </Text>
+              </View>
             </View>
-            <View className="items-end">
-              <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
-                ₦210,000.00
-              </Text>
-              <Text
-                className="text-[12px] text-[#00000099]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                30 mins ago
-              </Text>
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="time-outline" size={20} color="#ED2584" />
+              <View className="ml-2 flex-1">
+                <Text
+                  className="text-[14px]"
+                  style={{ fontFamily: "latoBold" }}
+                >
+                  #35674
+                </Text>
+                <Text
+                  className="text-[12px] text-[#00000099]"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  Akash mira
+                </Text>
+              </View>
+              <View className="items-end">
+                <Text
+                  className="text-[14px]"
+                  style={{ fontFamily: "latoBold" }}
+                >
+                  ₦210,000.00
+                </Text>
+                <Text
+                  className="text-[12px] text-[#00000099]"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  1 hr ago
+                </Text>
+              </View>
+            </View>
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="checkmark-circle" size={20} color="#ED2584" />
+              <View className="ml-2 flex-1">
+                <Text
+                  className="text-[14px]"
+                  style={{ fontFamily: "latoBold" }}
+                >
+                  #35674
+                </Text>
+                <Text
+                  className="text-[12px] text-[#00000099]"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  Raji Balikis
+                </Text>
+              </View>
+              <View className="items-end">
+                <Text
+                  className="text-[14px]"
+                  style={{ fontFamily: "latoBold" }}
+                >
+                  ₦210,000.00
+                </Text>
+                <Text
+                  className="text-[12px] text-[#00000099]"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  30 mins ago
+                </Text>
+              </View>
+            </View>
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="time-outline" size={20} color="#ED2584" />
+              <View className="ml-2 flex-1">
+                <Text
+                  className="text-[14px]"
+                  style={{ fontFamily: "latoBold" }}
+                >
+                  #35674
+                </Text>
+                <Text
+                  className="text-[12px] text-[#00000099]"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  Akash mira
+                </Text>
+              </View>
+              <View className="items-end">
+                <Text
+                  className="text-[14px]"
+                  style={{ fontFamily: "latoBold" }}
+                >
+                  ₦210,000.00
+                </Text>
+                <Text
+                  className="text-[12px] text-[#00000099]"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  1 hr ago
+                </Text>
+              </View>
             </View>
           </View>
-          <View className="flex-row items-center mb-3">
-            <Ionicons name="time-outline" size={20} color="#ED2584" />
-            <View className="ml-2 flex-1">
-              <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
-                #35674
-              </Text>
-              <Text
-                className="text-[12px] text-[#00000099]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                Akash mira
-              </Text>
-            </View>
-            <View className="items-end">
-              <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
-                ₦210,000.00
-              </Text>
-              <Text
-                className="text-[12px] text-[#00000099]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                1 hr ago
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row items-center mb-3">
-            <Ionicons name="checkmark-circle" size={20} color="#ED2584" />
-            <View className="ml-2 flex-1">
-              <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
-                #35674
-              </Text>
-              <Text
-                className="text-[12px] text-[#00000099]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                Raji Balikis
-              </Text>
-            </View>
-            <View className="items-end">
-              <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
-                ₦210,000.00
-              </Text>
-              <Text
-                className="text-[12px] text-[#00000099]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                30 mins ago
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row items-center mb-3">
-            <Ionicons name="time-outline" size={20} color="#ED2584" />
-            <View className="ml-2 flex-1">
-              <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
-                #35674
-              </Text>
-              <Text
-                className="text-[12px] text-[#00000099]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                Akash mira
-              </Text>
-            </View>
-            <View className="items-end">
-              <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
-                ₦210,000.00
-              </Text>
-              <Text
-                className="text-[12px] text-[#00000099]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                1 hr ago
-              </Text>
-            </View>
-          </View>
-        </View>
+        )}
       </ScrollView>
     </View>
   );

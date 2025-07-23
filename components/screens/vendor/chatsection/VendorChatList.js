@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -10,8 +10,10 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useAuth } from "../../../../context/AuthContext";
+import { io } from "socket.io-client";
 
-const chats = [
+const initialChats = [
   {
     id: "1",
     name: "Heritage Spa and Beauty",
@@ -51,6 +53,23 @@ const chats = [
 
 export default function VendorChatListScreen() {
   const navigation = useNavigation();
+  const { userId } = useAuth();
+  const [chats, setChats] = useState(initialChats);
+  const socketRef = useRef(null);
+
+  useEffect(() => {
+    if (userId) {
+      socketRef.current = io("https://sharplook-backend.onrender.com", {
+        query: { userId },
+        transports: ["websocket"],
+      });
+    }
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [userId]);
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8FB]">
       <View className="bg-primary pb-6 pt-[50px] items-center">

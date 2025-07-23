@@ -1,56 +1,67 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { HttpClient } from "../../../api/HttpClient";
 import EmptySVG from "../../../assets/img/empty.svg";
+import { formatAmount } from "../../formatAmount";
+import { useCart } from "../../../context/CartContext";
+import { showToast } from "../../ToastComponent/Toast";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function CartScreen() {
   const navigation = useNavigation();
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { cartItems, setCartItems, fetchCart, loading } = useCart();
+  const [deletingItemId, setDeletingItemId] = useState(null);
   useFocusEffect(
     useCallback(() => {
-      const fetchCart = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const res = await HttpClient.get("/client/getMycart");
-          console.log("API response:", res.data);
-          setItems(res.data.data || []);
-        } catch (err) {
-          setError("Failed to load cart");
-          setItems([]);
-        } finally {
-          setLoading(false);
-        }
-      };
       fetchCart();
-    }, [])
+    }, [fetchCart])
   );
 
   const updateQuantity = (itemId, newQuantity) => {
-    if (newQuantity < 1) return; // Prevent quantity from going below 1
-
-    setItems((prevItems) =>
+    if (newQuantity < 1) return;
+    setCartItems((prevItems) =>
       prevItems.map((item) =>
         item.id === itemId ? { ...item, quantity: newQuantity } : item
       )
     );
   };
 
-  const removeItem = (itemId) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+  const removeItem = async (itemId) => {
+    setDeletingItemId(itemId);
+    const token = await AsyncStorage.getItem("token");
+    console.log("token", token);
+
+    try {
+      const res = await HttpClient.delete(`/client/removeProduct/${itemId}`);
+      setCartItems((prevItems) =>
+        prevItems.filter((item) => item.id !== itemId)
+      );
+      console.log("removeItem response:", res.data);
+      showToast.success(res.data.message);
+    } catch (error) {
+      console.log("Error removing item:", error.response);
+    } finally {
+      setDeletingItemId(null);
+    }
   };
 
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
     0
   );
   const delivery = 2000;
   const total = subtotal + delivery;
-
+  console.log({ cartItems });
   return (
     <View className="flex-1 bg-secondary">
       {/* Header */}
@@ -81,7 +92,7 @@ export default function CartScreen() {
             </Text>
           </View>
         </ScrollView>
-      ) : items.length === 0 ? (
+      ) : cartItems.length === 0 ? (
         <View
           style={{
             position: "absolute",
@@ -106,35 +117,37 @@ export default function CartScreen() {
           className="flex-1 px-4"
           showsVerticalScrollIndicator={false}
         >
-          {items.map((item) => (
+          {cartItems.map((item) => (
             <View
-              key={item.id}
+              key={item.product.id}
               className="flex-row bg-white rounded-[8px] shadow-sm mb-4 p-3 items-center"
             >
               <Image
-                source={item.image}
+                source={{ uri: item.product.picture }}
                 className="w-[100px] h-[100px] rounded-xl mr-3"
                 resizeMode="cover"
               />
               <View className="flex-1">
                 <Text
-                  style={{ fontFamily: "poppinsSemiBold" }}
-                  className="text-[16px] text-faintDark"
+                  style={{ fontFamily: "poppinsMedium" }}
+                  className="text-[14px] text-faintDark"
                 >
-                  {item.name}
+                  {item.product.productName}
                 </Text>
                 <Text
                   style={{ fontFamily: "poppinsMedium" }}
                   className="text-[12px] text-primary"
                 >
-                  ₦ {item.price.toLocaleString()}
+                  {formatAmount(item.product.price)}
                 </Text>
                 <View className="flex-row items-center">
                   <Text
                     style={{ fontFamily: "latoRegular" }}
                     className="text-[13px] text-faintDark"
                   >
-                    {item.weight} lbs
+                    {item.product.status === "in stock"
+                      ? "In Stock"
+                      : "Out of Stock"}
                   </Text>
                 </View>
                 {/* Quantity Selector */}
@@ -161,20 +174,34 @@ export default function CartScreen() {
               </View>
               <TouchableOpacity
                 className="ml-2"
-                onPress={() => removeItem(item.id)}
+                onPress={() => removeItem(item.product.id)}
+                disabled={deletingItemId === item.product.id}
               >
-                <MaterialIcons
-                  name="delete-outline"
-                  size={24}
-                  color="#EB278D"
-                />
+                {deletingItemId === item.product.id ? (
+                  <View
+                    style={{
+                      width: 24,
+                      height: 24,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ActivityIndicator size="small" color="#EB278D" />
+                  </View>
+                ) : (
+                  <MaterialIcons
+                    name="delete-outline"
+                    size={24}
+                    color="#EB278D"
+                  />
+                )}
               </TouchableOpacity>
             </View>
           ))}
         </ScrollView>
       )}
       {/* Summary & Checkout */}
-      {items.length > 0 && (
+      {cartItems.length > 0 && (
         <View className="bg-white rounded-t-2xl pb-[60px] shadow-lg px-4 pt-4">
           <View className="flex-row justify-between mb-2">
             <Text
@@ -187,7 +214,7 @@ export default function CartScreen() {
               style={{ fontFamily: "poppinsRegular" }}
               className="text-[14px] text-[#868889]"
             >
-              ₦ {subtotal.toLocaleString()}
+              {formatAmount(subtotal)}
             </Text>
           </View>
           <View className="flex-row justify-between mb-2">

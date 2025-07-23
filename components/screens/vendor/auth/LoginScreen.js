@@ -10,6 +10,7 @@ import { HttpClient } from "../../../../api/HttpClient";
 import { useAuth } from "../../../../context/AuthContext";
 import { showToast } from "../../../ToastComponent/Toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
 
 export default function VendorLoginScreen({ navigation }) {
   const [rememberMe, setRememberMe] = useState(false);
@@ -44,7 +45,7 @@ export default function VendorLoginScreen({ navigation }) {
         if (
           status === 403 &&
           message ===
-            "Please complete your vendor profile (registration number and location required)."
+            "Please complete your vendor profile (business Name required)."
         ) {
           setLastAttemptedCredentials({
             email: values.email,
@@ -72,10 +73,7 @@ export default function VendorLoginScreen({ navigation }) {
             email: values.email,
           });
         } else {
-          // showToast.error(
-          //   message || error.message || "An unknown error occurred"
-          // );
-          showToast.error("An unknown error occurred");
+          showToast.error(error.response.data.message);
         }
       } else {
         showToast.error(error.message || "An unknown error occurred");
@@ -199,6 +197,7 @@ export default function VendorLoginScreen({ navigation }) {
           );
         }}
       </Formik>
+      <LoaderOverlay visible={isLoading} />
     </View>
   );
 }

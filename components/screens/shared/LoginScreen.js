@@ -14,6 +14,7 @@ import { HttpClient } from "../../../api/HttpClient";
 import { showToast } from "../../ToastComponent/Toast";
 import { useAuth } from "../../../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoaderOverlay from "../../reusuableComponents/LoaderOverlay";
 
 export default function LoginScreen({ navigation }) {
   const [rememberMe, setRememberMe] = useState(false);
@@ -196,6 +197,7 @@ export default function LoginScreen({ navigation }) {
           );
         }}
       </Formik>
+      <LoaderOverlay visible={isLoading} />
     </View>
   );
 }

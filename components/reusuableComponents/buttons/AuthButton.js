@@ -24,7 +24,6 @@ bg-primary border-primary ${isloading ? "cursor-not-allowed bg-[#d77eac]" : ""}`
           >
             {loadingMsg}...
           </Text>
-          <ActivityIndicator color="#fff" />
         </View>
       ) : (
         <View className="flex-row items-center justify-center w-full">

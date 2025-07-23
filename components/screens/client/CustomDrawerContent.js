@@ -9,23 +9,15 @@ import CloseNavBtn from "../../../assets/icon/closenav.svg";
 import BottomModal from "../../reusuableComponents/BottomModal";
 import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
 import { AntDesign } from "@expo/vector-icons";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function CustomDrawerContent(props) {
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-  const handleLogout = () => {
-    setShowLogoutModal(true);
+  const { user, logout } = useAuth();
+  const handleLogout = async () => {
+    await logout();
   };
+  console.log({ user });
 
-  const handleClientSelect = () => {
-    setShowLogoutModal(false);
-    props.navigation.replace("Login");
-  };
-
-  const handleVendorSelect = () => {
-    setShowLogoutModal(false);
-    props.navigation.replace("VendorLogin");
-  };
   return (
     <DrawerContentScrollView
       {...props}
@@ -41,9 +33,12 @@ export default function CustomDrawerContent(props) {
         {/* User Info */}
         <View className="flex-row mt-8 gap-3 items-center">
           <Image
-            source={{
-              uri: "https://images.unsplash.com/photo-1614023342667-6f060e9d1e04?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            }}
+            className="border border-primary"
+            source={
+              user?.avatar
+                ? { uri: user?.avatar }
+                : require("../../../assets/icon/avatar.png")
+            }
             style={{
               width: 40,
               height: 40,
@@ -53,7 +48,7 @@ export default function CustomDrawerContent(props) {
           />
           <View>
             <Text style={{ fontFamily: "poppinsMedium", fontSize: 16 }}>
-              Team Green
+              {user?.lastName} {user?.firstName}
             </Text>
             <Text
               className="text-faintDark"
@@ -62,7 +57,7 @@ export default function CustomDrawerContent(props) {
                 fontSize: 14,
               }}
             >
-              teamgreen@gmail.com
+              {user?.email}
             </Text>
           </View>
         </View>
@@ -86,28 +81,6 @@ export default function CustomDrawerContent(props) {
           Logout
         </Text>
       </TouchableOpacity>
-
-      {/* Logout Modal */}
-      <BottomModal
-        isVisible={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        backgroundcolor="#FCFCFC"
-      >
-        <View className="pt-10">
-          <OutlineButton
-            title="Are you a Client?"
-            onPress={handleClientSelect}
-            icon={<AntDesign name="user" size={20} color="#EB278D" />}
-            iconPosition="left"
-          />
-          <OutlineButton
-            title="Are you a Vendor?"
-            onPress={handleVendorSelect}
-            icon={<MaterialIcons name="storefront" size={20} color="#EB278D" />}
-            iconPosition="left"
-          />
-        </View>
-      </BottomModal>
     </DrawerContentScrollView>
   );
 }

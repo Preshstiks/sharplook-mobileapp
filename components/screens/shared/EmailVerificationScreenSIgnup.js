@@ -16,6 +16,7 @@ import { showToast } from "../../ToastComponent/Toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { HttpClient } from "../../../api/HttpClient";
 import { Feather } from "@expo/vector-icons";
+import LoaderOverlay from "../../reusuableComponents/LoaderOverlay";
 
 export default function EmailVerificationScreenSignup({ navigation, route }) {
   const [code, setCode] = useState(["", "", "", ""]);
@@ -200,6 +201,7 @@ export default function EmailVerificationScreenSignup({ navigation, route }) {
           </>
         )}
       </Formik>
+      <LoaderOverlay visible={loading} />
     </View>
   );
 }

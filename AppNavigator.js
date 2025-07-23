@@ -47,7 +47,7 @@ export default function AppNavigator() {
           <>
             {userType === "CLIENT" ? (
               <>
-                <Stack.Screen name="Client" options={{ headerShown: false }}>
+                <Stack.Screen name="ClientApp" options={{ headerShown: false }}>
                   {() => (
                     <ProtectedRoute allowedUserTypes={["CLIENT"]}>
                       <ClientNavigator />
@@ -67,7 +67,7 @@ export default function AppNavigator() {
               </>
             ) : (
               <>
-                <Stack.Screen name="Vendor" options={{ headerShown: false }}>
+                <Stack.Screen name="VendorApp" options={{ headerShown: false }}>
                   {() => (
                     <ProtectedRoute allowedUserTypes={["VENDOR"]}>
                       <VendorNavigator />

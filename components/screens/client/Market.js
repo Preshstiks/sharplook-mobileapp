@@ -18,6 +18,8 @@ import { showToast } from "../../ToastComponent/Toast";
 import { formatAmount } from "../../formatAmount";
 import { HttpClient } from "../../../api/HttpClient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useCart } from "../../../context/CartContext";
+import ProductDetailsModal from "./ProductDetailsModal";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
@@ -133,12 +135,27 @@ const SkeletonCard = () => {
 export default function Market() {
   const navigation = useNavigation();
   const { setBarType } = useStatusBar();
+  const { cartItems, fetchCart, loading: cartLoading } = useCart();
   useEffect(() => {
     setBarType("primary");
   }, []);
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState({});
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Helper to get all product IDs in cart
+  const cartProductIds = cartItems.map(
+    (item) =>
+      item.product?.id ||
+      item.product?._id ||
+      item.productId ||
+      item.id ||
+      item._id
+  );
+
   const fetch = async () => {
     setLoading(true);
     const token = await AsyncStorage.getItem("token");
@@ -147,7 +164,8 @@ export default function Market() {
       const res = await HttpClient.get("/products/getAllProducts");
       setProducts(res.data.data || []);
     } catch (error) {
-      const message = error.response.data.message || error.response.message;
+      console.log("Error fetching products:", error.response);
+      const message = error.response?.data?.message || error.response?.message;
       if (error.response && error.response.data) {
         showToast.error(message);
       }
@@ -158,89 +176,131 @@ export default function Market() {
   useFocusEffect(
     useCallback(() => {
       fetch();
-    }, [])
+      fetchCart();
+    }, [fetchCart])
   );
+  console.log({ products });
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const fetchProducts = async () => {
-  //       setLoading(true);
-  //       try {
-  //         const res = await HttpClient.get("/products/getVendorProducts");
-  //         console.log("API response:", res.data);
-  //         setProducts(res.data.data || []);
-  //       } catch (err) {
-  //         setProducts([]);
-  //       } finally {
-  //         setLoading(false);
-  //       }
-  //     };
-  //     fetchProducts();
-  //   }, [])
-  // );
-  // console.log({ products });
-  const renderProduct = ({ item }) => (
-    <View
-      style={{ width: CARD_WIDTH, marginBottom: 18 }}
-      className="bg-white rounded-2xl shadow-sm overflow-hidden mr-3"
-    >
-      <Image
-        source={
-          item.picture
-            ? { uri: item.picture }
-            : require("../../../assets/img/product1.jpg")
-        }
-        style={{ width: "100%", height: 110 }}
-        resizeMode="cover"
-      />
-      <View className="p-3">
-        <Text
-          style={{ fontFamily: "latoBold" }}
-          className="text-[16px] text-faintDark mb-1"
+  const handleAddToCart = async (product) => {
+    const productId = product.id || product._id;
+    setAddingToCart((prev) => ({ ...prev, [productId]: true }));
+
+    try {
+      const res = await HttpClient.post("/client/addProductTocart", {
+        productId: productId,
+      });
+      showToast.success(res.data.message);
+      await fetchCart(); // Refresh cart after adding
+    } catch (error) {
+      console.log("Error adding to cart:", error.response);
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.message ||
+        "Failed to add to cart.";
+      showToast.error(message);
+    } finally {
+      setAddingToCart((prev) => {
+        const { [productId]: removed, ...rest } = prev;
+        return rest;
+      });
+    }
+  };
+  const handleProductPress = (product) => {
+    setSelectedProduct(product);
+    setModalVisible(true);
+  };
+  const handleAddToCartFromModal = async (product, quantity) => {
+    for (let i = 0; i < quantity; i++) {
+      await handleAddToCart(product);
+    }
+    setModalVisible(false);
+  };
+  const renderProduct = ({ item }) => {
+    const productId = item.id || item._id;
+    const isInCart = cartProductIds.includes(productId);
+    return (
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => handleProductPress(item)}
+      >
+        <View
+          style={{ width: CARD_WIDTH, marginBottom: 18 }}
+          className="bg-white rounded-2xl shadow-sm overflow-hidden mr-3"
         >
-          {item.productName || item.title}
-        </Text>
-        <Text
-          style={{ fontFamily: "latoRegular" }}
-          className="text-[10px] text-[#A9A9A9] mb-1"
-        >
-          {item.description || item.desc}
-        </Text>
-        <View className="flex-row items-center justify-between">
-          <Text style={{ fontFamily: "latoBold" }} className="text-[10px] my-2">
-            Vendor: {item.vendorName || item.vendor || "-"}
-          </Text>
-          <MaterialIcons name="chat" size={20} color="#EB278D" />
-        </View>
-        <Text
-          style={{ fontFamily: "latoBold" }}
-          className="text-[13px] text-faintDark mb-1"
-        >
-          {formatAmount(item.price)}
-        </Text>
-        <View className="flex-row items-center justify-between mt-1">
-          <View className="flex-row items-center">
-            {[...Array(5)].map((_, i) => (
-              <Ionicons
-                key={i}
-                name={
-                  i < Math.floor(item.rating || 0) ? "star" : "star-outline"
-                }
-                size={14}
-                color="#FFC107"
-              />
-            ))}
+          <Image
+            source={
+              item.picture
+                ? { uri: item.picture }
+                : require("../../../assets/img/product1.jpg")
+            }
+            style={{ width: "100%", height: 110 }}
+            resizeMode="cover"
+          />
+          <View className="p-3">
             <Text
-              style={{ fontFamily: "latoRegular" }}
-              className="text-[10px] ml-1 text-[#A9A9A9]"
+              style={{ fontFamily: "latoBold" }}
+              className="text-[16px] text-faintDark mb-1"
             >
-              {(item.reviews || 0).toLocaleString()}
+              {item.productName || item.title}
             </Text>
+            <View className="flex-row items-center justify-between">
+              <Text
+                style={{ fontFamily: "latoBold" }}
+                className="text-[10px] w-[80%] my-2"
+              >
+                Vendor: {item?.vendor?.vendorOnboarding?.businessName}
+              </Text>
+              <TouchableOpacity className="">
+                <MaterialIcons name="chat" size={20} color="#EB278D" />
+              </TouchableOpacity>
+            </View>
+            <Text
+              style={{ fontFamily: "latoBold" }}
+              className="text-[13px] text-faintDark mb-1"
+            >
+              {formatAmount(item.price)}
+            </Text>
+            <View className="flex-row items-center justify-between mt-1">
+              <View className="flex-row items-center">
+                {[...Array(5)].map((_, i) => (
+                  <Ionicons
+                    key={i}
+                    name={
+                      i < Math.floor(item.rating || 0) ? "star" : "star-outline"
+                    }
+                    size={14}
+                    color="#FFC107"
+                  />
+                ))}
+                <Text
+                  style={{ fontFamily: "latoRegular" }}
+                  className="text-[10px] ml-1 text-[#A9A9A9]"
+                >
+                  {(item.reviews || 0).toLocaleString()}
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              disabled={addingToCart[productId] || isInCart}
+              className={` py-2 rounded-[8px] mt-3 ${addingToCart[productId] ? "opacity-50" : ""} ${isInCart ? "border border-primary" : "bg-primary"}`}
+              onPress={() => handleAddToCart(item)}
+            >
+              <Text
+                style={{ fontFamily: "poppinsRegular" }}
+                className={`text-[11px] text-center  ${isInCart ? "text-primary" : "text-white"}`}
+              >
+                {isInCart
+                  ? "Added to Cart"
+                  : addingToCart[productId]
+                    ? "Adding..."
+                    : "Add to Cart"}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
-      </View>
-    </View>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View className="flex-1 bg-secondary">
@@ -314,6 +374,12 @@ export default function Market() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
         />
       )}
+      <ProductDetailsModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        product={selectedProduct}
+        onAddToCart={handleAddToCartFromModal}
+      />
     </View>
   );
 }

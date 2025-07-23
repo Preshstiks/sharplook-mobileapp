@@ -18,6 +18,7 @@ import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 import { HttpClient } from "../../../../api/HttpClient";
 import SuccessModal from "../../../Modal/SuccessModal";
 import { addProductSchema } from "../../../../utils/validationSchemas";
+import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
 
 export default function EditProductScreen({ navigation, route }) {
   const product = route?.params?.product;
@@ -44,6 +45,7 @@ export default function EditProductScreen({ navigation, route }) {
     try {
       const formData = new FormData();
       formData.append("productName", values.productName);
+      formData.append("description", values.description);
       formData.append("price", values.price);
       formData.append("qtyAvailable", values.qtyAvailable);
 
@@ -108,6 +110,7 @@ export default function EditProductScreen({ navigation, route }) {
       <Formik
         initialValues={{
           productName: product?.productName || "",
+          description: product?.description || "",
           price: product?.price ? String(product.price) : "",
           qtyAvailable: product?.qtyAvailable
             ? String(product.qtyAvailable)
@@ -179,6 +182,14 @@ export default function EditProductScreen({ navigation, route }) {
                     onBlur={handleBlur("productName")}
                     error={errors.productName}
                     touched={touched.productName}
+                  />
+                  <AuthInput
+                    label="Product Description"
+                    value={values.description}
+                    onChangeText={handleChange("description")}
+                    onBlur={handleBlur("description")}
+                    error={errors.description}
+                    touched={touched.description}
                   />
                   <AuthInput
                     label="Price"
@@ -272,6 +283,7 @@ export default function EditProductScreen({ navigation, route }) {
         message="Congratulations, your product was edited successfully!!!"
         buttonText={false}
       />
+      <LoaderOverlay visible={loading} />
     </View>
   );
 }

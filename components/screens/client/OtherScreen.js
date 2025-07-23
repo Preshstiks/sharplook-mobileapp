@@ -12,6 +12,7 @@ import MakeupIcon from "../../../assets/icon/makeupicon.svg";
 import BarbingSaloonIcon from "../../../assets/icon/clipper.svg";
 import HairIcon from "../../../assets/icon/hairicon.svg";
 import OptionsIcon from "../../../assets/icon/options.svg";
+import { useRoute, useNavigation } from "@react-navigation/native";
 
 const categories = [
   { label: "Nails", icon: <NailIcon width={36} height={36} color="#EB278D" /> },
@@ -42,7 +43,11 @@ const categories = [
   },
 ];
 
-export default function OtherScreen({ navigation }) {
+export default function OtherScreen() {
+  const route = useRoute();
+  const navigation = useNavigation();
+  const allServices = route.params?.allServices || [];
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -65,8 +70,12 @@ export default function OtherScreen({ navigation }) {
           {categories.map((cat, idx) => (
             <TouchableOpacity
               onPress={() => {
+                const filteredServices = allServices.filter(
+                  (service) => service.serviceName === cat.label
+                );
                 navigation.navigate("Categories", {
                   category: cat.label,
+                  services: filteredServices,
                 });
               }}
               key={cat.label + idx}

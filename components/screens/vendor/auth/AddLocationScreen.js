@@ -22,6 +22,7 @@ import { AxiosError } from "axios";
 import { showToast } from "../../../ToastComponent/Toast";
 import SuccessModal from "../../../Modal/SuccessModal";
 import { useAuth } from "../../../../context/AuthContext";
+import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
 const { width, height } = Dimensions.get("window");
 
 export default function AddLocationScreen({ navigation }) {
@@ -283,13 +284,6 @@ export default function AddLocationScreen({ navigation }) {
             <Text style={styles.currentLocationText}>
               {isLoading ? "Updating..." : "Use my current location"}
             </Text>
-            {isLoading && (
-              <ActivityIndicator
-                size="small"
-                color="#EB278D"
-                style={{ marginLeft: 10 }}
-              />
-            )}
           </TouchableOpacity>
           {sampleLocations.map((location, index) => (
             <TouchableOpacity key={index} style={styles.locationOption}>
@@ -302,12 +296,8 @@ export default function AddLocationScreen({ navigation }) {
           ))}
         </ScrollView>
       </View>
-      <SuccessModal
-        onClose={handleProceed}
-        visible={visible}
-        message="Congratulations, your password reset was successful!!!"
-        buttonText="Proceed to Login"
-      />
+
+      <LoaderOverlay visible={isLoading} />
     </View>
   );
 }

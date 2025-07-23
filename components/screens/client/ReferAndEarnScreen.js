@@ -7,9 +7,12 @@ import {
   TextInput,
   ScrollView,
   Clipboard,
+  Linking,
+  Share,
 } from "react-native";
 import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
-
+import { useAuth } from "../../../context/AuthContext";
+import { showToast } from "../../ToastComponent/Toast";
 const mockTransactions = [
   {
     type: "credit",
@@ -50,15 +53,34 @@ const mockTransactions = [
 ];
 
 export default function ReferAndEarnScreen() {
-  const [referralCode] = useState("SHARPLOOK123");
   const [inputCode, setInputCode] = useState("");
   const [copied, setCopied] = useState(false);
-
+  const { user } = useAuth();
   const handleCopy = () => {
     Clipboard.setString(referralCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
+  //   const sharemsg = `I’ve been using this app lately, and it’s honestly made self-care so much easier. From finding trusted experts to grabbing my favorite beauty essentials—everything's just a tap away
+  // And here’s the best part: you get ₦100 when you join using my referral code ${user?.referralCode}, and I get ₦100 for every person who joins using my referral code. Give it a try—you’ll thank me later 💖`;
+  //   const shareToWhatsApp = async () => {
+  //     const url = `whatsapp://send?text=${encodeURIComponent(sharemsg)}`;
+  //     const canOpen = await Linking.canOpenURL(url);
+  //     if (canOpen) {
+  //       Linking.openURL(url);
+  //     } else {
+  //       showToast.info("Whatsapp not installed");
+  //     }
+  //   };
+  //   const shareToOtherApps = async () => {
+  //     try {
+  //       await Share.share({
+  //         message: sharemsg,
+  //       });
+  //     } catch (error) {
+  //       showToast.info("Cannot share message");
+  //     }
+  //   };
 
   return (
     <View className="flex-1 bg-white">
@@ -104,7 +126,7 @@ export default function ReferAndEarnScreen() {
             Share this code with your friends!
           </Text>
           <View style={styles.codeRow} className="border border-[#EBEBEA]">
-            <Text style={styles.code}>{referralCode}</Text>
+            <Text style={styles.code}>{user?.referralCode}</Text>
             <TouchableOpacity onPress={handleCopy} style={styles.copyIcon}>
               <Feather
                 name={copied ? "check" : "copy"}
@@ -124,12 +146,7 @@ export default function ReferAndEarnScreen() {
               color="#22C55E"
               style={styles.shareIcon}
             />
-            <Feather
-              name="link"
-              size={20}
-              color="#3B82F6"
-              style={styles.shareIcon}
-            />
+
             <Feather
               name="share-2"
               size={20}
