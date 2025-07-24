@@ -1,76 +1,46 @@
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import ClientBottomNav from "./ClientBottomNav";
-import { View, Text } from "react-native";
 import CustomDrawerContent from "./CustomDrawerContent";
 import { Ionicons } from "@expo/vector-icons";
 import FilterScreen from "./FilterScreen";
-import VendorProfileScreen from "./VendorProfileScreen";
-import ChatListScreen from "./ChatListScreen";
-import ChatDetailScreen from "./ChatDetailScreen";
+import ChatListScreen from "./GlobalScreens/ChatListScreen";
+import ChatDetailScreen from "./GlobalScreens/ChatDetailScreen";
 import DebitCardPaymentForm from "./DebitCardPaymentForm";
 import AddNewCardForm from "./AddNewCardForm";
 import Search from "./Search";
-import NotificationDetailScreen from "./NotificationDetailScreen";
-import BookAppointmentScreen from "./BookAppointmentScreen";
-import BookingDetailScreen from "./BookingDetailScreen";
+import BookAppointmentScreen from "./GlobalScreens/BookAppointmentScreen";
+import BookingDetailScreen from "./Booking/BookingDetailScreen";
 import ChatDetailScreenHardcoded from "./ChatDetailScreenHardcoded";
-import CartScreen from "./CartScreen";
-import SettingsScreen from "./SettingsScreen";
-import HelpSupportScreen from "./HelpSupportScreen";
-import LegalScreen from "./LegalScreen";
-import PrivacyPolicyScreen from "./PrivacyPolicyScreen";
+import SettingsScreen from "./Profile/SettingsScreen";
+import HelpSupportScreen from "./Profile/HelpSupportScreen";
+import LegalScreen from "./Profile/LegalScreen";
 import AddReviewScreen from "./reviews/AddReviewScreen";
 import OtherScreen from "./OtherScreen";
-import WhatInformationWeCollectScreen from "./privacypolicy/WhatInformationWeCollectScreen";
-import HowWeUseYourInformationScreen from "./privacypolicy/HowWeUseYourInformationScreen";
-import HowWeShareYourInformationScreen from "./privacypolicy/HowWeShareYourInformationScreen";
-import WhereWeStoreYourInformationScreen from "./privacypolicy/WhereWeStoreYourInformationScreen";
-import YourRightsAndChoicesScreen from "./privacypolicy/YourRightsAndChoicesScreen";
-import TheSecurityOfYourInformationScreen from "./privacypolicy/TheSecurityOfYourInformationScreen";
-import HowLongWeKeepYourInformationScreen from "./privacypolicy/HowLongWeKeepYourInformationScreen";
-import InformationRelatingToChildrenAndTeensScreen from "./privacypolicy/InformationRelatingToChildrenAndTeensScreen";
-import PrivacyPolicyUpdateScreen from "./privacypolicy/PrivacyPolicyUpdateScreen";
-import ContactScreen from "./privacypolicy/ContactScreen";
-import JurisdictionSpecificScreen from "./privacypolicy/JurisdictionSpecificScreen";
-import TermsOfUseScreen from "./TermsOfUseScreen";
-import TermsOfUseYourRelationshipWithUsScreen from "./termsofuse/TermsOfUseYourRelationshipWithUsScreen";
-import TermsOfUseAcceptingTheTermsScreen from "./termsofuse/TermsOfUseAcceptingTheTermsScreen";
-import TermsOfUseChangesToTheTermsScreen from "./termsofuse/TermsOfUseChangesToTheTermsScreen";
-import TermsOfUseYourAccountWithUsScreen from "./termsofuse/TermsOfUseYourAccountWithUsScreen";
-import TermsOfUseYourAccessToAndUseOfOurServicesScreen from "./termsofuse/TermsOfUseYourAccessToAndUseOfOurServicesScreen";
-import TermsOfUseIntellectualPropertyRightsScreen from "./termsofuse/TermsOfUseIntellectualPropertyRightsScreen";
-import TermsOfUseContentScreen from "./termsofuse/TermsOfUseContentScreen";
-import TermsOfUseIndemnityScreen from "./termsofuse/TermsOfUseIndemnityScreen";
-import TermsOfUseExclusionOfWarrantiesScreen from "./termsofuse/TermsOfUseExclusionOfWarrantiesScreen";
-import TermsOfUseLimitationOfLiabilityScreen from "./termsofuse/TermsOfUseLimitationOfLiabilityScreen";
-import TermsOfUseOtherTermsScreen from "./termsofuse/TermsOfUseOtherTermsScreen";
-import UserProfileScreen from "./userprofile/UserProfileScreen";
-import EditProfileScreen from "./userprofile/EditProfileScreen";
-import BookingsScreen from "./BookingsScreen";
-import ProfileScreen from "./ProfileScreen";
 import ReferAndEarnScreen from "./ReferAndEarnScreen";
 import WalletScreen from "./WalletScreen";
 import ReviewsScreen from "./reviews/ReviewsScreen";
-import OfferPriceScreen from "./OfferPriceScreen";
-import VendorPortfolioScreen from "./VendorPortfolioScreen";
+import OfferPriceScreen from "./Booking/OfferPriceScreen";
+import VendorPortfolioScreen from "./GlobalScreens/VendorPortfolioScreen";
 import ClientWithdrawScreen from "./ClientWithdrawScreen";
 import FundClientWalletScreen from "./FundClientWallet";
-import BookingHomeServiceAppointScreen from "./bookingHomeserviceappointscreen";
+import BookingHomeServiceAppointScreen from "./GlobalScreens/bookingHomeserviceappointscreen";
 import PaystackWebViewScreen from "./PaystackWebViewScreen";
 import AddProductReviewScreen from "./reviews/AddProductReview";
 import AddServiceReviewScreen from "./reviews/AddServiceReview";
 import ServiceReviewsScreen from "./reviews/ServiceReview";
 import ProductReviewsScreen from "./reviews/ProductReview";
-import AcceptedOfferDetailScreen from "./AcceptedOfferDetailScreen";
-// Removed: import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
+import AcceptedOfferDetailScreen from "./Booking/AcceptedOfferDetailScreen";
+import BookingStack from "./Booking/BookingStack";
+import NotificationStack from "./Notification/NotificationStack";
+import ProfileStack from "./Profile/ProfileStack";
 
 const Drawer = createDrawerNavigator();
 
 export default function ClientNavigator() {
   return (
     <Drawer.Navigator
-      initialRouteName="Home"
+      initialRouteName="Main"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
@@ -83,15 +53,14 @@ export default function ClientNavigator() {
       }}
     >
       <Drawer.Screen
-        name="Home"
+        name="Main"
         component={ClientBottomNav}
         options={{ drawerItemStyle: { display: "none" } }}
       />
-      {/* AccountInfoScreen does not exist in the codebase. If you add it, uncomment below and import it. */}
 
       <Drawer.Screen
         name="Account Information"
-        component={ProfileScreen}
+        component={ProfileStack}
         options={{
           drawerIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
@@ -101,7 +70,7 @@ export default function ClientNavigator() {
 
       <Drawer.Screen
         name="My Bookings"
-        component={BookingsScreen}
+        component={BookingStack}
         options={{
           drawerIcon: ({ color, size }) => (
             <Ionicons name="calendar-outline" size={size} color={color} />
@@ -137,6 +106,15 @@ export default function ClientNavigator() {
           ),
         }}
       />
+
+      {/* ScreenSTacks */}
+
+      <Drawer.Screen
+        name="Notification"
+        component={NotificationStack}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+
       <Drawer.Screen
         name="HelpSupportScreen"
         component={HelpSupportScreen}
@@ -147,16 +125,7 @@ export default function ClientNavigator() {
         component={LegalScreen}
         options={{ drawerItemStyle: { display: "none" } }}
       />
-      <Drawer.Screen
-        name="PrivacyPolicyScreen"
-        component={PrivacyPolicyScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="VendorProfileScreen"
-        component={VendorProfileScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
+
       <Drawer.Screen
         name="VendorPortfolioScreen"
         component={VendorPortfolioScreen}
@@ -193,11 +162,7 @@ export default function ClientNavigator() {
         component={Search}
         options={{ drawerItemStyle: { display: "none" } }}
       />
-      <Drawer.Screen
-        name="NotificationDetailScreen"
-        component={NotificationDetailScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
+
       <Drawer.Screen
         name="BookAppointmentScreen"
         component={BookAppointmentScreen}
@@ -213,11 +178,7 @@ export default function ClientNavigator() {
         component={ChatDetailScreenHardcoded}
         options={{ drawerItemStyle: { display: "none" } }}
       />
-      <Drawer.Screen
-        name="CartScreen"
-        component={CartScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
+
       <Drawer.Screen
         name="ReviewsScreen"
         component={ReviewsScreen}
@@ -254,71 +215,7 @@ export default function ClientNavigator() {
         component={OtherScreen}
         options={{ drawerItemStyle: { display: "none" } }}
       />
-      <Drawer.Screen
-        name="WhatInformationWeCollectScreen"
-        component={WhatInformationWeCollectScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="HowWeUseYourInformationScreen"
-        component={HowWeUseYourInformationScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="HowWeShareYourInformationScreen"
-        component={HowWeShareYourInformationScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="WhereWeStoreYourInformationScreen"
-        component={WhereWeStoreYourInformationScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="YourRightsAndChoicesScreen"
-        component={YourRightsAndChoicesScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TheSecurityOfYourInformationScreen"
-        component={TheSecurityOfYourInformationScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="HowLongWeKeepYourInformationScreen"
-        component={HowLongWeKeepYourInformationScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="InformationRelatingToChildrenAndTeensScreen"
-        component={InformationRelatingToChildrenAndTeensScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="PrivacyPolicyUpdateScreen"
-        component={PrivacyPolicyUpdateScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="ContactScreen"
-        component={ContactScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="JurisdictionSpecificScreen"
-        component={JurisdictionSpecificScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseScreen"
-        component={TermsOfUseScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseYourRelationshipWithUsScreen"
-        component={TermsOfUseYourRelationshipWithUsScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
+
       <Drawer.Screen
         name="ClientWithdrawScreen"
         component={ClientWithdrawScreen}
@@ -329,66 +226,7 @@ export default function ClientNavigator() {
         component={FundClientWalletScreen}
         options={{ drawerItemStyle: { display: "none" } }}
       />
-      <Drawer.Screen
-        name="TermsOfUseAcceptingTheTermsScreen"
-        component={TermsOfUseAcceptingTheTermsScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseChangesToTheTermsScreen"
-        component={TermsOfUseChangesToTheTermsScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseYourAccountWithUsScreen"
-        component={TermsOfUseYourAccountWithUsScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseYourAccessToAndUseOfOurServicesScreen"
-        component={TermsOfUseYourAccessToAndUseOfOurServicesScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseIntellectualPropertyRightsScreen"
-        component={TermsOfUseIntellectualPropertyRightsScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseContentScreen"
-        component={TermsOfUseContentScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseIndemnityScreen"
-        component={TermsOfUseIndemnityScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseExclusionOfWarrantiesScreen"
-        component={TermsOfUseExclusionOfWarrantiesScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseLimitationOfLiabilityScreen"
-        component={TermsOfUseLimitationOfLiabilityScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="TermsOfUseOtherTermsScreen"
-        component={TermsOfUseOtherTermsScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="UserProfileScreen"
-        component={UserProfileScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-      <Drawer.Screen
-        name="EditProfileScreen"
-        component={EditProfileScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
+
       <Drawer.Screen
         name="OfferPriceScreen"
         component={OfferPriceScreen}

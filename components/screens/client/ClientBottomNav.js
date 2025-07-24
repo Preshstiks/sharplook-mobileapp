@@ -1,31 +1,17 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import HomeScreen from "./HomeScreen";
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text } from "react-native";
 import {
   MaterialIcons,
   Ionicons,
   FontAwesome6,
   AntDesign,
 } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import ProfileScreen from "./ProfileScreen";
-import NotificationList from "./NotificationList";
-import BookingsScreen from "./BookingsScreen";
-import Market from "./Market";
-
-function NotificationScreen() {
-  return (
-    <SafeAreaView
-      className="flex-1 bg-secondary"
-      edges={["bottom", "left", "right"]}
-    >
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text>Notification Screen</Text>
-      </View>
-    </SafeAreaView>
-  );
-}
+import HomeStack from "./Home/HomeStack";
+import MarketStack from "./Market/MarketStack";
+import BookingStack from "./Booking/BookingStack";
+import NotificationStack from "./Notification/NotificationStack";
+import ProfileStack from "./Profile/ProfileStack";
 
 const Tab = createBottomTabNavigator();
 
@@ -62,11 +48,11 @@ export default function ClientBottomNav() {
         tabBarPressOpacity: 0.7,
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Market" component={Market} />
-      <Tab.Screen name="Bookings" component={BookingsScreen} />
-      <Tab.Screen name="Notification" component={NotificationList} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Home" component={HomeStack} />
+      <Tab.Screen name="Market" component={MarketStack} />
+      <Tab.Screen name="Bookings" component={BookingStack} />
+      <Tab.Screen name="Notification" component={NotificationStack} />
+      <Tab.Screen name="Profile" component={ProfileStack} />
     </Tab.Navigator>
   );
 }

@@ -14,7 +14,18 @@ if (__DEV__) {
     ? global.originalXMLHttpRequest
     : global.XMLHttpRequest;
 }
-
+const linking = {
+  prefixes: ["sharplook://"],
+  config: {
+    screens: {
+      ClientApp: {
+        screens: {
+          BookAppointmentScreen: "BookAppointmentScreen/:id",
+        },
+      },
+    },
+  },
+};
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -23,7 +34,8 @@ export default function App() {
           <StatusBar barStyle="light-content" backgroundColor="#EB278D" />
           <AuthProvider>
             <CartProvider>
-              <AppNavigator />
+              {/* Pass linking prop to AppNavigator */}
+              <AppNavigator linking={linking} />
               <Toast config={toastConfig} />
             </CartProvider>
           </AuthProvider>

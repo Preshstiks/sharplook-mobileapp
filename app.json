@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "scheme": "sharplook",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.techtrove.sharplook"

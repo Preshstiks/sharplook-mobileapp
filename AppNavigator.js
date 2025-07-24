@@ -5,7 +5,6 @@ import LoginScreen from "./components/screens/shared/LoginScreen";
 import RegisterScreen from "./components/screens/shared/RegisterScreen";
 import ClientNavigator from "./components/screens/client/ClientNavigator";
 import VendorNavigator from "./components/screens/vendor/VendorNavigator";
-import AdminNavigator from "./components/screens/admin/AdminNavigator";
 import OnboardingScreen from "./components/screens/shared/OnboardingScreen";
 import VendorLoginScreen from "./components/screens/vendor/auth/LoginScreen";
 import { NavigationContainer } from "@react-navigation/native";
@@ -21,7 +20,6 @@ import ClientAddLocationScreen from "./components/screens/shared/AddLocationScre
 import ClientVerifyPhoneNumber from "./components/screens/shared/VerifyPhoneNumber";
 import VerifyWithPhoneOTP from "./components/screens/shared/VerifyWithPhoneOTP";
 import EmailVerificationForgotPassword from "./components/screens/shared/EmailVerificationForgotPassword";
-import CategoriesScreen from "./components/screens/client/CategoriesScreen";
 import EmailVerificationScreenSignup from "./components/screens/shared/EmailVerificationScreenSIgnup";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/reusuableComponents/ProtectedRoute";
@@ -29,7 +27,7 @@ import AddLocationScreen from "./components/screens/vendor/auth/AddLocationScree
 
 const Stack = createNativeStackNavigator();
 
-export default function AppNavigator() {
+export default function AppNavigator({ linking }) {
   const { isAuthenticated, userType, isLoading } = useAuth();
   const fontsLoaded = useCustomFonts();
   if (!fontsLoaded) {
@@ -41,7 +39,7 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator initialRouteName="Splash">
         {isAuthenticated ? (
           <>
@@ -51,16 +49,6 @@ export default function AppNavigator() {
                   {() => (
                     <ProtectedRoute allowedUserTypes={["CLIENT"]}>
                       <ClientNavigator />
-                    </ProtectedRoute>
-                  )}
-                </Stack.Screen>
-                <Stack.Screen
-                  name="Categories"
-                  options={{ headerShown: false }}
-                >
-                  {() => (
-                    <ProtectedRoute allowedUserTypes={["CLIENT"]}>
-                      <CategoriesScreen />
                     </ProtectedRoute>
                   )}
                 </Stack.Screen>
@@ -179,11 +167,7 @@ export default function AppNavigator() {
           options={{ headerShown: false }}
         />
 
-        <Stack.Screen
-          name="Categories"
-          component={CategoriesScreen}
-          options={{ headerShown: false }}
-        /> */}
+        */}
       </Stack.Navigator>
     </NavigationContainer>
   );
