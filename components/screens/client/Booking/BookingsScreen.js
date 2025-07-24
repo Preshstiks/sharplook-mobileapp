@@ -4,10 +4,14 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Empty from "../../../../assets/img/empty.svg";
 import { HttpClient } from "../../../../api/HttpClient";
 import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
+import { HexConverter } from "../../../reusuableComponents/HexConverter";
+import { DateConverter } from "../../../reusuableComponents/DateConverter";
+import { DayConverter } from "../../../reusuableComponents/DayConverter";
+import { formatAmount } from "../../../formatAmount";
 
 export default function BookingsScreen() {
   const navigation = useNavigation();
-  const [tab, setTab] = useState("Pending");
+  const [tab, setTab] = useState("PENDING");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -31,7 +35,7 @@ export default function BookingsScreen() {
   );
 
   const filteredBookings = bookings.filter((b) => b.status === tab);
-
+  console.log({ filteredBookings });
   const EmptyState = () => (
     <View className="flex-1 justify-center items-center px-8">
       <Empty width={150} height={150} />
@@ -39,7 +43,7 @@ export default function BookingsScreen() {
         style={{ fontFamily: "poppinsRegular" }}
         className="text-[12px] text-center"
       >
-        {tab === "Pending"
+        {tab === "PENDING"
           ? "You have no pending bookings"
           : "You have no completed bookings"}
       </Text>
@@ -133,23 +137,23 @@ export default function BookingsScreen() {
       </View>
       <View className="flex-row justify-center mt-8 mb-2 gap-3">
         <Pressable
-          className={`px-6 py-3 rounded-[8px] ${tab === "Pending" ? "bg-primary" : "bg-white border border-[#A5A5A5]"}`}
-          onPress={() => setTab("Pending")}
+          className={`px-6 py-3 rounded-[8px] ${tab === "PENDING" ? "bg-primary" : "bg-white border border-[#A5A5A5]"}`}
+          onPress={() => setTab("PENDING")}
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "Pending" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[12px] ${tab === "PENDING" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             Pending
           </Text>
         </Pressable>
         <Pressable
-          className={`px-6 py-3 rounded-[8px] ${tab === "Completed" ? "bg-primary" : "bg-white border border-[#A5A5A5]"}`}
-          onPress={() => setTab("Completed")}
+          className={`px-6 py-3 rounded-[8px] ${tab === "COMPLETED" ? "bg-primary" : "bg-white border border-[#A5A5A5]"}`}
+          onPress={() => setTab("COMPLETED")}
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "Completed" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[12px] ${tab === "COMPLETED" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             Completed
           </Text>
@@ -175,8 +179,8 @@ export default function BookingsScreen() {
             >
               <Image
                 source={
-                  booking.image
-                    ? { uri: booking.image }
+                  booking?.image
+                    ? { uri: booking?.image }
                     : require("../../../../assets/img/facials.png")
                 }
                 className="w-[100px] h-[100px] rounded-[8px] mr-2"
@@ -187,38 +191,38 @@ export default function BookingsScreen() {
                     style={{ fontFamily: "poppinsMedium" }}
                     className="text-[16px] mb-1 text-fadedDark"
                   >
-                    {booking.service}
+                    {booking?.serviceName}
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
                     className="text-[10px] text-fadedDark"
                   >
-                    {booking.vendor}
+                    {booking?.vendorName}
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
                     className="text-[10px] text-fadedDark"
                   >
-                    {booking.date}
+                    {DateConverter(booking?.date)}
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
                     className="text-[10px] text-fadedDark"
                   >
-                    {booking.time}
+                    {booking?.time}
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
                     className="text-[10px] text-fadedDark"
                   >
-                    {booking.day}
+                    {DayConverter(booking?.date)}
                   </Text>
                 </View>
                 <Text
                   style={{ fontFamily: "latoBold" }}
                   className="text-primary text-[14px] pr-2 self-end"
                 >
-                  {booking.price}
+                  {formatAmount(booking?.price)}
                 </Text>
               </View>
             </Pressable>

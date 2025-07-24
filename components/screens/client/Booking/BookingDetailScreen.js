@@ -21,6 +21,12 @@ import * as Yup from "yup";
 import BottomModal from "../../../reusuableComponents/BottomModal";
 import { useState } from "react";
 import { OutlineTextAreaInput } from "../../../reusuableComponents/inputFields/OutlineTextInput";
+import { HexConverter } from "../../../reusuableComponents/HexConverter";
+import {
+  DateConverter,
+  formatDateToDDMMYYYY,
+} from "../../../reusuableComponents/DateConverter";
+import { formatAmount } from "../../../formatAmount";
 
 export default function BookingDetailScreen() {
   const route = useRoute();
@@ -127,19 +133,20 @@ export default function BookingDetailScreen() {
             style={{ fontFamily: "poppinsSemiBold" }}
             className="text-[20px]"
           >
-            {booking?.status || "Pending"}
+            {booking?.status === "PENDING" ? "Pending" : "Completed"}
           </Text>
           <Text
             style={{ fontFamily: "latoBold" }}
             className="text-[16px] text-[#00000080] mt-1"
           >
-            Booking ID: <Text className="text-[#000]">#440404</Text>
+            Booking ID:{" "}
+            <Text className="text-[#000]">{HexConverter(booking?.id)}</Text>
           </Text>
           <Text
             style={{ fontFamily: "latoBold" }}
             className="text-[12px] text-[#00000080] mt-2"
           >
-            11/02/2024
+            {formatDateToDDMMYYYY(booking?.date)}
           </Text>
         </View>
         <View className="h-[1px] my-5 bg-[#FDE9F4]" />
@@ -149,19 +156,19 @@ export default function BookingDetailScreen() {
             style={{ fontFamily: "poppinsMedium" }}
             className="text-[16px] mb-1"
           >
-            Team Green
+            {booking?.vendor?.lastName} {booking?.vendor?.firstName}
           </Text>
           <Text
             style={{ fontFamily: "poppinsRegular" }}
             className="text-[12px] text-faintDark2"
           >
-            No 25, Dosunmu Street, Mafoluku, Oshodi, 100024, Lagos
+            {booking?.vendor?.address}
           </Text>
           <Text
             style={{ fontFamily: "poppinsRegular" }}
             className="text-[12px] mt-1 text-faintDark2"
           >
-            +2349071682117
+            {booking?.vendor?.phone}
           </Text>
         </View>
         {/* Vendor */}
@@ -182,13 +189,7 @@ export default function BookingDetailScreen() {
                 style={{ fontFamily: "poppinsMedium" }}
                 className="text-[14px]"
               >
-                {booking?.vendor}
-              </Text>
-              <Text
-                style={{ fontFamily: "poppinsRegular" }}
-                className="text-[12px] text-faintDark2"
-              >
-                18, Afolabi Aina Street, Ikeja, Lagos
+                {booking?.vendor?.businessName}
               </Text>
             </View>
             <MaterialIcons name="chat" size={20} color="#EB278D" />
@@ -212,38 +213,36 @@ export default function BookingDetailScreen() {
                 style={{ fontFamily: "latoRegular" }}
                 className="text-[16px]"
               >
-                {booking?.service}
+                {booking?.serviceName}
               </Text>
               <Text
                 style={{ fontFamily: "poppinsRegular" }}
                 className="text-[10px] mt-3 text-faintDark2"
               >
-                9:00AM July 9, 2025
+                {booking?.time} {DateConverter(booking?.date)}
               </Text>
             </View>
             <Text
               style={{ fontFamily: "latoBold" }}
               className="text-primary text-[14px] "
             >
-              ₦188,528
+              {formatAmount(booking?.price)}
             </Text>
           </View>
         </View>
         {/* Static Map */}
         <View className="rounded-xl h-64 mb-6 overflow-hidden bg-gray-100 relative">
-          {/* Map Background */}
           <View className="w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 items-center justify-center">
             <MaterialIcons name="map" size={48} color="#EB278D" />
             <Text className="text-gray-500 mt-2">Map View</Text>
           </View>
 
-          {/* Custom Markers */}
-          <View className="absolute top-1/4 left-1/4">
+          {/* <View className="absolute top-1/4 left-1/4">
             <View className="bg-blue-500 rounded-full p-2 border-2 border-white shadow-lg">
               <MaterialIcons name="my-location" size={16} color="white" />
             </View>
             <Text className="text-xs text-gray-600 mt-1 text-center">You</Text>
-          </View>
+          </View> */}
 
           <View className="absolute bottom-1/4 right-1/4">
             <View className="bg-primary rounded-full p-2 border-2 border-white shadow-lg">
@@ -255,7 +254,7 @@ export default function BookingDetailScreen() {
           </View>
 
           {/* Map Controls Overlay */}
-          <View className="absolute top-4 right-4">
+          {/* <View className="absolute top-4 right-4">
             <TouchableOpacity
               className="bg-white rounded-full p-2 shadow-lg"
               style={{
@@ -268,10 +267,10 @@ export default function BookingDetailScreen() {
             >
               <MaterialIcons name="navigation" size={20} color="#EB278D" />
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           {/* Location Info Card */}
-          <View
+          {/* <View
             className="absolute bottom-4 left-4 right-4 bg-white rounded-lg p-3 shadow-lg"
             style={{
               shadowColor: "#000",
@@ -293,7 +292,7 @@ export default function BookingDetailScreen() {
                 Distance: 2.3 km
               </Text>
             </View>
-          </View>
+          </View> */}
         </View>
         {/* Action Buttons */}
 

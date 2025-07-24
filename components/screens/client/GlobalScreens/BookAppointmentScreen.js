@@ -4,29 +4,22 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  TextInput,
   Alert,
   Modal,
+  StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import Specialist1 from "../../../../assets/img/ayo.svg";
-import Specialist2 from "../../../../assets/img/alex.svg";
-import Specialist3 from "../../../../assets/img/sharon.svg";
-import Specialist4 from "../../../../assets/img/priti.svg";
 import { Calendar } from "react-native-calendars";
-import { AuthInput } from "../../../reusuableComponents/inputFields/AuthInput";
 import { formatAmount } from "../../../formatAmount";
 import { Formik } from "formik";
 import { inshopvalidationSchema } from "../../../../utils/validationSchemas";
 import { useAuth } from "../../../../context/AuthContext";
 import { HttpClient } from "../../../../api/HttpClient";
-import { PaystackProvider, usePaystack } from "react-native-paystack-webview";
 import { WebView } from "react-native-webview";
 import { showToast } from "../../../ToastComponent/Toast";
-
+import Dropdown from "../../../reusuableComponents/inputFields/Dropdown";
 export default function BookAppointmentScreen() {
-  const { popup } = usePaystack();
   const navigation = useNavigation();
   const route = useRoute();
   const service = route.params?.service;
@@ -34,13 +27,13 @@ export default function BookAppointmentScreen() {
   const today = new Date();
   const todayString = today.toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(todayString);
-  const [selectedSpecialist, setSelectedSpecialist] = useState(0);
   const [loading, setLoading] = useState(false);
   const [time, setTime] = useState("");
-  const { user } = useAuth();
   const [paystackModalVisible, setPaystackModalVisible] = useState(false);
   const [paystackPaymentUrl, setPaystackPaymentUrl] = useState("");
+  const [paymentReference, setPaymentReference] = useState("");
   const { id } = route.params;
+  const [pendingBookingValues, setPendingBookingValues] = useState({});
   console.log("service at render:", service);
   console.log({ vendorData });
   const handleBookNow = async (values) => {
@@ -49,7 +42,7 @@ export default function BookAppointmentScreen() {
     try {
       const res = await HttpClient.post("/bookings/bookVendor", {
         vendorId: id,
-        date: selectedDate,
+        date: new Date(`${selectedDate}T${values.time}:00.000Z`),
         time: values.time,
         price: service.servicePrice,
         serviceName: service.serviceName,
@@ -73,7 +66,6 @@ export default function BookAppointmentScreen() {
     }
   };
   console.log({ service });
-  const CALLBACK_URL = "sharplookapp://payment-callback";
   const checkout = async (values) => {
     console.log("[DEBUG] checkout called with values:", values);
     try {
@@ -81,9 +73,9 @@ export default function BookAppointmentScreen() {
         paymentFor: "BOOKING",
         description: "Booking for In Shop",
         amount: service.servicePrice,
-        // callback_url: CALLBACK_URL, // Not needed for WebView-only flow
       });
       setPaystackPaymentUrl(res.data.paymentUrl);
+      setPaymentReference(res.data.reference);
       setPaystackModalVisible(true);
     } catch (error) {
       console.log("[DEBUG] checkout error:", error?.response || error);
@@ -93,53 +85,82 @@ export default function BookAppointmentScreen() {
     { label: "Paystack", value: "PAYSTACK" },
     { label: "SharpPay", value: "SHARP-PAY" },
   ];
-
-  // Add this useEffect to handle paymentReference
-  useEffect(() => {
-    const paymentReference = route.params?.paymentReference;
-    if (paymentReference) {
-      handlePaystackVerificationAndBooking(paymentReference);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route.params?.paymentReference]);
-
+  const timeOptions = [
+    { label: "06:00AM", value: "06:00AM" },
+    { label: "07:00AM", value: "07:00AM" },
+    { label: "08:00AM", value: "08:00AM" },
+    { label: "09:00AM", value: "09:00AM" },
+    { label: "10:00AM", value: "10:00AM" },
+    { label: "11:00AM", value: "11:00AM" },
+    { label: "12:00PM", value: "12:00PM" },
+    { label: "01:00PM", value: "01:00PM" },
+    { label: "02:00PM", value: "02:00PM" },
+    { label: "03:00PM", value: "03:00PM" },
+    { label: "04:00PM", value: "04:00PM" },
+    { label: "05:00PM", value: "05:00PM" },
+    { label: "06:00PM", value: "06:00PM" },
+  ];
   // Handler for verifying payment and booking
-  const handlePaystackVerificationAndBooking = async (reference) => {
+  const handlePaystackVerificationAndBooking = async (
+    reference,
+    bookingValues
+  ) => {
+    if (!reference) {
+      showToast.error("Payment", "No payment reference found.");
+      return;
+    }
+    setLoading(true);
     try {
-      // 1. Verify payment
       const verifyRes = await HttpClient.get(
         `/payment/paystack/verify/${reference}`
       );
-      if (verifyRes.data.status === "success") {
-        // 2. Book appointment
+      console.log("[DEBUG] Paystack verify response:", verifyRes.data);
+
+      const appointmentData = new Date(selectedDate).toISOString();
+      if (verifyRes.data.transaction.status === "paid") {
         const bookingPayload = {
-          vendorId: id,
-          date: selectedDate,
-          time: time || "09:00", // fallback if time is not set
-          price: service.servicePrice,
-          serviceName: service.serviceName,
-          serviceId: service.id,
-          totalAmount: service.servicePrice,
+          vendorId: vendorData?.id,
+          date: appointmentData,
+          time: bookingValues?.time || time,
+          price: service?.servicePrice,
+          serviceName: service?.serviceName,
+          serviceId: service?.id,
+          totalAmount: service?.servicePrice,
           reference,
-          paymentMethod: "paystack",
+          paymentMethod: "PAYSTACK",
         };
+        console.log("[DEBUG] Booking payload:", bookingPayload);
+
         const bookRes = await HttpClient.post(
           "/bookings/bookVendor",
           bookingPayload
         );
-        // 3. Show success message
-        Alert.alert("Success", bookRes.data.message || "Booking successful!");
-        return "success";
+        console.log("[DEBUG] Booking response:", bookRes.data);
+        showToast.success(bookRes.data.message);
+        navigation.goBack();
       } else {
-        Alert.alert("Payment Failed", "Payment verification failed.");
-        return "failure";
+        showToast.error("Payment verification failed");
       }
+      setPaystackModalVisible(false);
     } catch (error) {
-      Alert.alert("Error", "An error occurred during booking.");
-      console.log(error);
-      return "failure";
+      console.log(error.response);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Payment verification or booking failed.";
+      showToast.error(message);
+
+      console.log(
+        "[DEBUG] handlePaystackVerificationAndBooking error:",
+        error?.response || error
+      );
+    } finally {
+      setLoading(false);
+      setPaymentReference("");
     }
   };
+
+  console.log({ paymentReference });
 
   return (
     <View className="flex-1 bg-white">
@@ -164,8 +185,7 @@ export default function BookAppointmentScreen() {
           console.log("[DEBUG] Form submitted with values:", values);
           try {
             if (values.paymentMethod === "SHARP-PAY") {
-              // Generate random reference
-              const reference = `SHARP-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+              const reference = `SHARP-PAY-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
               const payload = {
                 date: selectedDate,
                 time: values.time,
@@ -178,6 +198,7 @@ export default function BookAppointmentScreen() {
               console.log("[DEBUG] sharpPay payload:", payload);
               await handleBookNow(payload);
             } else if (values.paymentMethod === "PAYSTACK") {
+              setPendingBookingValues(values); // Save for use after payment
               await checkout(values);
             } else {
               console.log("[DEBUG] No payment method selected.");
@@ -255,11 +276,12 @@ export default function BookAppointmentScreen() {
 
               {/* Time Input */}
               <View className="mb-5">
-                <AuthInput
-                  label="Enter Time"
-                  name="time"
+                <Dropdown
+                  placeholder="Select Time"
+                  options={timeOptions}
+                  label="Select Time"
                   value={values.time}
-                  onChangeText={handleChange("time")}
+                  onValueChange={handleChange("time")}
                   error={errors.time}
                   touched={touched.time}
                 />
@@ -346,27 +368,19 @@ export default function BookAppointmentScreen() {
         transparent={false}
       >
         <View style={{ flex: 1 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              padding: 16,
-              backgroundColor: "#EB278D",
-            }}
-          >
-            <TouchableOpacity onPress={() => setPaystackModalVisible(false)}>
-              <Ionicons name="chevron-back" size={24} color="#fff" />
-            </TouchableOpacity>
-            <Text
-              style={{
-                color: "#fff",
-                fontSize: 16,
-                marginLeft: 16,
-                fontWeight: "bold",
+          <View style={styles.header}>
+            <TouchableOpacity
+              className="bg-primary rounded-[4px] py-2 px-4"
+              onPress={() => {
+                setPaystackModalVisible(false);
+                handlePaystackVerificationAndBooking(
+                  paymentReference,
+                  pendingBookingValues
+                );
               }}
             >
-              Pay with Paystack
-            </Text>
+              <Text className="text-[10px] text-white">Verify Payment</Text>
+            </TouchableOpacity>
           </View>
           {paystackPaymentUrl ? (
             <WebView
@@ -379,11 +393,14 @@ export default function BookAppointmentScreen() {
                 ) {
                   // Try to extract reference from URL if possible
                   const refMatch = navState.url.match(/[?&]reference=([^&#]+)/);
-                  const reference = refMatch ? refMatch[1] : null;
+                  const reference = refMatch ? refMatch[1] : paymentReference;
                   setPaystackModalVisible(false);
                   setPaystackPaymentUrl("");
                   if (reference) {
-                    handlePaystackVerificationAndBooking(reference);
+                    handlePaystackVerificationAndBooking(
+                      reference,
+                      pendingBookingValues
+                    );
                   } else {
                     Alert.alert(
                       "Payment",
@@ -401,3 +418,28 @@ export default function BookAppointmentScreen() {
     </View>
   );
 }
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: "#fff",
+    paddingTop: 20,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  headerTitle: {
+    color: "#222",
+    fontSize: 16,
+    fontFamily: "poppinsMedium",
+    flex: 1,
+    textAlign: "center",
+    marginLeft: -28,
+  },
+});
