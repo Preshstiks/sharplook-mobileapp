@@ -11,16 +11,22 @@ import PageModal from "../../reusuableComponents/PageModal";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { formatAmount } from "../../formatAmount";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
-
+import OutlinedButton from "../../reusuableComponents/buttons/OutlineButton";
 export default function ProductDetailsModal({
   visible,
   onClose,
   product,
   onAddToCart,
+  cartProductIds = [],
+  addingToCart = {},
 }) {
   const [quantity, setQuantity] = useState(1);
 
   if (!product) return null;
+
+  const productId = product.id || product._id;
+  const isInCart = cartProductIds.includes(productId);
+  const isAdding = addingToCart[productId];
 
   const maxStock = product.stock || 24;
 
@@ -98,55 +104,6 @@ export default function ProductDetailsModal({
                   {formatAmount(product.price)}
                 </Text>
               </View>
-
-              <View
-                className="bg-[#FDE9F4]"
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  borderRadius: 20,
-                  paddingHorizontal: 4,
-                  paddingVertical: 4,
-                }}
-              >
-                <TouchableOpacity
-                  className="bg-white"
-                  onPress={() => setQuantity(Math.max(1, quantity - 1))}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="remove" size={18} color="#EB278D" />
-                </TouchableOpacity>
-                <Text
-                  style={{
-                    marginHorizontal: 12,
-                    fontFamily: "latoBold",
-                    fontSize: 16,
-                    minWidth: 20,
-                    textAlign: "center",
-                  }}
-                >
-                  {quantity}
-                </Text>
-                <TouchableOpacity
-                  className="bg-white"
-                  onPress={() => setQuantity(Math.min(maxStock, quantity + 1))}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="add" size={18} color="#EB278D" />
-                </TouchableOpacity>
-              </View>
             </View>
 
             {/* Rating and Reviews */}
@@ -191,17 +148,29 @@ export default function ProductDetailsModal({
               </Text>
             </View>
             <View className="h-[0.8px] bg-[#E5E5E5]" />
-            <Text
-              style={{
-                fontFamily: "latoBold",
-                fontSize: 14,
-                color: "#000",
-                marginTop: 18,
-                marginBottom: 12,
-              }}
-            >
-              Vendor details
-            </Text>
+            <View className="flex-row items-center justify-between mb-4">
+              <Text
+                style={{
+                  fontFamily: "latoBold",
+                  fontSize: 14,
+                  color: "#222",
+                  marginBottom: 4,
+                }}
+              >
+                Vendor details
+              </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("ProductReviewsScreen")}
+                className="border border-primary self-start rounded-lg py-2 px-4 flex-row items-center"
+              >
+                <Text
+                  className="mt-1 text-primary"
+                  style={{ fontFamily: "poppinsRegular", fontSize: 12 }}
+                >
+                  See Reviews
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             <View
               style={{
@@ -317,12 +286,19 @@ export default function ProductDetailsModal({
           }}
         >
           <View className="px-4">
-            <AuthButton
-              title="Add to Cart"
-              onPress={() => {
-                onAddToCart(product, quantity);
-              }}
-            />
+            {isInCart ? (
+              <OutlinedButton title="Added to Cart" />
+            ) : (
+              <AuthButton
+                title={isAdding ? "Adding..." : "Add to Cart"}
+                disabled={isInCart || isAdding}
+                onPress={() => {
+                  if (!isInCart && !isAdding) {
+                    onAddToCart(product, quantity);
+                  }
+                }}
+              />
+            )}
           </View>
         </View>
       </SafeAreaView>

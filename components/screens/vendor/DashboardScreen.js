@@ -16,6 +16,10 @@ import EmptySVG from "../../../assets/img/empty.svg";
 import { useAuth } from "../../../context/AuthContext";
 import { formatAmount } from "../../formatAmount";
 import { useFocusEffect } from "@react-navigation/native";
+import {
+  DateConverter,
+  formatDateToDDMMYYYY,
+} from "../../reusuableComponents/DateConverter";
 
 // Skeleton Loader Component
 function SkeletonLoader() {
@@ -297,9 +301,7 @@ export default function DashboardScreen({ navigation }) {
               time: b.time || b.bookingTime || "",
               service: b.service || b.serviceName || "",
               price: b.price ? `₦${b.price}` : "",
-              avatar: b.avatar
-                ? { uri: b.avatar }
-                : require("../../../assets/img/blackman.jpg"), // fallback
+              avatar: typeof b.avatar === "string" ? b.avatar : null, // Only string URLs
             })
           );
           setProducts(productsRes.data.data);
@@ -315,6 +317,8 @@ export default function DashboardScreen({ navigation }) {
     }, [])
   );
 
+  console.log("products", products);
+  console.log("bookings", bookings);
   return (
     <ScrollView className="flex-1 bg-white">
       {/* Header */}
@@ -384,7 +388,6 @@ export default function DashboardScreen({ navigation }) {
             </Text>
           </TouchableOpacity>
         </View>
-        {/* Balance/Dots area with fixed height to prevent card resize */}
         <View style={{ height: 40, justifyContent: "center" }}>
           {isShowBalance ? (
             <Text
@@ -433,7 +436,6 @@ export default function DashboardScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Recent Bookings */}
       <View className="px-4 mb-6">
         <View className="flex-row justify-between items-center mb-2">
           <Text className="text-[16px]" style={{ fontFamily: "poppinsMedium" }}>
@@ -464,7 +466,11 @@ export default function DashboardScreen({ navigation }) {
           bookings.map((b) => (
             <View key={b.id} className="flex-row items-center mb-2">
               <Image
-                source={b.avatar}
+                source={
+                  b?.avatar
+                    ? { uri: b.avatar }
+                    : require("../../../assets/icon/avatar.png")
+                }
                 className="w-10 h-10 rounded-full mr-3"
               />
               <View className="flex-1">
@@ -472,13 +478,13 @@ export default function DashboardScreen({ navigation }) {
                   className="text-[14px]"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
-                  {b.name}
+                  {b?.name}
                 </Text>
                 <Text
                   className="text-[12px] text-fadedDark"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
-                  {b.date} {b.time}
+                  {DateConverter(b?.date)} {b?.time}
                 </Text>
               </View>
               <View className="items-end">
@@ -486,20 +492,20 @@ export default function DashboardScreen({ navigation }) {
                   className="text-[12px] text-fadedDark"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
-                  {b.service}
+                  {b?.service?.serviceName}
                 </Text>
                 <Text
                   className="text-[14px] text-primary"
                   style={{ fontFamily: "latoBold" }}
                 >
-                  {b.price}
+                  {b?.price}
                 </Text>
               </View>
             </View>
           ))
         )}
       </View>
-      {/* My Products */}
+
       <View className="px-4 mb-8">
         <Text
           className="text-[16px] mb-2"

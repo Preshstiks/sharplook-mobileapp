@@ -114,22 +114,25 @@ export default function ServiceReviewsScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const vendor = route.params?.vendor;
+  const vendorId = route.params?.vendorId;
+  const serviceId = route.params?.serviceId;
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const serviceId = vendor?.[0].id;
-  const vendorId = vendor?.[0].userId;
+  console.log(vendor);
+  console.log(vendorId, serviceId);
+  const hasReviewedThisService = reviews.some(
+    (review) => review.serviceId === serviceId
+  );
   useFocusEffect(
     useCallback(() => {
       const fetchReviews = async () => {
         setLoading(true);
         setError(null);
         try {
-          const res = await HttpClient.post(`/reviews/getAllReviews`, {
-            type: "SERVICE",
-            vendorId,
-            serviceId,
-          });
+          const res = await HttpClient.get(
+            `/reviews/${vendorId}/service/${serviceId}/reviews`
+          );
           setReviews(res.data?.data || []);
           console.log(res.data);
         } catch (err) {
@@ -207,28 +210,31 @@ export default function ServiceReviewsScreen() {
               ))}
             </View>
           </View>
-          <TouchableOpacity
-            className="bg-primary flex-row items-center px-4 py-[10px] rounded-lg"
-            onPress={() =>
-              navigation.navigate("AddServiceReviewScreen", {
-                vendorId,
-                serviceId,
-              })
-            }
-          >
-            <Ionicons
-              name="create-outline"
-              size={18}
-              color="#fff"
-              className="mr-1"
-            />
-            <Text
-              className="text-white mt-1 text-[12px] ml-2"
-              style={{ fontFamily: "poppinsRegular" }}
+          {/* Only show Add Review button if hasReviewedThisService is false */}
+          {!hasReviewedThisService && (
+            <TouchableOpacity
+              className="bg-primary flex-row items-center px-4 py-[10px] rounded-lg"
+              onPress={() =>
+                navigation.navigate("AddServiceReviewScreen", {
+                  vendorId,
+                  serviceId,
+                })
+              }
             >
-              Add Review
-            </Text>
-          </TouchableOpacity>
+              <Ionicons
+                name="create-outline"
+                size={18}
+                color="#fff"
+                className="mr-1"
+              />
+              <Text
+                className="text-white mt-1 text-[12px] ml-2"
+                style={{ fontFamily: "poppinsRegular" }}
+              >
+                Add Review
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
         {/* Loading/Error/Empty States */}
         {loading && (

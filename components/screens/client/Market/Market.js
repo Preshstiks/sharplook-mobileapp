@@ -10,8 +10,6 @@ import {
   Animated, // <-- Add Animated import
 } from "react-native";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import FilterBtn from "../../../../assets/icon/filter.svg";
-import ChatIcon from "../../../../assets/icon/chat.svg";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useStatusBar } from "../../../../context/StatusBarContext";
 import { showToast } from "../../../ToastComponent/Toast";
@@ -134,11 +132,8 @@ const SkeletonCard = () => {
 
 export default function Market() {
   const navigation = useNavigation();
-  const { setBarType } = useStatusBar();
   const { cartItems, fetchCart, loading: cartLoading } = useCart();
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
+
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -313,8 +308,31 @@ export default function Market() {
         >
           Market
         </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("CartScreen")}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("CartScreen")}
+          className="relative"
+        >
           <Ionicons name="cart-outline" size={26} color="#EB278D" />
+          {cartItems.length > 0 && (
+            <View
+              style={{
+                position: "absolute",
+                top: -4,
+                right: -4,
+                minWidth: 16,
+                height: 16,
+                borderRadius: 8,
+                backgroundColor: "#EB278D",
+                alignItems: "center",
+                justifyContent: "center",
+                paddingHorizontal: 3,
+              }}
+            >
+              <Text style={{ color: "#fff", fontSize: 10, fontWeight: "bold" }}>
+                {cartItems.length}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
       {/* Search Bar & Filter */}
@@ -379,6 +397,8 @@ export default function Market() {
         onClose={() => setModalVisible(false)}
         product={selectedProduct}
         onAddToCart={handleAddToCartFromModal}
+        cartProductIds={cartProductIds}
+        addingToCart={addingToCart}
       />
     </View>
   );

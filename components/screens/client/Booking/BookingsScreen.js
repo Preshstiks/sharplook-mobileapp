@@ -179,8 +179,8 @@ export default function BookingsScreen() {
             >
               <Image
                 source={
-                  booking?.image
-                    ? { uri: booking?.image }
+                  booking?.service.serviceImage
+                    ? { uri: booking?.service.serviceImage }
                     : require("../../../../assets/img/facials.png")
                 }
                 className="w-[100px] h-[100px] rounded-[8px] mr-2"
@@ -197,7 +197,7 @@ export default function BookingsScreen() {
                     style={{ fontFamily: "poppinsRegular" }}
                     className="text-[10px] text-fadedDark"
                   >
-                    {booking?.vendorName}
+                    {booking?.vendor.vendorOnboarding.businessName}
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}

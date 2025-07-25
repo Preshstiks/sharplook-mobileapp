@@ -1,4 +1,5 @@
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { BarIndicator } from "react-native-indicators";
 
 export default function AuthButton({
   onPress,
@@ -22,7 +23,7 @@ bg-primary border-primary ${isloading ? "cursor-not-allowed bg-[#d77eac]" : ""}`
             style={{ fontFamily: "poppinsMedium" }}
             className="text-center text-[13px] text-white"
           >
-            {loadingMsg}...
+            <BarIndicator color="#fff" size={20} />
           </Text>
         </View>
       ) : (

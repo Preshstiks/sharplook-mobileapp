@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -12,55 +12,43 @@ import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../../../../context/AuthContext";
 import { io } from "socket.io-client";
-
-const chats = [
-  {
-    id: "1",
-    name: "Heritage Spa and Beauty",
-    message: "Hi, can I order?",
-    time: "09:20 AM",
-    avatar: require("../../../../assets/img/logo/bglogo.svg"),
-  },
-  {
-    id: "2",
-    name: "Beauty by Ayo",
-    message: "I want to tell you that, ok?",
-    time: "08:30 PM",
-    avatar: require("../../../../assets/img/logo/bglogo.svg"),
-  },
-  {
-    id: "3",
-    name: "Priti Beauty Services",
-    message: "Ok, I will get back to you",
-    time: "08:30 PM",
-    avatar: require("../../../../assets/img/logo/bglogo.svg"),
-  },
-  {
-    id: "4",
-    name: "Priti Store",
-    message: "Let's chat on facebook",
-    time: "08:30 PM",
-    avatar: require("../../../../assets/img/logo/bglogo.svg"),
-  },
-  {
-    id: "5",
-    name: "Jameco Store",
-    message: "OH! my bad",
-    time: "08:30 PM",
-    avatar: require("../../../../assets/img/logo/bglogo.svg"),
-  },
-];
+import { HttpClient } from "../../../../api/HttpClient";
+import { EmptyData } from "../../../reusuableComponents/EmptyData";
 
 export default function ChatListScreen() {
   const navigation = useNavigation();
-  const { userId } = useAuth();
+  const { userId, isLoading: authLoading } = useAuth();
   const socketRef = useRef(null);
+  const [chats, setChats] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch chat list from backend
+  const fetchChats = async () => {
+    if (!userId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await HttpClient.get(`/messages/chats/${userId}`);
+      setChats(res.data.chats || []);
+      console.log(res.data);
+    } catch (err) {
+      setError("Failed to load chats");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (userId) {
+      fetchChats();
       socketRef.current = io("https://sharplook-backend.onrender.com", {
         query: { userId },
         transports: ["websocket"],
+      });
+      // Listen for new messages to update chat list
+      socketRef.current.on("newMessage", (msg) => {
+        fetchChats(); // Optionally, you can optimize this to update only the relevant chat
       });
     }
     return () => {
@@ -69,6 +57,32 @@ export default function ChatListScreen() {
       }
     };
   }, [userId]);
+
+  if (authLoading || loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#FFF8FB] items-center justify-center">
+        <Text style={{ fontFamily: "poppinsRegular" }}>Loading chats...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#FFF8FB] items-center justify-center">
+        <Text style={{ fontFamily: "poppinsRegular", color: "red" }}>
+          {error}
+        </Text>
+        <TouchableOpacity
+          onPress={fetchChats}
+          className="mt-4 bg-primary px-4 py-2 rounded"
+        >
+          <Text style={{ color: "#fff", fontFamily: "poppinsRegular" }}>
+            Retry
+          </Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8FB]">
@@ -93,7 +107,7 @@ export default function ChatListScreen() {
       </View>
       <FlatList
         data={chats}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id?.toString()}
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24 }}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -105,7 +119,11 @@ export default function ChatListScreen() {
             <View className="w-14 h-14 rounded-full bg-white items-center justify-center mr-4 overflow-hidden">
               {/* Replace with SVG if needed */}
               <Image
-                source={item.avatar}
+                source={
+                  item.avatar
+                    ? item.avatar
+                    : require("../../../../assets/img/logo/bglogo.svg")
+                }
                 style={{ width: 48, height: 48 }}
                 resizeMode="contain"
               />
@@ -121,7 +139,7 @@ export default function ChatListScreen() {
                 className="text-xs text-[#A9A9A9] mt-1"
                 style={{ fontFamily: "poppinsRegular" }}
               >
-                {item.message}
+                {item.lastMessage || item.message}
               </Text>
             </View>
             <View className="ml-2">
@@ -134,6 +152,7 @@ export default function ChatListScreen() {
             </View>
           </TouchableOpacity>
         )}
+        ListEmptyComponent={<EmptyData msg="No chats found" />}
       />
     </SafeAreaView>
   );

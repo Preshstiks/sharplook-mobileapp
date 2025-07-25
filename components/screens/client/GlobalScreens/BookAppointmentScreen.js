@@ -28,7 +28,7 @@ export default function BookAppointmentScreen() {
   const todayString = today.toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(todayString);
   const [loading, setLoading] = useState(false);
-  const [time, setTime] = useState("");
+  const [time] = useState("");
   const [paystackModalVisible, setPaystackModalVisible] = useState(false);
   const [paystackPaymentUrl, setPaystackPaymentUrl] = useState("");
   const [paymentReference, setPaymentReference] = useState("");

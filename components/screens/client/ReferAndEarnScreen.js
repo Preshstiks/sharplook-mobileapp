@@ -56,11 +56,7 @@ export default function ReferAndEarnScreen() {
   const [inputCode, setInputCode] = useState("");
   const [copied, setCopied] = useState(false);
   const { user } = useAuth();
-  const handleCopy = () => {
-    Clipboard.setString(referralCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
+
   //   const sharemsg = `I’ve been using this app lately, and it’s honestly made self-care so much easier. From finding trusted experts to grabbing my favorite beauty essentials—everything's just a tap away
   // And here’s the best part: you get ₦100 when you join using my referral code ${user?.referralCode}, and I get ₦100 for every person who joins using my referral code. Give it a try—you’ll thank me later 💖`;
   //   const shareToWhatsApp = async () => {
@@ -81,7 +77,12 @@ export default function ReferAndEarnScreen() {
   //       showToast.info("Cannot share message");
   //     }
   //   };
-
+  const referralCode = user?.referralCode;
+  const handleCopy = () => {
+    Clipboard.setString(referralCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
   return (
     <View className="flex-1 bg-white">
       <View style={styles.header}>

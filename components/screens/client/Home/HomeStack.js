@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import CartScreen from "../GlobalScreens/CartScreen";
 import VendorProfileScreen from "../GlobalScreens/VendorProfileScreen";
 import BookAppointmentScreen from "../GlobalScreens/BookAppointmentScreen";
+import ProductReviewsScreen from "../reviews/ProductReview";
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +20,10 @@ export default function HomeStack() {
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="Categories" component={CategoriesScreen} />
       <Stack.Screen name="CartScreen" component={CartScreen} />
+      <Stack.Screen
+        name="ProductReviewsScreen"
+        component={ProductReviewsScreen}
+      />
       <Stack.Screen name="ChatListScreen" component={ChatListScreen} />
       <Stack.Screen name="ChatDetailScreen" component={ChatDetailScreen} />
       <Stack.Screen

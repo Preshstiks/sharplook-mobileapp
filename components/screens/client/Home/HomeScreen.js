@@ -133,7 +133,6 @@ function SkeletonBox({ width, height, style }) {
 
 export default function HomeScreen() {
   const navigation = useNavigation();
-  const { setBarType } = useStatusBar();
   const [isSearchBarActive, setIsSearchBarActive] = useState(false);
   const [searchInput, setSearchInput] = useState(""); // <-- new state
   const [filteredVendors, setFilteredVendors] = useState([]); // <-- new state
@@ -151,9 +150,7 @@ export default function HomeScreen() {
   };
   const user = useAuth();
   const { cartItems, fetchCart } = useCart();
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
+
   useFocusEffect(
     useCallback(() => {
       fetchCart();
@@ -293,7 +290,7 @@ export default function HomeScreen() {
         </View>
         {/* Categories or Search Results */}
         {isSearchBarActive ? (
-          <ScrollView className="mt-8 px-4 space-y-4">
+          <ScrollView className="mt-8 px-4 space-y-4" style={{ zIndex: 20 }}>
             {/* If searchInput is empty, show nothing. If not, show filtered vendors. */}
             {searchInput.trim() === "" ? null : filteredVendors.length === 0 ? (
               <View className="items-center justify-center py-8">
@@ -309,11 +306,18 @@ export default function HomeScreen() {
               filteredVendors.map((vendor, idx) => (
                 <Pressable
                   key={vendor.id || idx}
-                  onPress={() =>
+                  onPress={() => {
                     navigation.navigate("VendorProfileScreen", {
                       vendorData: vendor,
-                    })
-                  }
+                    });
+                    // Close search bar and reset search
+                    setIsSearchBarActive(false);
+                    setSearchInput("");
+                    setFilteredVendors([]);
+                    if (searchInputRef.current) {
+                      searchInputRef.current.blur();
+                    }
+                  }}
                   className="bg-[#FCDFEE] mb-6 rounded-2xl overflow-hidden shadow-md"
                   style={{ elevation: 2 }}
                 >
@@ -647,7 +651,7 @@ export default function HomeScreen() {
             left: 0,
             right: 0,
             bottom: 0,
-            zIndex: 30,
+            zIndex: 5,
           }}
           onPress={() => {
             setIsSearchBarActive(false);

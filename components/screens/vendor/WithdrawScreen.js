@@ -1,47 +1,61 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import OutlineTextInput from "../../reusuableComponents/inputFields/OutlineTextInput";
 import Dropdown from "../../reusuableComponents/inputFields/Dropdown";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
+import { Formik } from "formik";
+import * as Yup from "yup";
+import HttpClient from "../../../api/HttpClient";
+
+const bankOptions = [
+  { label: "Access Bank", value: "Access Bank" },
+  { label: "Citibank", value: "Citibank" },
+  { label: "Ecobank", value: "Ecobank" },
+  { label: "Fidelity Bank", value: "Fidelity Bank" },
+  { label: "First Bank", value: "First Bank" },
+  {
+    label: "First City Monument Bank (FCMB)",
+    value: "First City Monument Bank (FCMB)",
+  },
+  { label: "Globus Bank", value: "Globus Bank" },
+  { label: "Guaranty Trust Bank (GTB)", value: "Guaranty Trust Bank (GTB)" },
+  { label: "Heritage Bank", value: "Heritage Bank" },
+  { label: "Keystone Bank", value: "Keystone Bank" },
+  { label: "Polaris Bank", value: "Polaris Bank" },
+  { label: "Providus Bank", value: "Providus Bank" },
+  { label: "Stanbic IBTC Bank", value: "Stanbic IBTC Bank" },
+  { label: "Standard Chartered Bank", value: "Standard Chartered Bank" },
+  { label: "Sterling Bank", value: "Sterling Bank" },
+  { label: "Suntrust Bank", value: "Suntrust Bank" },
+  { label: "Union Bank", value: "Union Bank" },
+  {
+    label: "United Bank for Africa (UBA)",
+    value: "United Bank for Africa (UBA)",
+  },
+  { label: "Unity Bank", value: "Unity Bank" },
+  { label: "Wema Bank", value: "Wema Bank" },
+  { label: "Zenith Bank", value: "Zenith Bank" },
+];
+
+const methodOptions = [{ label: "Bank Transfer", value: "bank_transfer" }];
+
+const validationSchema = Yup.object().shape({
+  amount: Yup.number()
+    .typeError("Amount must be a number")
+    .positive("Amount must be greater than zero")
+    .required("Amount is required"),
+  reason: Yup.string().required("Reason is required"),
+  method: Yup.string().required("Withdrawal method is required"),
+  accountName: Yup.string().required("Account name is required"),
+  accountNumber: Yup.string()
+    .matches(/^\d{10}$/, "Account number must be 10 digits")
+    .required("Account number is required"),
+  bankName: Yup.string().required("Bank name is required"),
+});
 
 export default function WithdrawScreen({ navigation }) {
-  const [accountNumber, setAccountNumber] = useState("");
-  const [amount, setAmount] = useState("");
-  const [bank, setBank] = useState("");
-
-  // Placeholder for bank dropdown and account name
-  const accountName = "Raji Balikis";
-
-  const bankOptions = [
-    { label: "Access Bank", value: "access" },
-    { label: "Citibank", value: "citibank" },
-    { label: "Ecobank", value: "ecobank" },
-    { label: "Fidelity Bank", value: "fidelity" },
-    { label: "First Bank", value: "firstbank" },
-    { label: "First City Monument Bank (FCMB)", value: "fcmb" },
-    { label: "Globus Bank", value: "globus" },
-    { label: "Guaranty Trust Bank (GTB)", value: "gtb" },
-    { label: "Heritage Bank", value: "heritage" },
-    { label: "Keystone Bank", value: "keystone" },
-    { label: "Polaris Bank", value: "polaris" },
-    { label: "Providus Bank", value: "providus" },
-    { label: "Stanbic IBTC Bank", value: "stanbic" },
-    { label: "Standard Chartered Bank", value: "standardchartered" },
-    { label: "Sterling Bank", value: "sterling" },
-    { label: "Suntrust Bank", value: "suntrust" },
-    { label: "Union Bank", value: "union" },
-    { label: "United Bank for Africa (UBA)", value: "uba" },
-    { label: "Unity Bank", value: "unity" },
-    { label: "Wema Bank", value: "wema" },
-    { label: "Zenith Bank", value: "zenith" },
-  ];
+  const [loading, setLoading] = useState(false);
 
   return (
     <View className="flex-1 pb-10 bg-white">
@@ -59,38 +73,141 @@ export default function WithdrawScreen({ navigation }) {
         <View style={{ width: 28 }} />
       </View>
 
-      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
-        <Text
-          className="text-[14px] mt-6 mb-4"
-          style={{ fontFamily: "latoBold" }}
-        >
-          Please fill the details below
-        </Text>
+      <Formik
+        initialValues={{
+          amount: "",
+          reason: "",
+          method: "bank_transfer",
+          accountName: "",
+          accountNumber: "",
+          bankName: "",
+        }}
+        validationSchema={validationSchema}
+        onSubmit={async (values, { setSubmitting, setErrors, resetForm }) => {
+          setLoading(true);
+          try {
+            const payload = {
+              amount: Number(values.amount),
+              reason: values.reason,
+              method: values.method,
+              metadata: {
+                accountName: values.accountName,
+                accountNumber: values.accountNumber,
+                bankName: values.bankName,
+              },
+            };
+            await HttpClient.post("/withdrawals/requestWithdrawals", payload);
+            resetForm();
+            navigation.goBack();
+          } catch (error) {
+            setErrors({
+              submit:
+                error?.response?.data?.message ||
+                "Withdrawal failed. Please try again.",
+            });
+          } finally {
+            setLoading(false);
+            setSubmitting(false);
+          }
+        }}
+      >
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          values,
+          errors,
+          touched,
+          setFieldValue,
+          isSubmitting,
+        }) => (
+          <>
+            <ScrollView
+              className="flex-1 px-4"
+              showsVerticalScrollIndicator={false}
+            >
+              <Text
+                className="text-[14px] mt-6 mb-4"
+                style={{ fontFamily: "latoBold" }}
+              >
+                Please fill the details below
+              </Text>
 
-        {/* Account Number */}
-        <OutlineTextInput label="Enter Account Number" value={accountNumber} />
-        <Dropdown
-          label="Select Bank"
-          value={bank}
-          options={bankOptions}
-          onValueChange={setBank}
-          placeholder="Select Bank"
-        />
-        <Text
-          className="text-[12px] text-primary -mt-3 mb-4"
-          style={{ fontFamily: "poppinsRegular" }}
-        >
-          {accountName}
-        </Text>
-        <View className="-mt-1">
-          <OutlineTextInput label="Enter Amount" value={amount} />
-        </View>
-      </ScrollView>
-
-      {/* Withdraw Button */}
-      <View className="px-4 pb-6 bg-white">
-        <AuthButton title="Withdraw" onPress={() => navigation.goBack()} />
-      </View>
+              {/* Amount */}
+              <OutlineTextInput
+                label="Enter Amount"
+                value={values.amount}
+                onChangeText={handleChange("amount")}
+                onBlur={handleBlur("amount")}
+                keyboardType="numeric"
+                error={errors.amount}
+                touched={touched.amount}
+              />
+              {/* Reason */}
+              <OutlineTextInput
+                label="Reason for Withdrawal"
+                value={values.reason}
+                onChangeText={handleChange("reason")}
+                onBlur={handleBlur("reason")}
+                error={errors.reason}
+                touched={touched.reason}
+              />
+              {/* Method */}
+              <Dropdown
+                label="Withdrawal Method"
+                value={values.method}
+                options={methodOptions}
+                onValueChange={(val) => setFieldValue("method", val)}
+                placeholder="Select Method"
+                error={errors.method}
+                touched={touched.method}
+              />
+              {/* Account Name */}
+              <OutlineTextInput
+                label="Account Name"
+                value={values.accountName}
+                onChangeText={handleChange("accountName")}
+                onBlur={handleBlur("accountName")}
+                error={errors.accountName}
+                touched={touched.accountName}
+              />
+              {/* Account Number */}
+              <OutlineTextInput
+                label="Account Number"
+                value={values.accountNumber}
+                onChangeText={handleChange("accountNumber")}
+                onBlur={handleBlur("accountNumber")}
+                keyboardType="numeric"
+                error={errors.accountNumber}
+                touched={touched.accountNumber}
+              />
+              {/* Bank Name */}
+              <Dropdown
+                label="Select Bank"
+                value={values.bankName}
+                options={bankOptions}
+                onValueChange={(val) => setFieldValue("bankName", val)}
+                placeholder="Select Bank"
+                error={errors.bankName}
+                touched={touched.bankName}
+              />
+              {errors.submit && (
+                <Text className="text-red-500 mt-2 mb-2 text-center">
+                  {errors.submit}
+                </Text>
+              )}
+              <View style={{ height: 24 }} />
+            </ScrollView>
+            <View className="px-4 pb-6 bg-white">
+              <AuthButton
+                title={loading ? "Processing..." : "Withdraw"}
+                onPress={handleSubmit}
+                disabled={loading || isSubmitting}
+              />
+            </View>
+          </>
+        )}
+      </Formik>
     </View>
   );
 }

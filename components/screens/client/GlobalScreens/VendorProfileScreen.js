@@ -179,7 +179,16 @@ export default function VendorProfileScreen({ navigation, route }) {
           Vendor's Profile
         </Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate("ChatDetailScreenHardcoded")}
+          onPress={() =>
+            navigation.navigate("ChatDetailScreen", {
+              chat: {
+                id: vendorData?.id,
+                name: vendorData?.vendorOnboarding?.businessName,
+                avatar: vendorData?.vendorOnboarding?.profilePicture,
+                vendorId: vendorData?.id,
+              },
+            })
+          }
         >
           <WhiteChatIcon width={30} height={30} />
         </TouchableOpacity>
@@ -442,6 +451,8 @@ export default function VendorProfileScreen({ navigation, route }) {
         product={selectedProduct}
         vendorData={vendorData} // Pass the entire vendor object
         onAddToCart={handleAddToCartFromModal}
+        cartProductIds={cartProductIds}
+        addingToCart={addingToCart}
       />
       <VendorProfileServiceDetails
         visible={modalVisible}

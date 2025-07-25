@@ -84,6 +84,7 @@ export default function RegisterScreen({ navigation }) {
               firstName: "",
               lastName: "",
               email: "",
+              phone: "",
               password: "",
               role: "CLIENT",
               acceptedPersonalData: false,
@@ -132,6 +133,15 @@ export default function RegisterScreen({ navigation }) {
                   error={errors.email}
                   touched={touched.email}
                   keyboardType="email-address"
+                />
+                <AuthInput
+                  label="Phone"
+                  value={values.phone}
+                  onChangeText={handleChange("phone")}
+                  onBlur={handleBlur("phone")}
+                  error={errors.phone}
+                  touched={touched.phone}
+                  keyboardType="phone-pad"
                 />
 
                 <AuthInput
@@ -189,21 +199,6 @@ export default function RegisterScreen({ navigation }) {
                 />
                 {/* Social Login Section */}
                 <View className="mt-8 w-full items-center">
-                  <View className="flex-row items-center w-full mb-6">
-                    <View className="flex-1 h-px bg-[#0000001A]" />
-                    <Text
-                      className="mx-2 text-base text-faintDark"
-                      style={{ fontFamily: "poppinsRegular" }}
-                    >
-                      Sign Up with
-                    </Text>
-                    <View className="flex-1 h-px bg-[#0000001A]" />
-                  </View>
-                  <View className="flex-row justify-center items-center gap-[36px] mb-8">
-                    <FBicon width={24} height={24} />
-                    <Twittericon width={24} height={24} />
-                    <Appleicon width={30} height={30} />
-                  </View>
                   <View className="flex-row justify-center gap-1 items-center mt-2">
                     <Text
                       className="text-sm text-[#6B6B6B]"
@@ -217,6 +212,18 @@ export default function RegisterScreen({ navigation }) {
                         style={{ fontFamily: "latoRegular" }}
                       >
                         Login
+                      </Text>
+                    </Pressable>
+                  </View>
+                  <View className="flex-row justify-center gap-1 items-center mt-5">
+                    <Pressable
+                      onPress={() => navigation.navigate("VendorRegister")}
+                    >
+                      <Text
+                        className="text-sm text-primary"
+                        style={{ fontFamily: "latoRegular" }}
+                      >
+                        Switch to Vendor Signup
                       </Text>
                     </Pressable>
                   </View>

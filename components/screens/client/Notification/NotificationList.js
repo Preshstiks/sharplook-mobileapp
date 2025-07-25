@@ -10,19 +10,42 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { HttpClient } from "../../../../api/HttpClient";
 import EmptySVG from "../../../../assets/img/empty.svg";
+import { getRelativeTime } from "../../../reusuableComponents/RelativeTime";
 
 export default function NotificationList() {
   const navigation = useNavigation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+
   useFocusEffect(
     useCallback(() => {
       const fetchNotifications = async () => {
         setLoading(true);
         try {
           const res = await HttpClient.get("/notifications/getNotifications");
-          setNotifications(res.data?.data || []);
+          const data = res?.data?.data || [];
+
+          // Ensure data is an array and has the correct structure for SectionList
+          if (Array.isArray(data)) {
+            // If the API returns sections with title and data properties, use as is
+            if (data.length > 0 && data[0].title && data[0].data) {
+              setNotifications(data);
+            } else {
+              // If API returns flat array, convert to section format
+              setNotifications([
+                {
+                  title: "Recent",
+                  data: data,
+                },
+              ]);
+            }
+          } else {
+            setNotifications([]);
+          }
+
+          console.log("Processed notifications:", data);
         } catch (error) {
+          console.error("Error fetching notifications:", error);
           setNotifications([]);
         } finally {
           setLoading(false);
@@ -95,7 +118,13 @@ export default function NotificationList() {
     );
   }
 
-  if (!loading && (!notifications || notifications.length === 0)) {
+  // Check if notifications array is empty or has no data
+  const hasNotifications =
+    notifications &&
+    notifications.length > 0 &&
+    notifications.some((section) => section.data && section.data.length > 0);
+
+  if (!loading && !hasNotifications) {
     return (
       <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
         <View
@@ -156,9 +185,7 @@ export default function NotificationList() {
       </View>
       <SectionList
         sections={notifications}
-        keyExtractor={(item) =>
-          item.id?.toString?.() || Math.random().toString()
-        }
+        keyExtractor={(item, index) => item.id || `notification-${index}`}
         renderSectionHeader={({ section: { title } }) => (
           <Text
             style={{
@@ -177,6 +204,7 @@ export default function NotificationList() {
             onPress={() =>
               navigation.navigate("NotificationDetailScreen", {
                 notification: item,
+                id: item.id,
               })
             }
           >
@@ -196,14 +224,14 @@ export default function NotificationList() {
                 className="text-[14px] opacity-60"
                 style={{ fontFamily: "latoRegular" }}
               >
-                {item.title}
+                {item.message}
               </Text>
             </View>
             <Text
               className="text-[10px] opacity-60 mt-1"
               style={{ fontFamily: "latoRegular" }}
             >
-              {item.time}
+              {getRelativeTime(item.createdAt)}
             </Text>
           </TouchableOpacity>
         )}

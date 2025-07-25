@@ -29,9 +29,11 @@ const UserProfileScreen = ({ navigation }) => {
         </TouchableOpacity>
         {/* Avatar */}
         <Image
-          source={{
-            uri: "https://images.unsplash.com/photo-1614023342667-6f060e9d1e04?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-          }}
+          source={
+            user?.picture
+              ? { uri: user?.picture }
+              : require("../../../../assets/icon/avatar.png")
+          }
           className="w-24 h-24 rounded-full mb-4"
         />
         <Text

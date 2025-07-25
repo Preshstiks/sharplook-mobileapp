@@ -36,6 +36,7 @@ export default function VendorRegisterScreen({ navigation }) {
       formData.append("firstName", values.firstName);
       formData.append("lastName", values.lastName);
       formData.append("email", values.email);
+      formData.append("phone", values.phone);
       formData.append("password", values.password);
       formData.append("serviceType", values.serviceType);
       formData.append("referredByCode", values.referredByCode || "");
@@ -108,6 +109,7 @@ export default function VendorRegisterScreen({ navigation }) {
               firstName: "",
               lastName: "",
               email: "",
+              phone: "",
               password: "",
               serviceType: "",
               referredByCode: "",
@@ -160,6 +162,15 @@ export default function VendorRegisterScreen({ navigation }) {
                   keyboardType="email-address"
                 />
 
+                <AuthInput
+                  label="Phone"
+                  value={values.phone}
+                  onChangeText={handleChange("phone")}
+                  onBlur={handleBlur("phone")}
+                  error={errors.phone}
+                  touched={touched.phone}
+                  keyboardType="phone-pad"
+                />
                 <AuthInput
                   label="Password"
                   value={values.password}
@@ -303,12 +314,24 @@ export default function VendorRegisterScreen({ navigation }) {
                     >
                       Already have an account?
                     </Text>
-                    <Pressable onPress={() => navigation.navigate("Login")}>
+                    <Pressable
+                      onPress={() => navigation.navigate("VendorLogin")}
+                    >
                       <Text
                         className="text-sm text-primary"
                         style={{ fontFamily: "latoRegular" }}
                       >
                         Login
+                      </Text>
+                    </Pressable>
+                  </View>
+                  <View className="flex-row justify-center gap-1 items-center mt-5">
+                    <Pressable onPress={() => navigation.navigate("Register")}>
+                      <Text
+                        className="text-sm text-primary"
+                        style={{ fontFamily: "latoRegular" }}
+                      >
+                        Switch to Client Signup
                       </Text>
                     </Pressable>
                   </View>

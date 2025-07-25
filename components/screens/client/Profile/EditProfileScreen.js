@@ -13,22 +13,28 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import OutlineTextInput from "../../../reusuableComponents/inputFields/OutlineTextInput";
 import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 import { useAuth } from "../../../../context/AuthContext";
+import { Formik } from "formik";
+import { showToast } from "../../../ToastComponent/Toast";
+import { HttpClient } from "../../../../api/HttpClient";
 
 const EditProfileScreen = ({ navigation }) => {
   const { user } = useAuth();
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [phone, setPhone] = useState(user?.phone || "");
-  const [location, setLocation] = useState(user?.location || "");
-
-  React.useEffect(() => {
-    setFirstName(user?.firstName || "");
-    setLastName(user?.lastName || "");
-    setEmail(user?.email || "");
-    setPhone(user?.phone || "");
-    setLocation(user?.location || "");
-  }, [user]);
+  const [isLoading, setIsLoading] = useState(false);
+  const handleUpdateProfile = async (values) => {
+    setIsLoading(true);
+    try {
+      const response = await HttpClient.put("/users/updateProfile", values);
+      showToast(response.data.message);
+      navigation.goBack();
+    } catch (error) {
+      console.log(error.response);
+      const message =
+        error.response.data.message || error.message || error.data.message;
+      showToast(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -44,9 +50,11 @@ const EditProfileScreen = ({ navigation }) => {
         <View className="items-center mt-2 mb-4">
           <View>
             <Image
-              source={{
-                uri: "https://images.unsplash.com/photo-1614023342667-6f060e9d1e04?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-              }}
+              source={
+                user?.picture
+                  ? { uri: user?.picture }
+                  : require("../../../../assets/icon/avatar.png")
+              }
               className="w-24 h-24 rounded-full"
             />
             <TouchableOpacity className="absolute bottom-2 right-2 bg-white p-1 rounded-full border border-gray-200">
@@ -54,25 +62,81 @@ const EditProfileScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
-        {/* Form */}
-        <View className="px-4">
-          <OutlineTextInput label="First Name" value={firstName} />
-          <OutlineTextInput label="Last Name" value={lastName} />
-          <OutlineTextInput label="Email Address" value={email} />
-          <OutlineTextInput label="Phone Number" value={phone} />
-          <View className="">
-            <View className="absolute right-0 top-0">
-              <TouchableOpacity onPress={() => console.log("Not implemented")}>
-                <Text className="text-xs text-primary">Change My Location</Text>
-              </TouchableOpacity>
-            </View>
-            <OutlineTextInput label="Location" value={location} />
-          </View>
-        </View>
-        {/* Update Button */}
-        <View className="px-4 mt-8">
-          <AuthButton title="Update Profile" />
-        </View>
+        {/* Formik Form */}
+        <Formik
+          initialValues={{
+            firstName: user?.firstName || "",
+            lastName: user?.lastName || "",
+            email: user?.email || "",
+            phone: user?.phone || "",
+            location: user?.location || "",
+          }}
+          enableReinitialize
+          onSubmit={handleUpdateProfile}
+        >
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+          }) => (
+            <>
+              <View className="px-4">
+                <OutlineTextInput
+                  label="First Name"
+                  value={values.firstName}
+                  onChangeText={handleChange("firstName")}
+                  onBlur={handleBlur("firstName")}
+                  error={errors.firstName}
+                  touched={touched.firstName}
+                />
+                <OutlineTextInput
+                  label="Last Name"
+                  value={values.lastName}
+                  onChangeText={handleChange("lastName")}
+                  onBlur={handleBlur("lastName")}
+                  error={errors.lastName}
+                  touched={touched.lastName}
+                />
+                <OutlineTextInput
+                  label="Email Address"
+                  value={values.email}
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  error={errors.email}
+                  touched={touched.email}
+                />
+                <OutlineTextInput
+                  label="Phone Number"
+                  value={values.phone}
+                  onChangeText={handleChange("phone")}
+                  onBlur={handleBlur("phone")}
+                  error={errors.phone}
+                  touched={touched.phone}
+                />
+                <OutlineTextInput
+                  label="Location"
+                  value={values.location}
+                  onChangeText={handleChange("location")}
+                  onBlur={handleBlur("location")}
+                  error={errors.location}
+                  touched={touched.location}
+                />
+              </View>
+              {/* Update Button */}
+              <View className="px-4 mt-8">
+                <AuthButton
+                  isloading={isLoading}
+                  disabled={isLoading}
+                  title="Update Profile"
+                  onPress={handleSubmit}
+                />
+              </View>
+            </>
+          )}
+        </Formik>
       </ScrollView>
     </SafeAreaView>
   );

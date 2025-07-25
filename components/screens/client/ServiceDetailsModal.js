@@ -119,7 +119,7 @@ export default function ServiceDetailsModal({
               Vendor details
             </Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("ReviewsScreen")}
+              onPress={() => navigation.navigate("ServiceReviewsScreen")}
               className="border border-primary self-start rounded-lg py-2 px-4 flex-row items-center"
             >
               <Text

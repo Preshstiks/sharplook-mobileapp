@@ -114,20 +114,22 @@ export default function ProductReviewsScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const vendor = route.params?.vendor;
+  const product = route.params?.product;
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const vendorId = vendor?.[0].userId;
+  const vendorId = vendor?.id;
+  const productId = product?.id;
+  console.log(vendor);
   useFocusEffect(
     useCallback(() => {
       const fetchReviews = async () => {
         setLoading(true);
         setError(null);
         try {
-          const res = await HttpClient.post(`/reviews/getAllReviews`, {
-            type: "PRODUCT",
-            vendorId,
-          });
+          const res = await HttpClient.get(
+            `/reviews/${vendorId}/product/${productId}/reviews`
+          );
           setReviews(res.data?.data || []);
           console.log(res.data);
         } catch (err) {
@@ -207,7 +209,12 @@ export default function ProductReviewsScreen() {
           </View>
           <TouchableOpacity
             className="bg-primary flex-row items-center px-4 py-[10px] rounded-lg"
-            onPress={() => navigation.navigate("AddReviewScreen", { vendorId })}
+            onPress={() =>
+              navigation.navigate("AddProductReviewScreen", {
+                vendorId,
+                productId,
+              })
+            }
           >
             <Ionicons
               name="create-outline"

@@ -10,7 +10,6 @@ import {
   Platform,
 } from "react-native";
 import { Formik } from "formik";
-import * as yup from "yup";
 import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
 import { AuthInput } from "../../../reusuableComponents/inputFields/AuthInput";
 import * as ImagePicker from "expo-image-picker";

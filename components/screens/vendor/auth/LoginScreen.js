@@ -192,6 +192,16 @@ export default function VendorLoginScreen({ navigation }) {
                     </Text>
                   </Pressable>
                 </View>
+                <View className="flex-row justify-center gap-1 items-center mt-5">
+                  <Pressable onPress={() => navigation.navigate("Login")}>
+                    <Text
+                      className="text-sm text-primary"
+                      style={{ fontFamily: "latoRegular" }}
+                    >
+                      Switch to Client Login
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
           );

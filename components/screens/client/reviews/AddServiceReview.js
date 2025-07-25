@@ -25,7 +25,7 @@ export default function AddServiceReviewScreen() {
   const handleAddReview = async (values) => {
     setLoading(true);
     const payload = {
-      type: "BOOKING",
+      type: "SERVICE",
       clientId,
       vendorId,
       serviceId,

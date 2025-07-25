@@ -18,6 +18,8 @@ export default function VendorProfileServiceDetails({
   console.log({ service });
   const navigation = useNavigation();
 
+  const vendorServiceType = vendorData?.vendorOnboarding?.serviceType;
+
   // Use vendor data for business name and location
   const businessName =
     vendorData?.vendorOnboarding?.businessName || "Vendor Name";
@@ -130,9 +132,12 @@ export default function VendorProfileServiceDetails({
             </Text>
             <TouchableOpacity
               onPress={() => {
-                const firstServiceId = vendorData?.vendorServices;
+                const vendorId = service?.userId;
+                const serviceId = service?.id;
                 navigation.navigate("ServiceReviewScreen", {
-                  vendor: firstServiceId,
+                  vendor: service,
+                  vendorId,
+                  serviceId,
                 });
               }}
               className="border border-primary self-start rounded-lg py-2 px-4 flex-row items-center"
@@ -253,7 +258,23 @@ export default function VendorProfileServiceDetails({
           borderTopColor: "#F0F0F0",
         }}
       >
-        <AuthButton onPress={() => onBookNow(service)} title="Book Now" />
+        <AuthButton
+          onPress={() => {
+            if (vendorServiceType === "HOME_SERVICE") {
+              navigation.navigate("BookingHomeServiceAppointScreen", {
+                service,
+                vendorData,
+                id: vendorData?.id,
+              });
+            } else {
+              navigation.navigate("BookAppointmentScreen", {
+                service,
+                vendorData,
+              });
+            }
+          }}
+          title="Book Now"
+        />
       </View>
     </PageModal>
   );

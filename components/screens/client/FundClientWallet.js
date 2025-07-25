@@ -28,18 +28,21 @@ export default function FundClientWalletScreen({ navigation }) {
     setApiError("");
     setSuccessMsg("");
     try {
-      const res = await HttpClient.post("/payment/paystack/initiate", {
+      const res = await HttpClient.post("/wallet/fund", {
         email: user.email,
         amount: values.amount,
       });
-      if (res.data && res.data.authorization_url) {
-        setPendingReference(res.data.reference);
-        navigation.navigate("PaystackWebViewScreen", {
-          paymentUrl: res.data.authorization_url,
-        });
-      } else {
-        setApiError("Failed to initialize payment. Please try again.");
-      }
+      console.log(res.data);
+      setPendingReference(res.data.data.reference);
+
+      // if (res.data && res.data.authorization_url) {
+      //   setPendingReference(res.data.reference);
+      //   navigation.navigate("PaystackWebViewScreen", {
+      //     paymentUrl: res.data.authorization_url,
+      //   });
+      // } else {
+      //   setApiError("Failed to initialize payment. Please try again.");
+      // }
     } catch (error) {
       console.log(error.response);
       setApiError(

@@ -10,45 +10,69 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRoute, useNavigation } from "@react-navigation/native";
-
-const messages = [
-  { id: 1, text: "Hello!", time: "03:14 PM", seen: true, sent: true },
-  { id: 2, text: "Hi", time: "03:15 PM", seen: true, sent: false },
-  {
-    id: 3,
-    text: "I just booked a session",
-    time: "03:17 PM",
-    seen: true,
-    sent: true,
-  },
-  {
-    id: 4,
-    text: "Just want to message to know because it is urgent?",
-    time: "03:17 PM",
-    seen: true,
-    sent: true,
-  },
-  {
-    id: 5,
-    text: "Okay, kindly come to the spa at your scheduled time",
-    time: "03:20 PM",
-    seen: true,
-    sent: false,
-  },
-  {
-    id: 6,
-    text: "Okay, my information is below\nName: Raji Balikis\nAddress: 25, Dosunmu str. Mafoluku, Osodi\nTel: 09071682117",
-    time: "03:20 PM",
-    seen: true,
-    sent: true,
-  },
-];
+import { useAuth } from "../../../../context/AuthContext";
+import { io } from "socket.io-client";
 
 export default function ChatDetailScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const { chat } = route.params;
+  const { user } = useAuth();
   const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
+  const socketRef = React.useRef(null);
+  const userId = user?.id;
+  // Generate roomId from userId and chatPartnerId
+  const chatPartnerId = chat.id;
+  const generateRoomId = (userA, userB) => [userA, userB].sort().join("_");
+  const roomId = generateRoomId(userId, chatPartnerId);
+
+  React.useEffect(() => {
+    if (!userId || !chatPartnerId) return;
+    socketRef.current = io("https://sharplook-backend.onrender.com", {
+      query: { userId },
+      transports: ["websocket"],
+    });
+    // Join the room
+    socketRef.current.emit("join-room", roomId);
+    // Listen for new messages
+    socketRef.current.on("newMessage", (message) => {
+      setMessages((prev) => [...prev, message]);
+    });
+    // Optionally: fetch initial messages via REST or socket event
+    fetch(`https://sharplook-backend.onrender.com/api/v1/messages/${roomId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setMessages(data.data);
+      });
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [userId, chatPartnerId, roomId]);
+
+  const sendMessage = () => {
+    if (!input.trim()) return;
+    const messageData = {
+      senderId: userId,
+      receiverId: chatPartnerId,
+      roomId,
+      message: input.trim(),
+    };
+    socketRef.current.emit("sendMessage", messageData);
+    setMessages((prev) => [
+      ...prev,
+      {
+        ...messageData,
+        id: Date.now(),
+        createdAt: new Date().toISOString(),
+        seen: false,
+        sent: true,
+      },
+    ]);
+    setInput("");
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8FB]">
@@ -80,33 +104,39 @@ export default function ChatDetailScreen() {
         </View>
       </View>
       <ScrollView className="flex-1 px-4 py-4">
-        {messages.map((msg) => (
-          <View
-            key={msg.id}
-            className={msg.sent ? "items-end mb-2" : "items-start mb-2"}
-          >
+        {messages.map((msg) => {
+          const isOwn = msg.senderId === userId;
+          return (
             <View
-              className={
-                msg.sent
-                  ? "bg-primary rounded-xl px-4 py-2 max-w-[80%]"
-                  : "bg-white border border-[#E5E5E5] rounded-xl px-4 py-2 max-w-[80%]"
-              }
+              key={msg.id}
+              className={isOwn ? "items-end mb-2" : "items-start mb-2"}
             >
+              <View
+                className={
+                  isOwn
+                    ? "bg-primary rounded-xl px-4 py-2 max-w-[80%]"
+                    : "bg-white border border-[#E5E5E5] rounded-xl px-4 py-2 max-w-[80%]"
+                }
+              >
+                <Text
+                  className={isOwn ? "text-white" : "text-faintDark"}
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  {msg.message}
+                </Text>
+              </View>
               <Text
-                className={msg.sent ? "text-white" : "text-faintDark"}
+                className="text-xs text-[#A9A9A9] mt-1"
                 style={{ fontFamily: "poppinsRegular" }}
               >
-                {msg.text}
+                {msg.seen ? "Seen " : "Sent "}
+                {msg.createdAt
+                  ? new Date(msg.createdAt).toLocaleTimeString()
+                  : msg.time || ""}
               </Text>
             </View>
-            <Text
-              className="text-xs text-[#A9A9A9] mt-1"
-              style={{ fontFamily: "poppinsRegular" }}
-            >
-              Seen {msg.time}
-            </Text>
-          </View>
-        ))}
+          );
+        })}
       </ScrollView>
       <View className="flex-row items-center px-4 py-3 bg-white border-t border-[#E5E5E5]">
         <TextInput
@@ -116,7 +146,10 @@ export default function ChatDetailScreen() {
           onChangeText={setInput}
           style={{ fontFamily: "poppinsRegular" }}
         />
-        <TouchableOpacity className="ml-2 bg-primary rounded-full p-2">
+        <TouchableOpacity
+          className="ml-2 bg-primary rounded-full p-2"
+          onPress={sendMessage}
+        >
           <Ionicons name="send" size={24} color="#fff" />
         </TouchableOpacity>
       </View>

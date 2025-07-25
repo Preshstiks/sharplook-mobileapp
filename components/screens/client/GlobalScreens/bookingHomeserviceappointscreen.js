@@ -7,6 +7,8 @@ import {
   TextInput,
   Image,
   ActivityIndicator,
+  Modal,
+  StyleSheet,
 } from "react-native";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -16,14 +18,14 @@ import { formatAmount } from "../../../formatAmount";
 import { OutlineTextAreaInput } from "../../../reusuableComponents/inputFields/OutlineTextInput";
 import Dropdown from "../../../reusuableComponents/inputFields/Dropdown";
 import { WebView } from "react-native-webview";
-import {
-  calculateDistance,
-  formatDistance,
-  getCurrentLocation,
-} from "../../../../utils/locationUtils";
+import { getCurrentLocation } from "../../../../utils/locationUtils";
 import { HttpClient } from "../../../../api/HttpClient";
 import { showToast } from "../../../ToastComponent/Toast";
-
+import { calculatePrice } from "../../../reusuableComponents/PriceKmCalculator";
+import { Formik } from "formik";
+import * as Yup from "yup";
+import { useAuth } from "../../../../context/AuthContext";
+import * as ImagePicker from "expo-image-picker";
 export default function BookingHomeServiceAppointScreen() {
   const navigation = useNavigation();
   const route = useRoute();
@@ -36,13 +38,19 @@ export default function BookingHomeServiceAppointScreen() {
   const [landmark, setLandmark] = useState("");
   const [specialInstruction, setSpecialInstruction] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
-  const [referencePhoto, setReferencePhoto] = useState(null);
+  const [referencePhoto, setReferencePhoto] = useState("");
   const [currentLocation, setCurrentLocation] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [distanceApart, setDistanceApart] = useState(null);
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [paystackModalVisible, setPaystackModalVisible] = useState(false);
+  const [paystackPaymentUrl, setPaystackPaymentUrl] = useState("");
+  const [paymentReference, setPaymentReference] = useState("");
+  const [pendingBookingValues] = useState({});
   const service = route.params?.service;
-
+  console.log({ user });
   const locationOption = [
     {
       label: "No",
@@ -53,7 +61,17 @@ export default function BookingHomeServiceAppointScreen() {
       value: "Yes",
     },
   ];
-
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setReferencePhoto(result.assets[0].uri);
+    }
+  };
   const fetchCurrentLocation = async () => {
     if (!currentLocation || !selectedLocation) return;
 
@@ -66,8 +84,9 @@ export default function BookingHomeServiceAppointScreen() {
         vendorLng: selectedLocation.longitude,
       };
       console.log(payload);
-      const response = await HttpClient.put("/distance/calcDistance", payload);
+      const response = await HttpClient.post("/distance/calcDistance", payload);
       console.log("API response:", response.data);
+      setDistanceApart(response.data.distanceKm);
     } catch (error) {
       console.error("API error:", error);
       if (error.response && error.response.data) {
@@ -113,6 +132,7 @@ export default function BookingHomeServiceAppointScreen() {
       setSelectedLocation(location);
 
       webviewRef.current.postMessage(JSON.stringify(location));
+      fetchCurrentLocation();
       console.log("handleUseCurrentLocation - sent to WebView:", location);
     } catch (error) {
       console.error("handleUseCurrentLocation error:", error);
@@ -130,6 +150,192 @@ export default function BookingHomeServiceAppointScreen() {
   console.log(selectedOption);
   console.log({ service });
 
+  const handleBookNow = async (values) => {
+    console.log("[DEBUG] handleBookNow called with values:", values);
+    console.log("service in handleBookNow:", service);
+    try {
+      const formData = new FormData();
+      formData.append("clientId", user.id);
+      formData.append("vendorId", service.userId);
+      formData.append("serviceId", service.id);
+      formData.append("serviceName", service.serviceName);
+      formData.append("paymentMethod", values.paymentMethod);
+      formData.append("price", service.servicePrice);
+      formData.append(
+        "totalAmount",
+        service.servicePrice + calculatePrice(distanceApart)
+      );
+      formData.append("date", selectedDate);
+      formData.append("time", values.time);
+      formData.append("reference", values.reference);
+      formData.append("serviceType", "HOME_SERVICE");
+      // Home service fields as nested object (exclude serviceLocation)
+      const homeDetails = {
+        fullAddress: values.fullAddress,
+        landmark: values.landmark,
+        referencePhoto: referencePhoto, // This will be the local URI
+        specialInstruction: values.specialInstruction,
+      };
+      formData.append("homeDetails", JSON.stringify(homeDetails));
+      // If you need to upload the image separately, do so before this step and use the URL
+      // Send request
+      // Log all FormData entries in detail
+      const formDataEntries = [];
+      for (let pair of formData.entries()) {
+        formDataEntries.push({ key: pair[0], value: pair[1] });
+        console.log(`[FormData] ${pair[0]}:`, pair[1]);
+      }
+      console.log("[DEBUG] Full FormData entries:", formDataEntries);
+      console.log("[DEBUG] FormData object:", formData);
+      const res = await HttpClient.post("/bookings/bookVendor", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("[DEBUG] handleBookNow response:", res.data);
+      showToast.success(res.data.message);
+      navigation.goBack();
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message === "Insufficient wallet balance"
+      ) {
+        showToast.error(error.response.data.message);
+      } else {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          (error.response && error.response.message) ||
+          "An unknown error occurred";
+        showToast.error(message);
+      }
+      console.log("[DEBUG] handleBookNow error:", error?.response || error);
+    }
+  };
+  console.log({ service });
+  const checkout = async (values) => {
+    console.log("[DEBUG] checkout called with values:", values);
+    try {
+      const res = await HttpClient.post("/payment/paystack/initiate", {
+        paymentFor: "BOOKING",
+        description: "Booking for Home Service",
+        amount: service.servicePrice + calculatePrice(distanceApart),
+      });
+      setPaystackPaymentUrl(res.data.paymentUrl);
+      setPaymentReference(res.data.reference);
+      setPaystackModalVisible(true);
+    } catch (error) {
+      console.log("[DEBUG] checkout error:", error?.response || error);
+    }
+  };
+  const paymentMethods = [
+    { label: "Paystack", value: "PAYSTACK" },
+    { label: "SharpPay", value: "SHARP-PAY" },
+  ];
+  const timeOptions = [
+    { label: "06:00AM", value: "06:00AM" },
+    { label: "07:00AM", value: "07:00AM" },
+    { label: "08:00AM", value: "08:00AM" },
+    { label: "09:00AM", value: "09:00AM" },
+    { label: "10:00AM", value: "10:00AM" },
+    { label: "11:00AM", value: "11:00AM" },
+    { label: "12:00PM", value: "12:00PM" },
+    { label: "01:00PM", value: "01:00PM" },
+    { label: "02:00PM", value: "02:00PM" },
+    { label: "03:00PM", value: "03:00PM" },
+    { label: "04:00PM", value: "04:00PM" },
+    { label: "05:00PM", value: "05:00PM" },
+    { label: "06:00PM", value: "06:00PM" },
+  ];
+  // Handler for verifying payment and booking
+  const handlePaystackVerificationAndBooking = async (
+    reference,
+    bookingValues
+  ) => {
+    if (!reference) {
+      showToast.error("Payment", "No payment reference found.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const verifyRes = await HttpClient.get(
+        `/payment/paystack/verify/${reference}`
+      );
+      console.log("[DEBUG] Paystack verify response:", verifyRes.data);
+
+      const appointmentDate = new Date(selectedDate).toISOString();
+      if (verifyRes.data.transaction.status === "paid") {
+        // Build FormData for booking (like handleBookNow)
+        const formData = new FormData();
+        formData.append("clientId", user.id);
+        formData.append("vendorId", service.userId);
+        formData.append("serviceId", service.id);
+        formData.append("serviceName", service.serviceName);
+        formData.append("paymentMethod", "PAYSTACK");
+        formData.append("price", service.servicePrice);
+        formData.append(
+          "totalAmount",
+          service.servicePrice + calculatePrice(distanceApart)
+        );
+        formData.append("date", selectedDate);
+        formData.append("time", appointmentDate);
+        formData.append("reference", reference);
+        formData.append("serviceType", "HOME_SERVICE");
+        formData.append("fullAddress", bookingValues.fullAddress);
+        formData.append("landmark", bookingValues.landmark);
+        formData.append("specialInstruction", bookingValues.specialInstruction);
+        // Append image if present
+        if (referencePhoto) {
+          const filename = referencePhoto.split("/").pop();
+          const match = /\.(\w+)$/.exec(filename ?? "");
+          const type = match ? `image/${match[1]}` : `image`;
+          formData.append("referencePhoto", {
+            uri: referencePhoto,
+            name: filename,
+            type,
+          });
+        }
+        console.log("[DEBUG] Booking FormData (Paystack):", formData);
+
+        const bookRes = await HttpClient.post(
+          "/bookings/bookVendor",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        console.log("[DEBUG] Booking response:", bookRes.data);
+        showToast.success(bookRes.data.message);
+        navigation.goBack();
+      } else {
+        showToast.error("Payment verification failed");
+      }
+      setPaystackModalVisible(false);
+    } catch (error) {
+      console.log(error.response);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Payment verification or booking failed.";
+      showToast.error(message);
+
+      console.log(
+        "[DEBUG] handlePaystackVerificationAndBooking error:",
+        error?.response || error
+      );
+    } finally {
+      setLoading(false);
+      setPaymentReference("");
+    }
+  };
+  // Validation schema for home service booking
+  const homeServiceValidationSchema = Yup.object().shape({
+    time: Yup.string().required("Time is required"),
+    paymentMethod: Yup.string().required("Select a payment method"),
+  });
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -146,119 +352,187 @@ export default function BookingHomeServiceAppointScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
-        <View className="px-4 mt-6">
-          <Text
-            className="text-[16px] mb-2"
-            style={{ fontFamily: "poppinsMedium" }}
-          >
-            Choose Date and Time
-          </Text>
-
-          {/* Calendar */}
-          <View className="bg-white rounded-xl p-4 mb-4">
-            <Calendar
-              current={selectedDate}
-              onDayPress={(day) => setSelectedDate(day.dateString)}
-              markedDates={{
-                [selectedDate]: {
-                  selected: true,
-                  selectedColor: "#EB278D",
-                  selectedTextColor: "#fff",
-                },
-              }}
-              theme={{
-                backgroundColor: "#fff",
-                calendarBackground: "#fff",
-                textSectionTitleColor: "#222",
-                textSectionTitleDisabledColor: "#d9e1e8",
-                selectedDayBackgroundColor: "#E91E63",
-                selectedDayTextColor: "#fff",
-                todayTextColor: "#E91E63",
-                dayTextColor: "#222",
-                textDisabledColor: "#d9e1e8",
-                arrowColor: "#222",
-                monthTextColor: "#222",
-                textMonthFontWeight: "bold",
-                textDayFontFamily: "Poppins-Medium",
-                textMonthFontFamily: "Poppins-Medium",
-                textDayHeaderFontFamily: "Poppins-Medium",
-              }}
-              renderArrow={(direction) => (
-                <Ionicons
-                  name={
-                    direction === "left" ? "chevron-back" : "chevron-forward"
-                  }
-                  size={20}
-                  color="#222"
-                />
-              )}
-              hideExtraDays={true}
-              firstDay={1}
-              style={{ borderRadius: 16 }}
-            />
-          </View>
-
-          <View className="mb-5">
-            <AuthInput
-              label="Enter Time"
-              name="time"
-              value={time}
-              onChangeText={setTime}
-            />
-          </View>
-
-          {/* Service Location */}
-          <View className="mb-4">
-            <View className="flex-row items-center border rounded-t-[8px] px-3 border-[#E9E9E9] py-5">
-              <Ionicons name="location-outline" size={24} color="#000" />
+      <Formik
+        initialValues={{
+          time: "",
+          paymentMethod: "",
+          fullAddress: "",
+          landmark: "",
+          specialInstruction: "",
+          referencePhoto: "",
+        }}
+        validationSchema={homeServiceValidationSchema}
+        onSubmit={async (values, { setSubmitting }) => {
+          setLoading(true);
+          try {
+            if (values.paymentMethod === "SHARP-PAY") {
+              const reference = `SHARP-PAY-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+              const payload = {
+                date: selectedDate,
+                time: values.time,
+                paymentMethod: values.paymentMethod,
+                reference,
+                serviceType: "HOME_SERVICE",
+                price: service.servicePrice,
+                totalAmount:
+                  service.servicePrice + calculatePrice(distanceApart),
+                fullAddress: values.fullAddress,
+                landmark: values.landmark,
+                specialInstruction: values.specialInstruction,
+                referencePhoto: values.referencePhoto,
+                serviceName: service.serviceName,
+                vendorId: service.userId,
+                clientId: user.id,
+                serviceId: service.id,
+              };
+              await handleBookNow(payload);
+            } else if (values.paymentMethod === "PAYSTACK") {
+              await checkout(values);
+            } else {
+              console.log("[DEBUG] No payment method selected.");
+            }
+          } catch (error) {
+            console.log("[DEBUG] onSubmit error:", error);
+          } finally {
+            setLoading(false);
+            setSubmitting(false);
+          }
+        }}
+      >
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          values,
+          errors,
+          touched,
+          setFieldValue,
+        }) => (
+          <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+            <View className="px-4 mt-6">
               <Text
-                className="ml-2 text-[16px"
+                className="text-[16px] mb-2"
                 style={{ fontFamily: "poppinsMedium" }}
               >
-                Service Location
+                Choose Date and Time
               </Text>
-            </View>
 
-            <View className="border-x border-[#E9E9E9] border-b rounded-b-[8px] px-3 border-t-0">
-              <AuthInput
-                label="Enter Full Address"
-                value={address}
-                onChangeText={setAddress}
-                name="address"
-              />
-              <AuthInput
-                label="Enter Landmark"
-                value={landmark}
-                onChangeText={setLandmark}
-                name="landmark"
-              />
-            </View>
+              {/* Calendar */}
+              <View className="bg-white rounded-xl p-4 mb-4">
+                <Calendar
+                  current={selectedDate}
+                  onDayPress={(day) => setSelectedDate(day.dateString)}
+                  markedDates={{
+                    [selectedDate]: {
+                      selected: true,
+                      selectedColor: "#EB278D",
+                      selectedTextColor: "#fff",
+                    },
+                  }}
+                  theme={{
+                    backgroundColor: "#fff",
+                    calendarBackground: "#fff",
+                    textSectionTitleColor: "#222",
+                    textSectionTitleDisabledColor: "#d9e1e8",
+                    selectedDayBackgroundColor: "#E91E63",
+                    selectedDayTextColor: "#fff",
+                    todayTextColor: "#E91E63",
+                    dayTextColor: "#222",
+                    textDisabledColor: "#d9e1e8",
+                    arrowColor: "#222",
+                    monthTextColor: "#222",
+                    textMonthFontWeight: "bold",
+                    textDayFontFamily: "Poppins-Medium",
+                    textMonthFontFamily: "Poppins-Medium",
+                    textDayHeaderFontFamily: "Poppins-Medium",
+                  }}
+                  renderArrow={(direction) => (
+                    <Ionicons
+                      name={
+                        direction === "left"
+                          ? "chevron-back"
+                          : "chevron-forward"
+                      }
+                      size={20}
+                      color="#222"
+                    />
+                  )}
+                  hideExtraDays={true}
+                  firstDay={1}
+                  style={{ borderRadius: 16 }}
+                />
+              </View>
 
-            <Dropdown
-              options={locationOption}
-              value={selectedOption}
-              onValueChange={setSelectedOption}
-              label="Are you in the current location you registered with?"
-            />
+              <View className="mb-5">
+                <Dropdown
+                  options={timeOptions}
+                  placeholder="Select Time"
+                  value={values.time}
+                  onValueChange={(value) => setFieldValue("time", value)}
+                  label="Select Time"
+                />
 
-            {/* Map Container - Using the working pattern */}
-            <View
-              style={{
-                height: 300,
-                marginVertical: 16,
-                borderRadius: 12,
-                overflow: "hidden",
-                borderWidth: 1,
-                borderColor: "#E9E9E9",
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <WebView
-                  ref={webviewRef}
-                  originWhitelist={["*"]}
-                  source={{
-                    html: `
+                {touched.time && errors.time && (
+                  <Text style={{ color: "#ff0000", fontSize: 12 }}>
+                    {errors.time}
+                  </Text>
+                )}
+              </View>
+
+              {/* Service Location */}
+              <View className="mb-4">
+                <View className="flex-row items-center border rounded-t-[8px] px-3 border-[#E9E9E9] py-5">
+                  <Ionicons name="location-outline" size={24} color="#000" />
+                  <Text
+                    className="ml-2 text-[16px"
+                    style={{ fontFamily: "poppinsMedium" }}
+                  >
+                    Service Location
+                  </Text>
+                </View>
+
+                <View className="border-x border-[#E9E9E9] border-b rounded-b-[8px] px-3 border-t-0">
+                  <AuthInput
+                    label="Enter Full Address"
+                    value={values.fullAddress}
+                    onChangeText={handleChange("fullAddress")}
+                    name="fullAddress"
+                  />
+                  <AuthInput
+                    label="Enter Landmark"
+                    value={values.landmark}
+                    onChangeText={handleChange("landmark")}
+                    name="landmark"
+                  />
+                </View>
+
+                <Dropdown
+                  options={locationOption}
+                  placeholder="Select"
+                  value={selectedOption}
+                  onValueChange={setSelectedOption}
+                  label="Are you in the current location you registered with?"
+                />
+
+                {/* Map Container - Using the working pattern */}
+                {selectedOption === "No" && (
+                  <>
+                    <View
+                      style={{
+                        height: 300,
+                        marginVertical: 16,
+                        borderRadius: 12,
+                        overflow: "hidden",
+                        borderWidth: 1,
+                        borderColor: "#E9E9E9",
+                      }}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <WebView
+                          ref={webviewRef}
+                          originWhitelist={["*"]}
+                          source={{
+                            html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -307,194 +581,323 @@ export default function BookingHomeServiceAppointScreen() {
           </body>
         </html>
       `,
-                  }}
-                  style={{ flex: 1 }}
-                  javaScriptEnabled
-                  domStorageEnabled
-                />
+                          }}
+                          style={{ flex: 1 }}
+                          javaScriptEnabled
+                          domStorageEnabled
+                        />
+                      </View>
+                    </View>
+                    <View className="mb-4">
+                      <TouchableOpacity
+                        style={[
+                          {
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginBottom: 18,
+                          },
+                          selectedLocation && {
+                            backgroundColor: "#F8F8F8",
+                            borderRadius: 8,
+                            padding: 8,
+                          },
+                        ]}
+                        onPress={() => handleUseCurrentLocation()}
+                        disabled={isLoading}
+                      >
+                        <MaterialIcons
+                          name="my-location"
+                          size={22}
+                          color="#EB278D"
+                        />
+                        <Text
+                          style={{
+                            color: "#EB278D",
+                            fontFamily: "poppinsMedium",
+                            fontSize: 15,
+                            marginLeft: 10,
+                          }}
+                        >
+                          {isLoading
+                            ? "Updating..."
+                            : "Mark your current location"}
+                        </Text>
+                        {isLoading && (
+                          <ActivityIndicator
+                            size="small"
+                            color="#EB278D"
+                            style={{ marginLeft: 10 }}
+                          />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+
+                {/* Current Location Button - Using the working pattern */}
+              </View>
+
+              {/* Reference Photo */}
+              <View className="mb-4">
+                <View className="flex-row items-center border rounded-t-[8px] px-3 border-[#E9E9E9] py-5">
+                  <Text
+                    className="text-base mb-2"
+                    style={{ fontFamily: "poppinsMedium" }}
+                  >
+                    Reference Photo (Optional)
+                  </Text>
+                </View>
+                <View className="border-x border-[#E9E9E9] border-b pb-3 rounded-b-[8px] px-3 border-t-0">
+                  <TouchableOpacity
+                    className="border-2 border-dashed border-[#F9BCDC] rounded-lg h-[140px] items-center justify-center"
+                    onPress={() => pickImage()}
+                  >
+                    {referencePhoto ? (
+                      <Image
+                        source={{ uri: referencePhoto }}
+                        className="w-full h-full rounded-lg"
+                      />
+                    ) : (
+                      <View className="items-center justify-center">
+                        <AntDesign name="picture" size={40} color="#8C8D8B" />
+                        <Text
+                          className="text-[#8C8D8B] text-[12px] mt-2"
+                          style={{ fontFamily: "poppinsRegular" }}
+                        >
+                          Click to upload
+                        </Text>
+                        <Text
+                          style={{ fontFamily: "poppinsRegular" }}
+                          className="text-[#8C8D8B] text-[10px]"
+                        >
+                          PNG, JPG, GIF up to 5MB
+                        </Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Special Instruction */}
+              <View className="rounded-xl mb-4">
+                <View className="flex-row items-center border rounded-t-[8px] px-3 border-[#E9E9E9] py-5">
+                  <Text
+                    className="text-base mb-2"
+                    style={{ fontFamily: "poppinsMedium" }}
+                  >
+                    Special Instruction (Optional)
+                  </Text>
+                </View>
+                <View className="border-x border-[#E9E9E9] border-b rounded-b-[8px] p-3 border-t-0">
+                  <OutlineTextAreaInput
+                    placeholder="Type here"
+                    value={values.specialInstruction}
+                    onChangeText={handleChange("specialInstruction")}
+                    name="specialInstruction"
+                  />
+                </View>
+              </View>
+
+              {/* Distance Info */}
+              <View className="bg-[#E9E9E9] pl-4 rounded-xl h-[60px] flex-row items-center mb-2">
+                <Ionicons name="alert-circle-outline" size={14} color="#000" />
+                <Text
+                  className="ml-2 text-[11px] text-[#000]"
+                  style={{ fontFamily: "poppinsRegular" }}
+                >
+                  ₦5,000 for first 5km,{" "}
+                  <Text
+                    className="text-[#ee9002]"
+                    style={{ fontFamily: "poppinsRegular" }}
+                  >
+                    extra charges apply for longer distances.
+                  </Text>
+                </Text>
+              </View>
+              <View className="mb-5 mt-4">
+                <Text
+                  className="text-[16px] mb-3"
+                  style={{ fontFamily: "poppinsMedium" }}
+                >
+                  Payment Method
+                </Text>
+                {paymentMethods.map((method) => (
+                  <TouchableOpacity
+                    key={method.value}
+                    onPress={() => setFieldValue("paymentMethod", method.value)}
+                    className="flex-row items-center mb-3"
+                  >
+                    <View
+                      className={`w-5 h-5 rounded-full border mr-3 ${
+                        values.paymentMethod === method.value
+                          ? "border-primary bg-primary"
+                          : "border-gray-400"
+                      }`}
+                    />
+                    <Text
+                      className="text-base"
+                      style={{ fontFamily: "poppinsRegular" }}
+                    >
+                      {method.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+                {touched.paymentMethod && errors.paymentMethod && (
+                  <Text style={{ color: "#ff0000", fontSize: 12 }}>
+                    {errors.paymentMethod}
+                  </Text>
+                )}
+              </View>
+              {/* Charges */}
+              <View className="mb-2 mt-10">
+                <View className="flex-row justify-between items-center mb-3">
+                  <Text
+                    className="text-[#A5A5A5] text-[12px]"
+                    style={{ fontFamily: "poppinsRegular" }}
+                  >
+                    Service Charge
+                  </Text>
+                  <Text
+                    className="text-primary text-[16px]"
+                    style={{ fontFamily: "poppinsMedium" }}
+                  >
+                    {formatAmount(service?.servicePrice)}
+                  </Text>
+                </View>
+                <View className="flex-row justify-between items-center mb-1">
+                  <Text
+                    className="text-[#A5A5A5] text-[12px]"
+                    style={{ fontFamily: "poppinsRegular" }}
+                  >
+                    Home Service Charge
+                  </Text>
+                  <Text
+                    className="text-primary text-[16px]"
+                    style={{ fontFamily: "poppinsMedium" }}
+                  >
+                    {formatAmount(calculatePrice(distanceApart))}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Payment Method Radio */}
+
+              {/* Total Payment */}
+              <View className="flex-row justify-between items-center border-t border-[#0000001A] py-4 mt-2">
+                <Text
+                  className="text-base font-semibold"
+                  style={{ fontFamily: "poppinsMedium" }}
+                >
+                  Total Payment
+                </Text>
+                <Text
+                  className="text-primary text-lg font-bold"
+                  style={{ fontFamily: "poppinsMedium" }}
+                >
+                  {formatAmount(
+                    service?.servicePrice + calculatePrice(distanceApart)
+                  )}
+                </Text>
               </View>
             </View>
 
-            {/* Current Location Button - Using the working pattern */}
-            <View className="mb-4">
+            {/* Submit Button */}
+            <View className="px-4 mt-4">
               <TouchableOpacity
-                style={[
-                  {
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 18,
-                  },
-                  selectedLocation && {
-                    backgroundColor: "#F8F8F8",
-                    borderRadius: 8,
-                    padding: 8,
-                  },
-                ]}
-                onPress={handleUseCurrentLocation}
-                disabled={isLoading}
+                disabled={loading}
+                className="bg-primary rounded-xl py-4 items-center"
+                onPress={handleSubmit}
               >
-                <MaterialIcons name="my-location" size={22} color="#EB278D" />
                 <Text
-                  style={{
-                    color: "#EB278D",
-                    fontFamily: "poppinsMedium",
-                    fontSize: 15,
-                    marginLeft: 10,
-                  }}
+                  className="text-white text-base font-semibold"
+                  style={{ fontFamily: "poppinsMedium" }}
                 >
-                  {isLoading ? "Updating..." : "Use my current location"}
+                  {loading ? "Proceeding..." : "Proceed to Payment"}
                 </Text>
-                {isLoading && (
-                  <ActivityIndicator
-                    size="small"
-                    color="#EB278D"
-                    style={{ marginLeft: 10 }}
-                  />
-                )}
               </TouchableOpacity>
             </View>
-          </View>
-
-          {/* Reference Photo */}
-          <View className="mb-4">
-            <View className="flex-row items-center border rounded-t-[8px] px-3 border-[#E9E9E9] py-5">
-              <Text
-                className="text-base mb-2"
-                style={{ fontFamily: "poppinsMedium" }}
-              >
-                Reference Photo (Optional)
-              </Text>
-            </View>
-            <View className="border-x border-[#E9E9E9] border-b pb-3 rounded-b-[8px] px-3 border-t-0">
-              <TouchableOpacity
-                className="border-2 border-dashed border-[#F9BCDC] rounded-lg h-[140px] items-center justify-center"
-                onPress={() => {}}
-              >
-                {referencePhoto ? (
-                  <Image
-                    source={{ uri: referencePhoto }}
-                    className="w-full h-full rounded-lg"
-                  />
-                ) : (
-                  <View className="items-center justify-center">
-                    <AntDesign name="picture" size={40} color="#8C8D8B" />
-                    <Text
-                      className="text-[#8C8D8B] text-[12px] mt-2"
-                      style={{ fontFamily: "poppinsRegular" }}
-                    >
-                      Click to upload
-                    </Text>
-                    <Text
-                      style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[#8C8D8B] text-[10px]"
-                    >
-                      PNG, JPG, GIF up to 5MB
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Special Instruction */}
-          <View className="rounded-xl mb-4">
-            <View className="flex-row items-center border rounded-t-[8px] px-3 border-[#E9E9E9] py-5">
-              <Text
-                className="text-base mb-2"
-                style={{ fontFamily: "poppinsMedium" }}
-              >
-                Special Instruction (Optional)
-              </Text>
-            </View>
-            <View className="border-x border-[#E9E9E9] border-b rounded-b-[8px] p-3 border-t-0">
-              <OutlineTextAreaInput
-                placeholder="Type here"
-                value={specialInstruction}
-                onChangeText={setSpecialInstruction}
-                name="specialInstruction"
-              />
-            </View>
-          </View>
-
-          {/* Distance Info */}
-          <View className="bg-[#E9E9E9] pl-4 rounded-xl h-[60px] flex-row items-center mb-2">
-            <Ionicons name="alert-circle-outline" size={14} color="#000" />
-            <Text
-              className="ml-2 text-[11px] text-[#000]"
-              style={{ fontFamily: "poppinsRegular" }}
+          </ScrollView>
+        )}
+      </Formik>
+      <Modal
+        visible={paystackModalVisible}
+        animationType="slide"
+        onRequestClose={() => setPaystackModalVisible(false)}
+        transparent={false}
+      >
+        <View style={{ flex: 1 }}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              className="bg-primary rounded-[4px] py-2 px-4"
+              onPress={() => {
+                setPaystackModalVisible(false);
+                handlePaystackVerificationAndBooking(
+                  paymentReference,
+                  pendingBookingValues
+                );
+              }}
             >
-              ₦5,000 for first 5km,{" "}
-              <Text
-                className="text-[#ee9002]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                extra charges apply for longer distances.
-              </Text>
-            </Text>
+              <Text className="text-[10px] text-white">Verify Payment</Text>
+            </TouchableOpacity>
           </View>
-
-          {/* Charges */}
-          <View className="mb-2 mt-10">
-            <View className="flex-row justify-between items-center mb-3">
-              <Text
-                className="text-[#A5A5A5] text-[12px]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                Service Charge
-              </Text>
-              <Text
-                className="text-primary text-[16px]"
-                style={{ fontFamily: "poppinsMedium" }}
-              >
-                {/* {formatAmount(serviceCharge)} */}
-              </Text>
-            </View>
-            <View className="flex-row justify-between items-center mb-1">
-              <Text
-                className="text-[#A5A5A5] text-[12px]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                Home Service Charge
-              </Text>
-              <Text
-                className="text-primary text-[16px]"
-                style={{ fontFamily: "poppinsMedium" }}
-              >
-                {/* {formatAmount(homeServiceCharge)} */}
-              </Text>
-            </View>
-            <View className="flex-row justify-between items-center border-t border-[#0000001A] pb-3 pt-6 mt-4">
-              <Text
-                className="text-[16px]"
-                style={{ fontFamily: "poppinsMedium" }}
-              >
-                Total Payment
-              </Text>
-              <Text
-                className="text-primary text-[16px]"
-                style={{ fontFamily: "poppinsMedium" }}
-              >
-                {/* {formatAmount(totalPayment)} */}
-              </Text>
-            </View>
-          </View>
+          {paystackPaymentUrl ? (
+            <WebView
+              source={{ uri: paystackPaymentUrl }}
+              onNavigationStateChange={(navState) => {
+                // Detect Paystack close or success URL
+                if (
+                  navState.url.includes("paystack.com/close") ||
+                  navState.url.includes("payment/success")
+                ) {
+                  // Try to extract reference from URL if possible
+                  const refMatch = navState.url.match(/[?&]reference=([^&#]+)/);
+                  const reference = refMatch ? refMatch[1] : paymentReference;
+                  setPaystackModalVisible(false);
+                  setPaystackPaymentUrl("");
+                  if (reference) {
+                    handlePaystackVerificationAndBooking(
+                      reference,
+                      pendingBookingValues
+                    );
+                  } else {
+                    Alert.alert(
+                      "Payment",
+                      "Payment completed, but reference not found."
+                    );
+                  }
+                }
+              }}
+              startInLoadingState
+              style={{ flex: 1 }}
+            />
+          ) : null}
         </View>
-
-        {/* Proceed to Payment Button */}
-        <View className="px-4 mt-4">
-          <TouchableOpacity
-            className="bg-primary rounded-xl py-4 items-center"
-            onPress={() => navigation.navigate("DebitCardScreen")}
-          >
-            <Text
-              className="text-white text-base font-semibold"
-              style={{ fontFamily: "poppinsMedium" }}
-            >
-              Proceed to Payment
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      </Modal>
     </View>
   );
 }
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: "#fff",
+    paddingTop: 20,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  headerTitle: {
+    color: "#222",
+    fontSize: 16,
+    fontFamily: "poppinsMedium",
+    flex: 1,
+    textAlign: "center",
+    marginLeft: -28,
+  },
+});

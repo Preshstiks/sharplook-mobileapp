@@ -14,6 +14,8 @@ export default function OutlineTextInput({
   ...props
 }) {
   const [isFocused, setIsFocused] = useState(false);
+  // Filter out key from props to avoid React warning
+  const { key, ...rest } = props;
   return (
     <View className="mb-3">
       {label && (
@@ -38,7 +40,7 @@ export default function OutlineTextInput({
         className={`border px-4 py-4 text-[12px] rounded-[12px] ${isFocused ? "border-primary" : error && touched ? "border-[#FF0000]" : "border-[#F9BCDC]"}`}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        {...props}
+        {...rest}
       />
       {error && touched && <Text style={styles.errorText}>{error}</Text>}
     </View>
@@ -58,6 +60,8 @@ export function OutlineTextAreaInput({
   ...props
 }) {
   const [isFocused, setIsFocused] = useState(false);
+  // Filter out key from props to avoid React warning
+  const { key, ...rest } = props;
   return (
     <View className="mb-3">
       {label && (
@@ -82,7 +86,7 @@ export function OutlineTextAreaInput({
         ]}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        {...props}
+        {...rest}
       />
       {error && touched && <Text style={styles.errorText}>{error}</Text>}
     </View>

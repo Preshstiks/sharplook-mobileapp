@@ -57,6 +57,9 @@ export const AuthInput = ({
     }
   };
 
+  // Filter out key from props to avoid React warning
+  const { key, ...rest } = props;
+
   return (
     <View style={[styles.container, style]}>
       <View
@@ -81,7 +84,7 @@ export const AuthInput = ({
           autoCapitalize={autoCapitalize}
           onFocus={() => setIsFocused(true)}
           onBlur={handleBlur}
-          {...props}
+          {...rest}
         />
         {isPassword && (
           <TouchableOpacity
