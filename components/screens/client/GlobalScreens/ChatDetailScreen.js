@@ -76,7 +76,7 @@ export default function ChatDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8FB]">
-      <View className="flex-row items-center bg-primary py-4 px-4">
+      <View className="flex-row items-center bg-primary pt-[50px] pb-6 px-6">
         <TouchableOpacity onPress={() => navigation.goBack()} className="mr-2">
           <Ionicons name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>

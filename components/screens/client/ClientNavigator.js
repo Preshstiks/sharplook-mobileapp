@@ -34,6 +34,7 @@ import AcceptedOfferDetailScreen from "./Booking/AcceptedOfferDetailScreen";
 import BookingStack from "./Booking/BookingStack";
 import NotificationStack from "./Notification/NotificationStack";
 import ProfileStack from "./Profile/ProfileStack";
+import WalletStack from "./WalletStack";
 
 const Drawer = createDrawerNavigator();
 
@@ -80,7 +81,7 @@ export default function ClientNavigator() {
 
       <Drawer.Screen
         name="SharpPay"
-        component={WalletScreen}
+        component={WalletStack}
         options={{
           drawerIcon: ({ color, size }) => (
             <Ionicons name="wallet-outline" size={size} color={color} />

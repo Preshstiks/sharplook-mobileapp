@@ -187,11 +187,13 @@ export default function BookAppointmentScreen() {
             if (values.paymentMethod === "SHARP-PAY") {
               const reference = `SHARP-PAY-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
               const payload = {
-                date: selectedDate,
+                vendorId: vendorData?.id || id,
+                date: new Date(`${selectedDate}T${values.time}:00.000Z`),
                 time: values.time,
                 paymentMethod: values.paymentMethod,
                 reference,
                 price: service.servicePrice,
+                totalAmount: service.servicePrice,
                 serviceName: service.serviceName,
                 serviceId: service.id,
               };

@@ -30,7 +30,7 @@ export default function VendorChatListScreen() {
     setError(null);
     try {
       const res = await HttpClient.get(`/messages/chats/${userId}`);
-      setChats(res.data.chats || []);
+      setChats(res.data.data || []);
     } catch (err) {
       setError("Failed to load chats");
     } finally {

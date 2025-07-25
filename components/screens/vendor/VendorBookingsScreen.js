@@ -13,7 +13,9 @@ import { useAuth } from "../../../context/AuthContext";
 import { HttpClient } from "../../../api/HttpClient";
 import EmptySVG from "../../../assets/img/empty.svg";
 import { ActivityIndicator } from "react-native";
-
+import { formatAmount } from "../../formatAmount";
+import { HexConverter } from "../../reusuableComponents/HexConverter";
+import { DateConverter } from "../../reusuableComponents/DateConverter";
 const bookings = [
   {
     id: "32145",
@@ -131,7 +133,21 @@ export default function VendorBookingsScreen() {
         setLoading(true);
         try {
           const res = await HttpClient.get("/bookings/getBookings");
-          setBookings(res.data?.data || []);
+          // Transform bookings to match UI expectations
+          const transformed = (res.data?.data || []).map((b) => ({
+            id: b.id,
+            date: b.date,
+            time: b.time,
+            status: b.status,
+            amount: b.totalAmount || b.price || 0,
+            client:
+              b.client?.name ||
+              b.clientName ||
+              b.client?.fullName ||
+              b.clientId ||
+              "Unknown",
+          }));
+          setBookings(transformed);
         } catch (err) {
           setBookings([]);
         } finally {
@@ -212,7 +228,7 @@ export default function VendorBookingsScreen() {
             Total Amount
           </Text>
           <Text className="text-[18px] mt-1" style={{ fontFamily: "latoBold" }}>
-            {totalAmount.toLocaleString()}
+            {formatAmount(totalAmount)}
           </Text>
         </View>
       </View>
@@ -259,7 +275,7 @@ export default function VendorBookingsScreen() {
         ) : (
           filteredBookings.map((b) => (
             <Pressable
-              key={b.id}
+              key={b?.id}
               className="bg-white rounded-[12px] shadow mb-4 p-4"
               onPress={() =>
                 navigation.navigate("VendorBookingDetailScreen", { booking: b })
@@ -270,20 +286,20 @@ export default function VendorBookingsScreen() {
                   className="text-[12px] text-[#0000004D]"
                   style={{ fontFamily: "latoBold" }}
                 >
-                  #{b.id} {b.date} {b.time}
+                  {HexConverter(b?.id)} {DateConverter(b.date)} {b.time}
                 </Text>
                 <Text
                   className={`text-[12px] ${b.status === "Completed" ? "text-success" : "text-pending"}`}
                   style={{ fontFamily: "latoBold" }}
                 >
-                  {b.status}
+                  {b?.status}
                 </Text>
               </View>
               <Text
                 className="text-[18px] text-fadedDark"
                 style={{ fontFamily: "latoBold" }}
               >
-                ₦{b.amount.toLocaleString()}
+                {formatAmount(b?.amount)}
               </Text>
               <View className="flex-row justify-between items-center mt-2">
                 <Text

@@ -7,6 +7,7 @@ import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { HttpClient } from "../../../api/HttpClient";
+import { showToast } from "../../ToastComponent/Toast";
 
 const bankOptions = [
   { label: "Access Bank", value: "Access Bank" },
@@ -98,10 +99,12 @@ export default function ClientWithdrawScreen({ navigation }) {
               "/withdrawals/requestWithdrawals",
               payload
             );
-            console.log(res.data);
+            showToast.success(res.data.message);
             resetForm();
             navigation.goBack();
           } catch (error) {
+            const message = error.response.data.message || error.message;
+            showToast.error(message);
             console.log(error.response);
           } finally {
             setLoading(false);

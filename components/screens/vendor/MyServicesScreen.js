@@ -8,6 +8,8 @@ import EmptySVG from "../../../assets/img/empty.svg";
 import { formatAmount } from "../../formatAmount";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import BottomModal from "../../reusuableComponents/BottomModal";
+import { BarIndicator } from "react-native-indicators";
+import { showToast } from "../../ToastComponent/Toast";
 
 function SkeletonLoader() {
   return (
@@ -70,38 +72,39 @@ export default function MyServicesScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [serviceToDelete, setServiceToDelete] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const fetchServices = async () => {
+    setLoading(true);
+    try {
+      const res = await HttpClient.get("/vendorServices/my-services");
+      setServices(res.data?.data || []);
+      console.log("API response:", res.data);
+      const token = await AsyncStorage.getItem("token");
+      console.log("token", token);
+    } catch (err) {
+      console.log("DEBUG: Error fetching services:", err.response?.data);
+      setServices([]);
+    } finally {
+      setLoading(false);
+    }
+  };
   useFocusEffect(
     useCallback(() => {
-      const fetchServices = async () => {
-        setLoading(true);
-        try {
-          const res = await HttpClient.get("/vendorServices/my-services");
-          setServices(res.data?.data || []);
-          console.log("API response:", res.data);
-          const token = await AsyncStorage.getItem("token");
-          console.log("token", token);
-        } catch (err) {
-          console.log("DEBUG: Error fetching services:", err.response.data);
-          setServices([]);
-          // console.log("Error fetching services:", err?.response || err);
-        } finally {
-          setLoading(false);
-        }
-      };
       fetchServices();
     }, [])
   );
+
+  // Move fetchServices outside so it can be reused
+
   const handleDeleteProduct = async () => {
-    if (!serviceToDelete) return;
+    setDeleting(true);
     try {
-      setLoading(true);
-      await HttpClient.delete(`/vendorServices/my-services/${productToDelete}`);
-      showToast.success("Service deleted successfully");
-      setShowModal(false);
-      setServiceToDelete(null);
-      // Refresh products
-      const res = await HttpClient.get("/vendorServices/my-services");
-      setServices(res.data.data);
+      const res = await HttpClient.delete(
+        `/vendorServices/delete/${serviceToDelete}`
+      );
+      showToast.success(res.data.message);
+      await fetchServices(); // Refresh the list after successful delete
     } catch (error) {
       console.log(error.response);
       let errorMsg = "An error occurred. Please try again.";
@@ -113,7 +116,9 @@ export default function MyServicesScreen({ navigation }) {
       }
       showToast.error(errorMsg);
     } finally {
-      setLoading(false);
+      setDeleting(false);
+      setShowModal(false);
+      setServiceToDelete(null);
     }
   };
   console.log({ services });
@@ -239,12 +244,16 @@ export default function MyServicesScreen({ navigation }) {
             className="mt-2 rounded-[12px] mb-4 h-[52px] flex flex-row items-center w-full bg-[#ff0000] justify-center"
             onPress={handleDeleteProduct}
           >
-            <Text
-              style={{ fontFamily: "poppinsMedium" }}
-              className="text-center text-[13px] text-white"
-            >
-              Yes
-            </Text>
+            {deleting ? (
+              <BarIndicator color="#fff" size={20} />
+            ) : (
+              <Text
+                style={{ fontFamily: "poppinsMedium" }}
+                className="text-center text-[13px] text-white"
+              >
+                Yes
+              </Text>
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             className="mt-2 rounded-[12px] mb-4 border h-[52px] flex flex-row items-center w-full border-[#ff0000] justify-center"

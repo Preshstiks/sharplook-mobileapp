@@ -7,6 +7,7 @@ import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import HttpClient from "../../../api/HttpClient";
+import { showToast } from "../../ToastComponent/Toast";
 
 const bankOptions = [
   { label: "Access Bank", value: "Access Bank" },
@@ -100,11 +101,8 @@ export default function WithdrawScreen({ navigation }) {
             resetForm();
             navigation.goBack();
           } catch (error) {
-            setErrors({
-              submit:
-                error?.response?.data?.message ||
-                "Withdrawal failed. Please try again.",
-            });
+            const message = error.response.data.message || error.message;
+            showToast.error(message);
           } finally {
             setLoading(false);
             setSubmitting(false);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   ScrollView,
   ActivityIndicator,
   Linking,
+  Modal,
+  StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import OutlineTextInput from "../../reusuableComponents/inputFields/OutlineTextInput";
@@ -16,25 +18,31 @@ import { fundWalletSchema } from "../../../utils/validationSchemas";
 import { HttpClient } from "../../../api/HttpClient";
 import LoaderOverlay from "../../reusuableComponents/LoaderOverlay";
 import { showToast } from "../../ToastComponent/Toast";
+import WebView from "react-native-webview";
+import { useFocusEffect } from "@react-navigation/native";
 export default function FundClientWalletScreen({ navigation }) {
   const { user } = useAuth();
   const [loading, setLoading] = React.useState(false);
-  const [apiError, setApiError] = React.useState("");
+
   const [pendingReference, setPendingReference] = React.useState(null);
-  const [successMsg, setSuccessMsg] = React.useState("");
+
+  const [paystackPaymentUrl, setPaystackPaymentUrl] = React.useState(null);
+  const [paystackModalVisible, setPaystackModalVisible] = React.useState(false);
+  const [pendingPaymentValues, setPendingPaymentValues] = React.useState({});
 
   const handleFundWallet = async (values, { resetForm }) => {
     setLoading(true);
-    setApiError("");
-    setSuccessMsg("");
+
     try {
       const res = await HttpClient.post("/wallet/fund", {
         email: user.email,
-        amount: values.amount,
+        amount: Number(values.amount),
       });
+      setPendingReference(res.data.data.reference);
       console.log(res.data);
       setPendingReference(res.data.data.reference);
-
+      setPaystackPaymentUrl(res.data.data.authorization_url);
+      setPaystackModalVisible(true);
       // if (res.data && res.data.authorization_url) {
       //   setPendingReference(res.data.reference);
       //   navigation.navigate("PaystackWebViewScreen", {
@@ -45,31 +53,24 @@ export default function FundClientWalletScreen({ navigation }) {
       // }
     } catch (error) {
       console.log(error.response);
-      setApiError(
-        error?.response?.data?.message ||
-          "Failed to fund wallet. Please try again."
-      );
     } finally {
       setLoading(false);
     }
   };
+  console.log({ paystackPaymentUrl });
   console.log({ pendingReference });
   const handleVerifyPayment = async () => {
     setLoading(true);
-    setApiError("");
-    setSuccessMsg("");
     try {
       const res = await HttpClient.post("/wallet/verify", {
         reference: pendingReference,
       });
-      const message = res.data.data.message || res.data.message;
-      showToast.success(message);
+
+      showToast.success("Wallet funded successfully");
+      navigation.goBack();
+      console.log(res.data);
     } catch (error) {
       console.log(error);
-      setApiError(
-        error?.response?.data?.message ||
-          "Verification failed. Please try again."
-      );
     } finally {
       setLoading(false);
     }
@@ -125,36 +126,6 @@ export default function FundClientWalletScreen({ navigation }) {
               placeholder="Enter amount"
             />
 
-            {apiError ? (
-              <Text
-                style={{
-                  color: "red",
-                  fontSize: 12,
-                  marginTop: 8,
-                  fontFamily: "latoRegular",
-                }}
-              >
-                {apiError}
-              </Text>
-            ) : null}
-            {successMsg ? (
-              <Text style={{ color: "green", fontSize: 14, marginTop: 12 }}>
-                {successMsg}
-              </Text>
-            ) : null}
-            {pendingReference && (
-              <View style={{ marginTop: 20 }}>
-                <AuthButton
-                  title="Verify Payment"
-                  onPress={handleVerifyPayment}
-                  isloading={loading}
-                  disabled={loading}
-                />
-                <Text style={{ fontSize: 12, marginTop: 8, color: "#555" }}>
-                  After completing payment, tap "Verify Payment" to confirm.
-                </Text>
-              </View>
-            )}
             <View className="px-0 pb-6 bg-white mt-6">
               <AuthButton
                 title="Fund Wallet"
@@ -168,6 +139,82 @@ export default function FundClientWalletScreen({ navigation }) {
         )}
       </Formik>
       <LoaderOverlay visible={loading} />
+      <Modal
+        visible={paystackModalVisible}
+        animationType="slide"
+        onRequestClose={() => setPaystackModalVisible(false)}
+        transparent={false}
+      >
+        <View style={{ flex: 1 }}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              className="bg-primary rounded-[4px] py-2 px-4"
+              onPress={() => {
+                setPaystackModalVisible(false);
+                handleVerifyPayment();
+              }}
+            >
+              <Text className="text-[10px] text-white">Verify Payment</Text>
+            </TouchableOpacity>
+          </View>
+          {paystackPaymentUrl ? (
+            <WebView
+              source={{ uri: paystackPaymentUrl }}
+              onNavigationStateChange={(navState) => {
+                // Detect Paystack close or success URL
+                if (
+                  navState.url.includes("paystack.com/close") ||
+                  navState.url.includes("payment/success")
+                ) {
+                  // Try to extract reference from URL if possible
+                  const refMatch = navState.url.match(/[?&]reference=([^&#]+)/);
+                  const reference = refMatch ? refMatch[1] : pendingReference;
+                  setPaystackModalVisible(false);
+                  setPaystackPaymentUrl("");
+                  if (reference) {
+                    handlePaystackVerificationAndBooking(
+                      reference,
+                      pendingPaymentValues
+                    );
+                  } else {
+                    Alert.alert(
+                      "Payment",
+                      "Payment completed, but reference not found."
+                    );
+                  }
+                }
+              }}
+              startInLoadingState
+              style={{ flex: 1 }}
+            />
+          ) : null}
+        </View>
+      </Modal>
     </View>
   );
 }
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: "#fff",
+    paddingTop: 20,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  headerTitle: {
+    color: "#222",
+    fontSize: 16,
+    fontFamily: "poppinsMedium",
+    flex: 1,
+    textAlign: "center",
+    marginLeft: -28,
+  },
+});

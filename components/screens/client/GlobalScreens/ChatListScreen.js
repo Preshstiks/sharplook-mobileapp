@@ -23,15 +23,89 @@ export default function ChatListScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch chat list from backend
+  // Fetch chat list and previews from backend
   const fetchChats = async () => {
     if (!userId) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await HttpClient.get(`/messages/chats/${userId}`);
-      setChats(res.data.chats || []);
-      console.log(res.data);
+      const [chatsRes, previewsRes] = await Promise.all([
+        HttpClient.get(`/messages/chats/${userId}`),
+        HttpClient.get(`/messages/previews/${userId}`),
+      ]);
+      let previews = previewsRes.data.data || [];
+      let chats = chatsRes.data.data || [];
+
+      // Combine all chats and previews into one array
+      const allItems = [...previews, ...chats];
+      // console.log({ allItems });
+
+      // Group by partnerId, keeping only the latest message per partner
+      const chatMap = {};
+      allItems.forEach((item) => {
+        const ids = item.roomId.split("_");
+        const partnerId = ids.find((id) => id !== userId);
+        const msgTime = item.lastMessage?.createdAt || item.createdAt || null;
+
+        // Try to get partner's name and avatar from lastMessage or item
+        let partnerName = null;
+        let partnerAvatar = null;
+        if (item.lastMessage) {
+          if (item.lastMessage.senderId === partnerId) {
+            partnerName = item.lastMessage.senderName;
+            partnerAvatar = item.lastMessage.senderAvatar;
+          } else if (item.lastMessage.receiverId === partnerId) {
+            partnerName = item.lastMessage.receiverName;
+            partnerAvatar = item.lastMessage.receiverAvatar;
+          }
+        }
+        // Fallbacks if not found in lastMessage
+        partnerName = partnerName || item.partnerName || "Chat Partner";
+        partnerAvatar =
+          partnerAvatar ||
+          item.partnerAvatar ||
+          require("../../../../assets/img/logo/bglogo.svg");
+
+        // Get last message text
+        const lastMessageText =
+          item.lastMessage?.text ||
+          item.lastMessage?.message ||
+          item.message ||
+          "";
+
+        if (
+          !chatMap[partnerId] ||
+          (msgTime && new Date(msgTime) > new Date(chatMap[partnerId].msgTime))
+        ) {
+          chatMap[partnerId] = {
+            partnerId,
+            roomId: item.roomId,
+            name: partnerName,
+            avatar: partnerAvatar,
+            lastMessage: lastMessageText,
+            msgTime,
+          };
+        }
+      });
+
+      // Convert to array and sort by latest message time
+      const groupedChats = Object.values(chatMap)
+        .sort((a, b) => new Date(b.msgTime) - new Date(a.msgTime))
+        .map((item) => ({
+          id: item.roomId,
+          name: item.name,
+          avatar: item.avatar,
+          lastMessage: item.lastMessage,
+          time: item.msgTime
+            ? new Date(item.msgTime).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "",
+        }));
+
+      // console.log({ groupedChats });
+      setChats(groupedChats);
     } catch (err) {
       setError("Failed to load chats");
     } finally {
@@ -86,7 +160,7 @@ export default function ChatListScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8FB]">
-      <View className="bg-primary py-6 items-center">
+      <View className="bg-primary pt-[80px] pb-6 items-center">
         <Text
           className="text-white text-xl font-bold"
           style={{ fontFamily: "poppinsRegular" }}

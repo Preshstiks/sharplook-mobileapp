@@ -14,6 +14,9 @@ import {
 } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { HttpClient } from "../../../api/HttpClient";
+import { formatAmount } from "../../formatAmount";
+import { EmptyData } from "../../reusuableComponents/EmptyData";
+import { formatDateTime } from "../../reusuableComponents/DateConverter";
 
 export default function WalletScreen() {
   const navigation = useNavigation();
@@ -21,28 +24,45 @@ export default function WalletScreen() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [walletInfo, setWalletInfo] = React.useState();
   const toggleShowBalance = () => {
     setIsShowBalance(!isShowBalance);
   };
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const fetchTransactions = async () => {
+  //       setLoading(true);
+  //       setError(null);
+  //       try {
+  //         const res = await HttpClient.get("/wallet/transactions");
+  //         setTransactions(res.data?.data || []);
+  //       } catch (err) {
+  //         setTransactions([]);
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     };
+  //     fetchTransactions();
+  //   }, [])
+  // );
+  console.log({ transactions });
+  const getWalletBalance = async () => {
+    setLoading(true);
+    try {
+      const res = await HttpClient.get("/wallet/walletDetails");
+      setWalletInfo(res.data.wallet);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  console.log({ walletInfo });
   useFocusEffect(
     useCallback(() => {
-      const fetchTransactions = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const res = await HttpClient.get("/wallet/transactions");
-          setTransactions(res.data?.data || []);
-        } catch (err) {
-          setTransactions([]);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchTransactions();
+      getWalletBalance();
     }, [])
   );
-
   // Skeleton loader for transaction card
   const SkeletonCard = () => (
     <View className="flex-row items-center mb-4" style={{ opacity: 0.7 }}>
@@ -96,7 +116,9 @@ export default function WalletScreen() {
               style={{ fontFamily: "poppinsBold" }}
               className="text-white opacity-80 text-[24px]"
             >
-              ₦146,500
+              {walletInfo?.balance
+                ? formatAmount(walletInfo.balance)
+                : formatAmount(0)}
             </Text>
           ) : (
             <View className="flex-row gap-2 mb-4">
@@ -143,7 +165,13 @@ export default function WalletScreen() {
             <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
               Transaction History
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("TransactionHistory", {
+                  transactions: walletInfo?.transactions,
+                })
+              }
+            >
               <Text
                 className="text-primary text-[12px]"
                 style={{ fontFamily: "latoBold" }}
@@ -157,12 +185,10 @@ export default function WalletScreen() {
             Array.from({ length: 5 }).map((_, idx) => (
               <SkeletonCard key={idx} />
             ))
-          ) : transactions.length === 0 ? (
-            <Text style={{ fontFamily: "poppinsRegular", color: "#888" }}>
-              No transactions found.
-            </Text>
+          ) : walletInfo?.transactions?.length === 0 ? (
+            <EmptyData title="No transactions found" />
           ) : (
-            transactions.map((tx, idx) => (
+            walletInfo?.transactions?.slice(0, 5).map((tx, idx) => (
               <View key={tx.id || idx} className="flex-row items-center mb-4">
                 <Image
                   source={require("../../../assets/icon/avatar.png")}
@@ -180,13 +206,7 @@ export default function WalletScreen() {
                       className="text-[10px] text-faintDark mr-2"
                       style={{ fontFamily: "poppinsRegular" }}
                     >
-                      {tx.date || "--"}
-                    </Text>
-                    <Text
-                      className="text-[10px] text-faintDark"
-                      style={{ fontFamily: "poppinsRegular" }}
-                    >
-                      {tx.time || "--"}
+                      {formatDateTime(tx.createdAt)}
                     </Text>
                   </View>
                 </View>

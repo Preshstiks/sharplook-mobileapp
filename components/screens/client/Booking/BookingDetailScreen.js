@@ -27,21 +27,23 @@ import {
   formatDateToDDMMYYYY,
 } from "../../../reusuableComponents/DateConverter";
 import { formatAmount } from "../../../formatAmount";
+import { showToast } from "../../../ToastComponent/Toast";
 
 export default function BookingDetailScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const [isloadingComplete, setIsloadingComplete] = useState(false);
   const { booking } = route.params || {};
-
-  console.log;
+  console.log({ booking });
   const handleCompleteBooking = async () => {
     setIsloadingComplete(true);
     try {
-      const res = await HttpClient.post(
+      const res = await HttpClient.patch(
         `/bookings/${booking?.id}/complete/client`
       );
       showToast.success(res.data.message);
+      console.log(res.data);
+      navigation.goBack();
     } catch (error) {
       console.log(error.response);
     } finally {
@@ -70,17 +72,19 @@ export default function BookingDetailScreen() {
   const handleDisputeSubmit = async (values, { resetForm }) => {
     setIsSubmittingDispute(true);
     try {
-      await HttpClient.post("/disputes/raiseDispute", {
+      const res = await HttpClient.post("/disputes/raiseDispute", {
         bookingId: booking?.id,
         reason: values.reason,
         image: values.image,
       });
+      console.log({ disputeRes: res.data });
+      showToast.success(res.data.message);
       // Optionally show a toast or feedback here
       setShowDisputeModal(false);
       resetForm();
     } catch (error) {
-      // Optionally show error toast or feedback
-      console.log(error);
+      showToast.error(error.response.data.message);
+      console.log(error.response);
     } finally {
       setIsSubmittingDispute(false);
     }
@@ -240,7 +244,6 @@ export default function BookingDetailScreen() {
 
         <AuthButton
           title="Booking Completed"
-          loadingMsg="Completing"
           isloading={isloadingComplete}
           onPress={handleCompleteBooking}
         />
