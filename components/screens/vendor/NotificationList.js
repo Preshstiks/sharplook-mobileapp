@@ -11,20 +11,46 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { HttpClient } from "../../../api/HttpClient";
 import EmptySVG from "../../../assets/img/empty.svg";
+import { DateConverter } from "../../reusuableComponents/DateConverter";
+import { getRelativeTime } from "../../reusuableComponents/RelativeTime";
 
 export default function NotificationList() {
   const navigation = useNavigation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Function to convert flat array to sections format
+  const convertToSections = (notifications) => {
+    if (!notifications || !Array.isArray(notifications)) {
+      return [];
+    }
+
+    // Group notifications by date or create a single section
+    const today = new Date();
+    const todayStr = today.toDateString();
+
+    // For now, let's create a single section with all notifications
+    // You can modify this logic based on your API response structure
+    return [
+      {
+        title: "Recent Notifications",
+        data: notifications,
+      },
+    ];
+  };
+
   useFocusEffect(
     useCallback(() => {
       const fetchNotifications = async () => {
         setLoading(true);
         try {
           const res = await HttpClient.get("/notifications/getNotifications");
-          setNotifications(res.data?.data || []);
+          const notificationsData = res.data?.data || [];
+          const sections = convertToSections(notificationsData);
+          setNotifications(sections);
           console.log(res.data);
         } catch (error) {
+          console.error("Error fetching notifications:", error);
           setNotifications([]);
         } finally {
           setLoading(false);
@@ -98,7 +124,6 @@ export default function NotificationList() {
   }
 
   // Empty state for no notifications
-
   if (!loading && (!notifications || notifications.length === 0)) {
     return (
       <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
@@ -160,8 +185,8 @@ export default function NotificationList() {
       </View>
       <SectionList
         sections={notifications}
-        keyExtractor={(item) =>
-          item.id?.toString?.() || Math.random().toString()
+        keyExtractor={(item, index) =>
+          item.id?.toString?.() || `notification-${index}`
         }
         renderSectionHeader={({ section: { title } }) => (
           <Text
@@ -170,6 +195,7 @@ export default function NotificationList() {
               fontFamily: "LatoBold",
               marginTop: 24,
               marginLeft: 20,
+              marginBottom: 8,
             }}
           >
             {title}
@@ -201,14 +227,14 @@ export default function NotificationList() {
                 className="text-[14px] opacity-60"
                 style={{ fontFamily: "latoRegular" }}
               >
-                {item.title}
+                {item.message}
               </Text>
             </View>
             <Text
               className="text-[10px] opacity-60 mt-1"
               style={{ fontFamily: "latoRegular" }}
             >
-              {item.time}
+              {getRelativeTime(item.createdAt)}
             </Text>
           </TouchableOpacity>
         )}

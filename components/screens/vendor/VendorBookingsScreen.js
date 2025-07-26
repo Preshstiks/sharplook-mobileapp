@@ -16,40 +16,6 @@ import { ActivityIndicator } from "react-native";
 import { formatAmount } from "../../formatAmount";
 import { HexConverter } from "../../reusuableComponents/HexConverter";
 import { DateConverter } from "../../reusuableComponents/DateConverter";
-const bookings = [
-  {
-    id: "32145",
-    client: "Raji Balikis",
-    amount: 188528,
-    status: "Pending",
-    date: "July 17th",
-    time: "09:30AM",
-  },
-  {
-    id: "32146",
-    client: "Alimosho",
-    amount: 202000,
-    status: "Completed",
-    date: "July 17th",
-    time: "09:30AM",
-  },
-  {
-    id: "32147",
-    client: "James",
-    amount: 12528,
-    status: "Pending",
-    date: "July 17th",
-    time: "09:30AM",
-  },
-  {
-    id: "32148",
-    client: "Precious",
-    amount: 60000,
-    status: "Completed",
-    date: "July 17th",
-    time: "09:30AM",
-  },
-];
 
 // Skeleton Loader Component
 function SkeletonLoader() {

@@ -281,6 +281,7 @@ export default function DashboardScreen({ navigation }) {
 
   console.log({ DETAILS: user });
   // Fetch products, bookings, and wallet balance
+
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
@@ -293,19 +294,9 @@ export default function DashboardScreen({ navigation }) {
           ]);
 
           // Map bookings: ensure each has id, name, date, time, service, price, avatar
-          const fetchedBookings = (bookingsRes.data?.data || []).map(
-            (b, idx) => ({
-              id: b.id || idx,
-              name: b.clientName || b.name || "Unknown",
-              date: b.date || b.bookingDate || "",
-              time: b.time || b.bookingTime || "",
-              service: b.service || b.serviceName || "",
-              price: b.price ? `₦${b.price}` : "",
-              avatar: typeof b.avatar === "string" ? b.avatar : null, // Only string URLs
-            })
-          );
+
           setProducts(productsRes.data.data);
-          setBookings(fetchedBookings);
+          setBookings(bookingsRes.data.data);
           setWalletBalance(walletRes.data?.wallet?.balance || 0);
         } catch (err) {
           console.error("Error fetching data:", err);
@@ -484,7 +475,7 @@ export default function DashboardScreen({ navigation }) {
                   className="text-[14px]"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
-                  {b?.name}
+                  {b?.client?.lastName} {b?.client?.firstName}
                 </Text>
                 <Text
                   className="text-[12px] text-fadedDark"
@@ -504,7 +495,7 @@ export default function DashboardScreen({ navigation }) {
                   className="text-[14px] text-primary"
                   style={{ fontFamily: "latoBold" }}
                 >
-                  {b?.price}
+                  {formatAmount(b?.price)}
                 </Text>
               </View>
             </View>

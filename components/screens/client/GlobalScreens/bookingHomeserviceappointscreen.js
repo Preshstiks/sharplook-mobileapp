@@ -245,7 +245,7 @@ export default function BookingHomeServiceAppointScreen() {
     try {
       const res = await HttpClient.post("/payment/paystack/initiate", {
         paymentFor: "BOOKING",
-        description: "Booking for Home Service",
+        description: "Payment for Home Service Booking",
         amount: service.servicePrice + calculatePrice(distanceApart),
       });
       setPaystackPaymentUrl(res.data.paymentUrl);

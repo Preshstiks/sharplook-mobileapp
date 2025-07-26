@@ -83,6 +83,18 @@ export default function CustomDrawerContent(props) {
             Analytics and Insight
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-row items-center px-6 py-4"
+          onPress={() => props.navigation.navigate("VendorOffers")}
+        >
+          <FontAwesome5 name="gift" size={20} color="#ED2584" />
+          <Text
+            className="ml-4 text-[15px] text-faintDark"
+            style={{ fontFamily: "poppinsRegular" }}
+          >
+            Offers
+          </Text>
+        </TouchableOpacity>
         {/* Notification */}
         <TouchableOpacity
           className="flex-row items-center px-6 py-4"

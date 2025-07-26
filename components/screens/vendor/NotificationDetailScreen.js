@@ -10,38 +10,6 @@ export default function NotificationDetailScreen() {
   const route = useRoute();
   const { notification } = route.params;
 
-  // Handles booking status update (accept/reject)
-  const handleSubmit = async (status) => {
-    try {
-      // Extract booking ID from notification. Adjust as needed.
-      const bookingId =
-        notification?.bookingId ||
-        notification?.id ||
-        notification?.details?.bookingId;
-      if (!bookingId) {
-        showToast.error("Booking ID not found.");
-        return;
-      }
-      const res = await HttpClient.patch(`/bookings/${bookingId}/status`, {
-        status,
-      });
-      showToast.success(res.data.message || `Booking ${status.toLowerCase()}.`);
-      navigation.goBack();
-    } catch (error) {
-      let msg = `Failed to ${status.toLowerCase()} booking.`;
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        msg = error.response.data.message;
-      } else if (error.message) {
-        msg = error.message;
-      }
-      showToast.error(msg);
-    }
-  };
-
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
       {/* Header */}
@@ -53,19 +21,19 @@ export default function NotificationDetailScreen() {
         <View style={{ width: 28 }} />
       </View>
       <View style={styles.body}>
-        {notification.heading && (
+        {notification.message.includes("booking") && (
           <Text
             className="text-[16px] font-bold mb-6"
             style={{ fontFamily: "poppinsBold" }}
           >
-            {notification.heading}
+            Booking Notification
           </Text>
         )}
         <Text
           className="text-[14px] mb-4"
           style={{ fontFamily: "latoRegular" }}
         >
-          {notification.details}
+          {notification.message}
         </Text>
         <Text
           className="text-[14px] mt-6"

@@ -57,6 +57,8 @@ import WithdrawScreen from "./WithdrawScreen";
 import EditServicesScreen from "./ProductAndServices/EditService";
 import FundVendorWalletScreen from "./FundVendorWallet";
 import VendorTransactionHistory from "./VendorTransactionHistory";
+import VendorOffersScreen from "./VendorOffersScreen";
+import VendorOfferDetailsScreen from "./VendorOfferDetailsScreen";
 
 // import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
 
@@ -548,6 +550,16 @@ export default function VendorNavigator() {
       <Stack.Screen
         name="VendorTransactionHistory"
         component={VendorTransactionHistory}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorOffers"
+        component={VendorOffersScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorOfferDetails"
+        component={VendorOfferDetailsScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

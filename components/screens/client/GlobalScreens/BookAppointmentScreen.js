@@ -71,7 +71,7 @@ export default function BookAppointmentScreen() {
     try {
       const res = await HttpClient.post("/payment/paystack/initiate", {
         paymentFor: "BOOKING",
-        description: "Booking for In Shop",
+        description: "Payment for In-Shop Booking",
         amount: service.servicePrice,
       });
       setPaystackPaymentUrl(res.data.paymentUrl);
