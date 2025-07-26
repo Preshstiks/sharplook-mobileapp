@@ -20,6 +20,9 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import BottomModal from "../../reusuableComponents/BottomModal";
 import { OutlineTextAreaInput } from "../../reusuableComponents/inputFields/OutlineTextInput";
+import { HexConverter } from "../../reusuableComponents/HexConverter";
+import { DateConverter } from "../../reusuableComponents/DateConverter";
+import { formatAmount } from "../../formatAmount";
 
 export default function VendorBookingDetailScreen() {
   const route = useRoute();
@@ -43,12 +46,11 @@ export default function VendorBookingDetailScreen() {
     if (!booking?.id) return;
     setIsLoadingComplete(true);
     try {
-      const res = await HttpClient.post(
-        `/bookings/${booking.id}/complete/vendor`
-      );
+      const res = await HttpClient.patch("/bookings/complete/vendor", {
+        bookingId: booking?.id,
+      });
       showToast.success(res.data.message || "Booking marked as completed.");
-      // Optionally, update UI or navigate
-      if (typeof booking === "object") booking.status = "Completed";
+      navigation.goBack();
     } catch (error) {
       showToast.error(
         error?.response?.data?.message ||
@@ -78,11 +80,13 @@ export default function VendorBookingDetailScreen() {
   const handleDisputeSubmit = async (values, { resetForm }) => {
     setIsSubmittingDispute(true);
     try {
-      await HttpClient.post("/disputes/raiseDispute", {
+      const res = await HttpClient.post("/disputes/raiseDispute", {
         bookingId: booking?.id,
         reason: values.reason,
         image: values.image,
       });
+      console.log(res.data);
+      showToast.success(res.data.message);
       // Optionally show a toast or feedback here
       setShowDisputeModal(false);
       resetForm();
@@ -137,16 +141,17 @@ export default function VendorBookingDetailScreen() {
         {/* Status */}
         <View className="mt-6 mb-2">
           <Text
-            className="text-[16px] mb-3 text-[#A5A5A5]"
+            className="text-[14px] mb-3 text-[#A5A5A5]"
             style={{ fontFamily: "poppinsMedium" }}
           >
-            Booking <Text className="text-fadedDark">#{booking?.id}</Text>
+            Booking{" "}
+            <Text className="text-fadedDark">{HexConverter(booking?.id)}</Text>
           </Text>
           <Text
-            className={`text-[16px] ${booking?.status === "Completed" ? "text-success" : "text-pending"}`}
+            className={`text-[12px] ${booking?.status === "COMPLETED" ? "text-success" : "text-pending"}`}
             style={{ fontFamily: "poppinsMedium" }}
           >
-            {booking?.status || "Pending"}
+            {booking?.status}
           </Text>
         </View>
         {/* Booking Details */}
@@ -170,30 +175,29 @@ export default function VendorBookingDetailScreen() {
             className="text-primary text-[12px] mb-1"
             style={{ fontFamily: "poppinsSemiBold" }}
           >
-            July 22, 2024 at 09:15pm
+            {DateConverter(booking?.date)} at {booking?.time}
           </Text>
           <Text
             className="text-[12px] mb-2"
             style={{ fontFamily: "poppinsRegular" }}
           >
-            By: Team Green
+            By: {booking?.client?.lastName} {booking?.client?.firstName}
           </Text>
-          {bookingDetails.map((item, idx) => (
-            <View key={idx} className="flex-row justify-between mb-1">
-              <Text
-                className="text-[12px] text-[#00000066]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                {idx + 1}. {item.name}
-              </Text>
-              <Text
-                className="text-[14px] text-[#00000066]"
-                style={{ fontFamily: "latoBold" }}
-              >
-                ₦{item.amount.toLocaleString()}
-              </Text>
-            </View>
-          ))}
+
+          <View className="flex-row justify-between mb-1">
+            <Text
+              className="text-[12px] text-[#00000066]"
+              style={{ fontFamily: "poppinsRegular" }}
+            >
+              {booking?.service?.serviceName}
+            </Text>
+            <Text
+              className="text-[14px] text-[#00000066]"
+              style={{ fontFamily: "latoBold" }}
+            >
+              {formatAmount(booking?.totalAmount)}
+            </Text>
+          </View>
         </View>
         {/* Payment Summary */}
         <View
@@ -227,25 +231,23 @@ export default function VendorBookingDetailScreen() {
               Total Payment{" "}
             </Text>
             <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
-              ₦{booking?.amount?.toLocaleString()}
+              {formatAmount(booking?.totalAmount)}
             </Text>
           </View>
-          {paymentDetails.map((item, idx) => (
-            <View key={idx} className="flex-row justify-between mb-1">
-              <Text
-                className="text-[12px] text-[#00000066]"
-                style={{ fontFamily: "poppinsRegular" }}
-              >
-                {idx + 1}. {item.name}
-              </Text>
-              <Text
-                className="text-[14px] text-[#00000066]"
-                style={{ fontFamily: "latoBold" }}
-              >
-                ₦{item.amount.toLocaleString()}
-              </Text>
-            </View>
-          ))}
+          <View className="flex-row justify-between mb-1">
+            <Text
+              className="text-[12px] text-[#00000066]"
+              style={{ fontFamily: "poppinsRegular" }}
+            >
+              {booking?.service?.serviceName}
+            </Text>
+            <Text
+              className="text-[14px] text-[#00000066]"
+              style={{ fontFamily: "latoBold" }}
+            >
+              {formatAmount(booking?.price)}
+            </Text>
+          </View>
         </View>
         {/* Appointment Details */}
         <View
@@ -275,13 +277,13 @@ export default function VendorBookingDetailScreen() {
               className="text-[12px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
-              Team Green
+              {booking?.client?.lastName} {booking?.client?.firstName}
             </Text>
           </View>
           <View className="flex-row justify-between mb-1">
             <Text
               className="text-[12px] text-[#00000066]"
-              style={{ fontFamily: "poppinsRegular" }}
+              style={{ fontFamily: "popptotalAmountinsRegular" }}
             >
               Time
             </Text>
@@ -289,7 +291,7 @@ export default function VendorBookingDetailScreen() {
               className="text-[12px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
-              9:00AM
+              {booking?.time}
             </Text>
           </View>
           <View className="flex-row justify-between mb-1">
@@ -303,11 +305,11 @@ export default function VendorBookingDetailScreen() {
               className="text-[12px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
-              July 6th, 2024
+              {DateConverter(booking?.date)}
             </Text>
           </View>
         </View>
-        {booking?.status === "Pending" && (
+        {booking?.status === "PENDING" && (
           <View className="mt-2 mb-1">
             <AuthButton
               title="Complete Booking"

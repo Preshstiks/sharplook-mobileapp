@@ -130,9 +130,10 @@ export default function ServiceReviewsScreen() {
         setLoading(true);
         setError(null);
         try {
-          const res = await HttpClient.get(
-            `/reviews/${vendorId}/service/${serviceId}/reviews`
-          );
+          const res = await HttpClient.post("/reviews/service", {
+            vendorId,
+            serviceId,
+          });
           setReviews(res.data?.data || []);
           console.log(res.data);
         } catch (err) {

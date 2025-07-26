@@ -23,14 +23,14 @@ const EditProfileScreen = ({ navigation }) => {
   const handleUpdateProfile = async (values) => {
     setIsLoading(true);
     try {
-      const response = await HttpClient.put("/users/updateProfile", values);
-      showToast(response.data.message);
+      const response = await HttpClient.put("/user/updateProfile", values);
+      showToast.success(response.data.message);
       navigation.goBack();
     } catch (error) {
       console.log(error.response);
       const message =
         error.response.data.message || error.message || error.data.message;
-      showToast(message);
+      showToast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -103,6 +103,7 @@ const EditProfileScreen = ({ navigation }) => {
                 <OutlineTextInput
                   label="Email Address"
                   value={values.email}
+                  editable={false}
                   onChangeText={handleChange("email")}
                   onBlur={handleBlur("email")}
                   error={errors.email}

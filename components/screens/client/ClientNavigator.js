@@ -16,9 +16,7 @@ import SettingsScreen from "./Profile/SettingsScreen";
 import HelpSupportScreen from "./Profile/HelpSupportScreen";
 import LegalScreen from "./Profile/LegalScreen";
 import AddReviewScreen from "./reviews/AddReviewScreen";
-import OtherScreen from "./OtherScreen";
 import ReferAndEarnScreen from "./ReferAndEarnScreen";
-import WalletScreen from "./WalletScreen";
 import ReviewsScreen from "./reviews/ReviewsScreen";
 import OfferPriceScreen from "./Booking/OfferPriceScreen";
 import VendorPortfolioScreen from "./GlobalScreens/VendorPortfolioScreen";
@@ -208,12 +206,6 @@ export default function ClientNavigator() {
       <Drawer.Screen
         name="ProductReviewScreen"
         component={ProductReviewsScreen}
-        options={{ drawerItemStyle: { display: "none" } }}
-      />
-
-      <Drawer.Screen
-        name="OtherScreen"
-        component={OtherScreen}
         options={{ drawerItemStyle: { display: "none" } }}
       />
 

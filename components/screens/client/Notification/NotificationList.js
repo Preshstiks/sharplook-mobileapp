@@ -10,7 +10,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { HttpClient } from "../../../../api/HttpClient";
 import EmptySVG from "../../../../assets/img/empty.svg";
-import { getRelativeTime } from "../../../reusuableComponents/RelativeTime";
+import {
+  getRelativeTime,
+  groupNotificationsByAge,
+} from "../../../reusuableComponents/RelativeTime";
 
 export default function NotificationList() {
   const navigation = useNavigation();
@@ -27,18 +30,9 @@ export default function NotificationList() {
 
           // Ensure data is an array and has the correct structure for SectionList
           if (Array.isArray(data)) {
-            // If the API returns sections with title and data properties, use as is
-            if (data.length > 0 && data[0].title && data[0].data) {
-              setNotifications(data);
-            } else {
-              // If API returns flat array, convert to section format
-              setNotifications([
-                {
-                  title: "Recent",
-                  data: data,
-                },
-              ]);
-            }
+            // Use the new grouping function to organize notifications by age
+            const groupedNotifications = groupNotificationsByAge(data);
+            setNotifications(groupedNotifications);
           } else {
             setNotifications([]);
           }

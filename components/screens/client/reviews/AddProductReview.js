@@ -11,6 +11,7 @@ import { HttpClient } from "../../../../api/HttpClient";
 import { Formik } from "formik";
 import { reviewValidationSchema } from "../../../../utils/validationSchemas";
 import { useAuth } from "../../../../context/AuthContext";
+import { showToast } from "../../../ToastComponent/Toast";
 
 export default function AddProductReviewScreen() {
   const route = useRoute();
@@ -42,6 +43,7 @@ export default function AddProductReviewScreen() {
         rating: values.rating,
       });
       showToast.success(res.data.message);
+      navigation.goBack();
     } catch (error) {
       console.log(error.response);
     } finally {

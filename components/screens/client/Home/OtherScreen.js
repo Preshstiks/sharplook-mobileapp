@@ -7,11 +7,11 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import NailIcon from "../../../assets/icon/nail.svg";
-import MakeupIcon from "../../../assets/icon/makeupicon.svg";
-import BarbingSaloonIcon from "../../../assets/icon/clipper.svg";
-import HairIcon from "../../../assets/icon/hairicon.svg";
-import OptionsIcon from "../../../assets/icon/options.svg";
+import NailIcon from "../../../../assets/icon/nail.svg";
+import MakeupIcon from "../../../../assets/icon/makeupicon.svg";
+import BarbingSaloonIcon from "../../../../assets/icon/clipper.svg";
+import HairIcon from "../../../../assets/icon/hairicon.svg";
+import OptionsIcon from "../../../../assets/icon/options.svg";
 import { useRoute, useNavigation } from "@react-navigation/native";
 
 const categories = [

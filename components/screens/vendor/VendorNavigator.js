@@ -55,6 +55,8 @@ import AddServicesScreen from "./ProductAndServices/AddServicesScreen";
 import EditProductScreen from "./ProductAndServices/EditProduct";
 import WithdrawScreen from "./WithdrawScreen";
 import EditServicesScreen from "./ProductAndServices/EditService";
+import FundVendorWalletScreen from "./FundVendorWallet";
+import VendorTransactionHistory from "./VendorTransactionHistory";
 
 // import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
 
@@ -208,6 +210,7 @@ export default function VendorNavigator() {
         component={StoreManagementScreen}
         options={{ headerShown: false }}
       />
+
       <Stack.Screen
         name="VendorSettingsScreen"
         children={(props) => (
@@ -535,6 +538,16 @@ export default function VendorNavigator() {
       <Stack.Screen
         name="Withdraw"
         component={WithdrawScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="FundVendorWallet"
+        component={FundVendorWalletScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorTransactionHistory"
+        component={VendorTransactionHistory}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

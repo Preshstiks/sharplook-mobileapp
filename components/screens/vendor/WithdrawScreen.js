@@ -6,7 +6,7 @@ import Dropdown from "../../reusuableComponents/inputFields/Dropdown";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import HttpClient from "../../../api/HttpClient";
+import { HttpClient } from "../../../api/HttpClient";
 import { showToast } from "../../ToastComponent/Toast";
 
 const bankOptions = [
@@ -39,15 +39,12 @@ const bankOptions = [
   { label: "Zenith Bank", value: "Zenith Bank" },
 ];
 
-const methodOptions = [{ label: "Bank Transfer", value: "bank_transfer" }];
-
 const validationSchema = Yup.object().shape({
   amount: Yup.number()
     .typeError("Amount must be a number")
     .positive("Amount must be greater than zero")
     .required("Amount is required"),
   reason: Yup.string().required("Reason is required"),
-  method: Yup.string().required("Withdrawal method is required"),
   accountName: Yup.string().required("Account name is required"),
   accountNumber: Yup.string()
     .matches(/^\d{10}$/, "Account number must be 10 digits")
@@ -55,7 +52,7 @@ const validationSchema = Yup.object().shape({
   bankName: Yup.string().required("Bank name is required"),
 });
 
-export default function WithdrawScreen({ navigation }) {
+export default function ClientWithdrawScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   return (
@@ -90,19 +87,25 @@ export default function WithdrawScreen({ navigation }) {
             const payload = {
               amount: Number(values.amount),
               reason: values.reason,
-              method: values.method,
+              method: "BANK_TRANSFER",
               metadata: {
                 accountName: values.accountName,
                 accountNumber: values.accountNumber,
                 bankName: values.bankName,
               },
             };
-            await HttpClient.post("/withdrawals/requestWithdrawals", payload);
+            console.log(payload);
+            const res = await HttpClient.post(
+              "/withdrawals/requestWithdrawals",
+              payload
+            );
+            showToast.success(res.data.message);
             resetForm();
             navigation.goBack();
           } catch (error) {
             const message = error.response.data.message || error.message;
             showToast.error(message);
+            console.log(error.response);
           } finally {
             setLoading(false);
             setSubmitting(false);
@@ -150,16 +153,7 @@ export default function WithdrawScreen({ navigation }) {
                 error={errors.reason}
                 touched={touched.reason}
               />
-              {/* Method */}
-              <Dropdown
-                label="Withdrawal Method"
-                value={values.method}
-                options={methodOptions}
-                onValueChange={(val) => setFieldValue("method", val)}
-                placeholder="Select Method"
-                error={errors.method}
-                touched={touched.method}
-              />
+
               {/* Account Name */}
               <OutlineTextInput
                 label="Account Name"
@@ -198,7 +192,8 @@ export default function WithdrawScreen({ navigation }) {
             </ScrollView>
             <View className="px-4 pb-6 bg-white">
               <AuthButton
-                title={loading ? "Processing..." : "Withdraw"}
+                isloading={loading}
+                title={"Withdraw"}
                 onPress={handleSubmit}
                 disabled={loading || isSubmitting}
               />

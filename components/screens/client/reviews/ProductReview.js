@@ -121,15 +121,20 @@ export default function ProductReviewsScreen() {
   const vendorId = vendor?.id;
   const productId = product?.id;
   console.log(vendor);
+  console.log(vendorId, productId);
+  const hasReviewedThisProduct = reviews.some(
+    (review) => review.productId === productId
+  );
   useFocusEffect(
     useCallback(() => {
       const fetchReviews = async () => {
         setLoading(true);
         setError(null);
         try {
-          const res = await HttpClient.get(
-            `/reviews/${vendorId}/product/${productId}/reviews`
-          );
+          const res = await HttpClient.post("/reviews/product", {
+            vendorId,
+            productId,
+          });
           setReviews(res.data?.data || []);
           console.log(res.data);
         } catch (err) {
@@ -207,28 +212,31 @@ export default function ProductReviewsScreen() {
               ))}
             </View>
           </View>
-          <TouchableOpacity
-            className="bg-primary flex-row items-center px-4 py-[10px] rounded-lg"
-            onPress={() =>
-              navigation.navigate("AddProductReviewScreen", {
-                vendorId,
-                productId,
-              })
-            }
-          >
-            <Ionicons
-              name="create-outline"
-              size={18}
-              color="#fff"
-              className="mr-1"
-            />
-            <Text
-              className="text-white mt-1 text-[12px] ml-2"
-              style={{ fontFamily: "poppinsRegular" }}
+          {/* Only show Add Review button if hasReviewedThisProduct is false */}
+          {!hasReviewedThisProduct && (
+            <TouchableOpacity
+              className="bg-primary flex-row items-center px-4 py-[10px] rounded-lg"
+              onPress={() =>
+                navigation.navigate("AddProductReviewScreen", {
+                  vendorId,
+                  productId,
+                })
+              }
             >
-              Add Review
-            </Text>
-          </TouchableOpacity>
+              <Ionicons
+                name="create-outline"
+                size={18}
+                color="#fff"
+                className="mr-1"
+              />
+              <Text
+                className="text-white mt-1 text-[12px] ml-2"
+                style={{ fontFamily: "poppinsRegular" }}
+              >
+                Add Review
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
         {/* Loading/Error/Empty States */}
         {loading && (

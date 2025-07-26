@@ -133,21 +133,8 @@ export default function VendorBookingsScreen() {
         setLoading(true);
         try {
           const res = await HttpClient.get("/bookings/getBookings");
-          // Transform bookings to match UI expectations
-          const transformed = (res.data?.data || []).map((b) => ({
-            id: b.id,
-            date: b.date,
-            time: b.time,
-            status: b.status,
-            amount: b.totalAmount || b.price || 0,
-            client:
-              b.client?.name ||
-              b.clientName ||
-              b.client?.fullName ||
-              b.clientId ||
-              "Unknown",
-          }));
-          setBookings(transformed);
+          console.log(res.data.data);
+          setBookings(res.data.data);
         } catch (err) {
           setBookings([]);
         } finally {
@@ -164,7 +151,7 @@ export default function VendorBookingsScreen() {
   });
 
   const totalBookings = bookings.length;
-  const totalAmount = bookings.reduce((sum, b) => sum + b.amount, 0);
+  const totalAmount = bookings.reduce((sum, b) => sum + b.price, 0);
   console.log({ bookings });
   return (
     <View className="flex-1 bg-white">
@@ -244,7 +231,7 @@ export default function VendorBookingsScreen() {
               style={{ fontFamily: "latoBold" }}
               className={`text-[12px] uppercase ${tab === t ? "text-white" : "text-fadedDark"}`}
             >
-              {t.charAt(0) + t.slice(1).toLowerCase()}
+              {t}
             </Text>
           </Pressable>
         ))}
@@ -289,7 +276,7 @@ export default function VendorBookingsScreen() {
                   {HexConverter(b?.id)} {DateConverter(b.date)} {b.time}
                 </Text>
                 <Text
-                  className={`text-[12px] ${b.status === "Completed" ? "text-success" : "text-pending"}`}
+                  className={`text-[12px] ${b.status === "COMPLETED" ? "text-success" : "text-pending"}`}
                   style={{ fontFamily: "latoBold" }}
                 >
                   {b?.status}
@@ -299,14 +286,14 @@ export default function VendorBookingsScreen() {
                 className="text-[18px] text-fadedDark"
                 style={{ fontFamily: "latoBold" }}
               >
-                {formatAmount(b?.amount)}
+                {formatAmount(b?.price)}
               </Text>
               <View className="flex-row justify-between items-center mt-2">
                 <Text
                   className="text-[14px]"
                   style={{ fontFamily: "latoRegular" }}
                 >
-                  {b.client}
+                  {b?.client?.lastName} {b?.client?.firstName}
                 </Text>
                 <Text
                   className="text-faintDark text-[12px]"

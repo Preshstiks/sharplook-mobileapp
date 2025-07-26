@@ -35,12 +35,13 @@ export default function BookingDetailScreen() {
   const [isloadingComplete, setIsloadingComplete] = useState(false);
   const { booking } = route.params || {};
   console.log({ booking });
+  const bookingId = booking?.id;
   const handleCompleteBooking = async () => {
     setIsloadingComplete(true);
     try {
-      const res = await HttpClient.patch(
-        `/bookings/${booking?.id}/complete/client`
-      );
+      const res = await HttpClient.patch("/bookings/complete/client", {
+        bookingId,
+      });
       showToast.success(res.data.message);
       console.log(res.data);
       navigation.goBack();

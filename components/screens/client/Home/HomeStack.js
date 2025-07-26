@@ -8,6 +8,7 @@ import CartScreen from "../GlobalScreens/CartScreen";
 import VendorProfileScreen from "../GlobalScreens/VendorProfileScreen";
 import BookAppointmentScreen from "../GlobalScreens/BookAppointmentScreen";
 import ProductReviewsScreen from "../reviews/ProductReview";
+import OtherScreen from "./OtherScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ export default function HomeStack() {
         name="ProductReviewsScreen"
         component={ProductReviewsScreen}
       />
+      <Stack.Screen name="OtherScreen" component={OtherScreen} />
       <Stack.Screen name="ChatListScreen" component={ChatListScreen} />
       <Stack.Screen name="ChatDetailScreen" component={ChatDetailScreen} />
       <Stack.Screen

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -13,49 +13,18 @@ import {
 import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { showToast } from "../../ToastComponent/Toast";
-const mockTransactions = [
-  {
-    type: "credit",
-    desc: "Friend Sarah joined & booked",
-    date: "2023-10-28",
-    amount: 100,
-  },
-  {
-    type: "credit",
-    desc: "Friend David joined & booked",
-    date: "2023-10-20",
-    amount: 100,
-  },
-  {
-    type: "debit",
-    desc: "Used for a Manicure service",
-    date: "2023-10-15",
-    amount: -50,
-  },
-  {
-    type: "credit",
-    desc: "Friend Emily joined & booked",
-    date: "2023-10-10",
-    amount: 100,
-  },
-  {
-    type: "credit",
-    desc: "Friend John joined & booked",
-    date: "2023-10-05",
-    amount: 100,
-  },
-  {
-    type: "credit",
-    desc: "Friend Mark joined & booked",
-    date: "2023-09-30",
-    amount: 100,
-  },
-];
+import { HttpClient } from "../../../api/HttpClient";
+import { useFocusEffect } from "@react-navigation/native";
+import { EmptyData } from "../../reusuableComponents/EmptyData";
+import { formatAmount } from "../../formatAmount";
 
 export default function ReferAndEarnScreen() {
   const [inputCode, setInputCode] = useState("");
   const [copied, setCopied] = useState(false);
   const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [referralTransactions, setReferralTransactions] = useState([]);
+  const [analytics, setAnalytics] = useState({});
 
   //   const sharemsg = `I’ve been using this app lately, and it’s honestly made self-care so much easier. From finding trusted experts to grabbing my favorite beauty essentials—everything's just a tap away
   // And here’s the best part: you get ₦100 when you join using my referral code ${user?.referralCode}, and I get ₦100 for every person who joins using my referral code. Give it a try—you’ll thank me later 💖`;
@@ -83,6 +52,27 @@ export default function ReferAndEarnScreen() {
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
+
+  const getReferralInfo = async () => {
+    setIsLoading(true);
+    try {
+      const [referralAnalytics, referralHistory] = await Promise.all([
+        HttpClient.get("/referrals/analytics"),
+        HttpClient.get("/referrals/referralHistory"),
+      ]);
+      setReferralTransactions(referralHistory.data.data);
+      setAnalytics(referralAnalytics.data.data);
+    } catch (error) {
+      console.log(error.response);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useFocusEffect(
+    useCallback(() => {
+      getReferralInfo();
+    }, [])
+  );
   return (
     <View className="flex-1 bg-white">
       <View style={styles.header}>
@@ -173,43 +163,51 @@ export default function ReferAndEarnScreen() {
 
           <View style={styles.summaryRow}>
             <Ionicons name="wallet-outline" size={20} color="#EB278D" />
-            <Text style={styles.summaryLabel}>Current Balance</Text>
-            <Text style={styles.summaryValue}>₦500</Text>
+            <Text style={styles.summaryLabel}>Money made</Text>
+            <Text style={styles.summaryValue}>
+              {formatAmount(analytics?.totalEarned)}
+            </Text>
           </View>
           <View style={styles.summaryRow}>
             <Ionicons name="people-outline" size={20} color="#EB278D" />
             <Text style={styles.summaryLabel}>Friends Who Joined</Text>
-            <Text style={styles.summaryValue}>5</Text>
+            <Text style={styles.summaryValue}>
+              {formatAmount(analytics?.totalReferrals)}
+            </Text>
           </View>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Wallet Transactions</Text>
-          {mockTransactions.map((tx, idx) => (
-            <View key={idx} style={styles.txRow}>
-              <Feather
-                name={
-                  tx.type === "credit" ? "arrow-up-right" : "arrow-down-left"
-                }
-                size={24}
-                color={tx.type === "credit" ? "#EB278D" : "#EF4444"}
-                style={{ marginRight: 8 }}
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.txDesc}>{tx.desc}</Text>
-                <Text style={styles.txDate}>{tx.date}</Text>
+          <Text style={styles.sectionTitle}>Referral History</Text>
+          {referralTransactions.length > 0 ? (
+            referralTransactions.map((tx, idx) => (
+              <View key={idx} style={styles.txRow}>
+                <Feather
+                  name={
+                    tx.type === "credit" ? "arrow-up-right" : "arrow-down-left"
+                  }
+                  size={24}
+                  color={tx.type === "credit" ? "#EB278D" : "#EF4444"}
+                  style={{ marginRight: 8 }}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.txDesc}>{tx.desc}</Text>
+                  <Text style={styles.txDate}>{tx.date}</Text>
+                </View>
+                <Text
+                  style={[
+                    styles.txAmount,
+                    { color: tx.amount > 0 ? "#EB278D" : "#EF4444" },
+                  ]}
+                >
+                  {" "}
+                  {tx.amount > 0 ? "+" : ""}₦{Math.abs(tx.amount)}
+                </Text>
               </View>
-              <Text
-                style={[
-                  styles.txAmount,
-                  { color: tx.amount > 0 ? "#EB278D" : "#EF4444" },
-                ]}
-              >
-                {" "}
-                {tx.amount > 0 ? "+" : ""}₦{Math.abs(tx.amount)}
-              </Text>
-            </View>
-          ))}
+            ))
+          ) : (
+            <EmptyData msg="No Referral yet" />
+          )}
         </View>
 
         <Text style={styles.forNewUsers}>For New Users</Text>

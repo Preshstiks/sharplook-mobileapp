@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Modal,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -48,7 +49,7 @@ export default function BookingHomeServiceAppointScreen() {
   const [paystackModalVisible, setPaystackModalVisible] = useState(false);
   const [paystackPaymentUrl, setPaystackPaymentUrl] = useState("");
   const [paymentReference, setPaymentReference] = useState("");
-  const [pendingBookingValues, setPendingPaymentValues] = useState({});
+  const [pendingBookingValues, setPendingBookingValues] = useState({});
   const service = route.params?.service;
   console.log({ user });
   const locationOption = [
@@ -150,69 +151,92 @@ export default function BookingHomeServiceAppointScreen() {
   console.log(selectedOption);
   console.log({ service });
 
-  const createBookingFormData = (
-    values,
-    paymentReference,
-    paymentMethod = "SHARP-PAY"
-  ) => {
-    const formData = new FormData();
-    formData.append("clientId", user.id);
-    formData.append("vendorId", service.userId);
-    formData.append("serviceId", service.id);
-    formData.append("serviceName", service.serviceName);
-    formData.append("paymentMethod", paymentMethod);
-    formData.append("price", service.servicePrice);
-    formData.append(
-      "totalAmount",
-      service.servicePrice + calculatePrice(distanceApart)
-    );
-    formData.append("date", new Date(`${selectedDate}T${values.time}:00.000Z`));
-    formData.append("time", values.time);
-    formData.append("reference", paymentReference);
-    formData.append("serviceType", "HOME_SERVICE");
-    formData.append("fullAddress", values.fullAddress);
-    formData.append("landmark", values.landmark);
-    formData.append("specialInstruction", values.specialInstruction);
-
-    // Handle reference photo properly
-    if (referencePhoto) {
-      const filename = referencePhoto.split("/").pop();
-      const match = /\.(\w+)$/.exec(filename ?? "");
-      const type = match ? `image/${match[1]}` : `image`;
-      formData.append("referencePhoto", {
-        uri: referencePhoto,
-        name: filename,
-        type,
-      });
-    }
-
-    return formData;
-  };
-
-  // Updated handleBookNow to use the standardized FormData
   const handleBookNow = async (
     values,
     paymentReference,
     paymentMethod = "SHARP-PAY"
   ) => {
     console.log("[DEBUG] handleBookNow called with values:", values);
-    try {
-      const formData = createBookingFormData(
-        values,
-        paymentReference,
-        paymentMethod
-      );
+    console.log("[DEBUG] referencePhoto:", referencePhoto);
 
-      const res = await HttpClient.post("/bookings/bookVendor", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log("[DEBUG] handleBookNow response:", res.data);
-      showToast.success(res.data.message);
-      navigation.goBack();
+    try {
+      const payload = {
+        clientId: user.id,
+        vendorId: service.userId,
+        serviceId: service.id,
+        serviceName: service.serviceName,
+        paymentMethod: paymentMethod,
+        price: service.servicePrice,
+        totalAmount: service.servicePrice + calculatePrice(distanceApart),
+        date: selectedDate, // Add this missing field
+        time: values.time,
+        reference: paymentReference,
+        serviceType: "HOME_SERVICE",
+        fullAddress: values.fullAddress,
+        landmark: values.landmark,
+        serviceLocation: values.serviceLocation,
+        specialInstruction: values.specialInstruction,
+      };
+
+      // Handle reference photo if present
+      if (referencePhoto) {
+        console.log("[DEBUG] Uploading with photo:", referencePhoto);
+
+        const formData = new FormData();
+
+        // Add all payload fields to FormData
+        Object.keys(payload).forEach((key) => {
+          formData.append(key, payload[key]);
+        });
+
+        // Add the image file
+        const filename = referencePhoto.split("/").pop();
+        const match = /\.(\w+)$/.exec(filename ?? "");
+        const type = match ? `image/${match[1]}` : `image/jpeg`;
+
+        formData.append("referencePhoto", {
+          uri: referencePhoto,
+          name: filename || "image.jpg",
+          type,
+        });
+
+        console.log("[DEBUG] FormData created with photo");
+
+        const res = await HttpClient.post(
+          "/bookings/createHomeServiceBooking",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        showToast.success(res.data.message);
+        console.log("[DEBUG] handleBookNow response with photo:", res.data);
+        navigation.goBack();
+      } else {
+        console.log("[DEBUG] Booking without photo");
+        // No photo, use JSON payload
+        const res = await HttpClient.post(
+          "/bookings/createHomeServiceBooking",
+          payload
+        );
+        showToast.success(res.data.message);
+        console.log("[DEBUG] handleBookNow response:", res.data);
+        navigation.goBack();
+      }
     } catch (error) {
-      // ... your existing error handling
+      if (error.response?.data?.message === "Insufficient wallet balance") {
+        showToast.error(error.response.data.message);
+      } else {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Booking failed. Please try again.";
+        showToast.error(message);
+      }
+      console.log("[DEBUG] handleBookNow error:", error?.response || error);
     }
   };
   console.log({ service });
@@ -273,7 +297,17 @@ export default function BookingHomeServiceAppointScreen() {
       }
       setPaystackModalVisible(false);
     } catch (error) {
-      // ... your existing error handling
+      console.log(error.response);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Payment verification or booking failed.";
+      showToast.error(message);
+
+      console.log(
+        "[DEBUG] handlePaystackVerificationAndBooking error:",
+        error?.response || error
+      );
     } finally {
       setLoading(false);
       setPaymentReference("");
@@ -308,6 +342,7 @@ export default function BookingHomeServiceAppointScreen() {
           landmark: "",
           specialInstruction: "",
           referencePhoto: "",
+          serviceLocation: "",
         }}
         validationSchema={homeServiceValidationSchema}
         onSubmit={async (values, { setSubmitting }) => {
@@ -317,7 +352,7 @@ export default function BookingHomeServiceAppointScreen() {
               const reference = `SHARP-PAY-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
               await handleBookNow(values, reference, "SHARP-PAY");
             } else if (values.paymentMethod === "PAYSTACK") {
-              setPendingPaymentValues(values);
+              setPendingBookingValues(values);
               await checkout(values);
             } else {
               console.log("[DEBUG] No payment method selected.");
@@ -423,6 +458,12 @@ export default function BookingHomeServiceAppointScreen() {
                 </View>
 
                 <View className="border-x border-[#E9E9E9] border-b rounded-b-[8px] px-3 border-t-0">
+                  <AuthInput
+                    label="Service Location"
+                    value={values.serviceLocation}
+                    onChangeText={handleChange("serviceLocation")}
+                    name="serviceLocation"
+                  />
                   <AuthInput
                     label="Enter Full Address"
                     value={values.fullAddress}

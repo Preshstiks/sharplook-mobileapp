@@ -84,9 +84,15 @@ export const vendorBusinessInfoSchema = Yup.object().shape({
   registerationNumber: Yup.string().required(
     "Business registration number is required"
   ),
-  // portfolioLink: Yup.string()
-  //   .url("Portfolio link must be a valid URL")
-  //   .notRequired(),
+  portfolioImages: Yup.array().of(Yup.mixed()).nullable(),
+  availability: Yup.object().shape({
+    days: Yup.array()
+      .of(Yup.string())
+      .min(1, "Select at least one day")
+      .required("Days are required"),
+    fromTime: Yup.string().required("Start time is required"),
+    toTime: Yup.string().required("End time is required"),
+  }),
 });
 
 export const addProductSchema = Yup.object().shape({

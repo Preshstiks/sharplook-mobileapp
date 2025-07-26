@@ -7,11 +7,7 @@ import {
   Image,
   StyleSheet,
 } from "react-native";
-import {
-  Ionicons,
-  MaterialCommunityIcons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { HttpClient } from "../../../api/HttpClient";
 import { formatAmount } from "../../formatAmount";
@@ -49,8 +45,12 @@ export default function WalletScreen() {
   const getWalletBalance = async () => {
     setLoading(true);
     try {
-      const res = await HttpClient.get("/wallet/walletDetails");
-      setWalletInfo(res.data.wallet);
+      const [walletRes, transactionsRes] = await Promise.all([
+        HttpClient.get("/wallet/walletDetails"),
+        HttpClient.get("/wallet/transactions"),
+      ]);
+      setWalletInfo(walletRes.data.wallet);
+      setTransactions(transactionsRes.data);
     } catch (error) {
       console.log(error);
     } finally {
@@ -185,10 +185,10 @@ export default function WalletScreen() {
             Array.from({ length: 5 }).map((_, idx) => (
               <SkeletonCard key={idx} />
             ))
-          ) : walletInfo?.transactions?.length === 0 ? (
+          ) : transactions?.length === 0 ? (
             <EmptyData title="No transactions found" />
           ) : (
-            walletInfo?.transactions?.slice(0, 5).map((tx, idx) => (
+            transactions?.slice(0, 5).map((tx, idx) => (
               <View key={tx.id || idx} className="flex-row items-center mb-4">
                 <Image
                   source={require("../../../assets/icon/avatar.png")}
@@ -199,24 +199,32 @@ export default function WalletScreen() {
                     className="text-[12px]"
                     style={{ fontFamily: "poppinsMedium" }}
                   >
-                    {tx.name || tx.description || "Transaction"}
+                    {tx?.description}
                   </Text>
                   <View className="flex-row mt-1 items-center">
                     <Text
                       className="text-[10px] text-faintDark mr-2"
                       style={{ fontFamily: "poppinsRegular" }}
                     >
-                      {formatDateTime(tx.createdAt)}
+                      {formatDateTime(tx?.createdAt)}
                     </Text>
                   </View>
                 </View>
                 <View className="items-end">
-                  <Text
-                    className="text-[10px] text-faintDark mb-1"
-                    style={{ fontFamily: "poppinsRegular" }}
-                  >
-                    {tx.type || "-"}
-                  </Text>
+                  <View className="flex-row items-center gap-1">
+                    <Text
+                      className="text-[10px] text-faintDark mb-1"
+                      style={{ fontFamily: "poppinsRegular" }}
+                    >
+                      {tx?.type}
+                    </Text>
+                    <Text
+                      className={`text-[10px] mb-1 ${tx?.status === "SUCCESS" ? "text-success" : tx?.status === "failed" ? "text-[#ff0000]" : tx?.status === "pending" || tx?.status === "PENDING" ? "text-pending" : tx?.status === "paid" ? "text-[#0D9488]" : null}`}
+                      style={{ fontFamily: "poppinsRegular" }}
+                    >
+                      {`(${tx?.status})`.toUpperCase()}
+                    </Text>
+                  </View>
                   <Text
                     className="text-primary text-[12px]"
                     style={{ fontFamily: "latoBold" }}

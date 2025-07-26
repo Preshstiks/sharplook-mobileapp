@@ -379,7 +379,9 @@ export default function DashboardScreen({ navigation }) {
               />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("VendorTransactionHistory")}
+          >
             <Text
               className="text-white text-[12px] opacity-80"
               style={{ fontFamily: "latoBold" }}
@@ -411,7 +413,11 @@ export default function DashboardScreen({ navigation }) {
           )}
         </View>
         <View className="flex-row justify-between mt-2">
-          <TouchableOpacity className="items-center flex-1" style={{ gap: 4 }}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("FundVendorWallet")}
+            className="items-center flex-1"
+            style={{ gap: 4 }}
+          >
             <MaterialIcons name="file-download" size={28} color="white" />
             <Text
               style={{ fontFamily: "latoRegular" }}
