@@ -196,7 +196,7 @@ export default function ChatDetailScreen() {
     } else {
       setConnectionStatus("connecting");
       // Initialize socket connection with improved options
-      socketRef.current = io("https://sharplook-backend-2l7j.onrender.com", {
+      socketRef.current = io("https://sharplook-backend-zd8j.onrender.com", {
         query: { userId },
         transports: ["websocket", "polling"], // Add polling as fallback
         reconnection: true,

@@ -178,7 +178,7 @@ export default function VendorChatDetail() {
           socketRef.current = preEstablishedSocket;
         } else {
           socketRef.current = io(
-            "https://sharplook-backend-2l7j.onrender.com",
+            "https://sharplook-backend-zd8j.onrender.com",
             {
               query: { userId },
               transports: ["websocket", "polling"],

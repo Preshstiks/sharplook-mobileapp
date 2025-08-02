@@ -125,7 +125,7 @@ export default function VendorChatListScreen() {
   useEffect(() => {
     if (userId) {
       fetchChats();
-      socketRef.current = io("https://sharplook-backend-2l7j.onrender.com", {
+      socketRef.current = io("https://sharplook-backend-zd8j.onrender.com", {
         query: { userId },
         transports: ["websocket"],
       });
