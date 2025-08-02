@@ -1,31 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import {
-  DrawerContentScrollView,
-  DrawerItemList,
-} from "@react-navigation/drawer";
-import { MaterialIcons, Ionicons, FontAwesome5 } from "@expo/vector-icons";
+import { DrawerContentScrollView } from "@react-navigation/drawer";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import CloseNavBtn from "../../../assets/icon/opennav.svg";
-import BottomModal from "../../reusuableComponents/BottomModal";
-import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
-import { AntDesign } from "@expo/vector-icons";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function CustomDrawerContent(props) {
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-  const handleLogout = () => {
-    setShowLogoutModal(true);
+  const { user, logout } = useAuth();
+  const handleLogout = async () => {
+    await logout();
   };
 
-  const handleClientSelect = () => {
-    setShowLogoutModal(false);
-    props.navigation.replace("Login");
-  };
-
-  const handleVendorSelect = () => {
-    setShowLogoutModal(false);
-    props.navigation.replace("VendorLogin");
-  };
   return (
     <DrawerContentScrollView
       {...props}
@@ -41,7 +26,11 @@ export default function CustomDrawerContent(props) {
         {/* Vendor Info */}
         <View className="flex-row mt-8 gap-3 items-center">
           <Image
-            source={require("../../../assets/img/logo/applogo.svg")}
+            source={
+              user?.avatar
+                ? { uri: user?.avatar }
+                : require("../../../assets/icon/avatar.png")
+            }
             style={{
               width: 40,
               height: 40,
@@ -49,9 +38,9 @@ export default function CustomDrawerContent(props) {
               marginBottom: 10,
             }}
           />
-          <View>
-            <Text style={{ fontFamily: "poppinsMedium", fontSize: 16 }}>
-              Heritage Spa and Beauty Services
+          <View className="w-[90%]">
+            <Text style={{ fontFamily: "poppinsMedium", fontSize: 14 }}>
+              {user?.vendorOnboarding?.businessName}
             </Text>
           </View>
         </View>
@@ -75,7 +64,7 @@ export default function CustomDrawerContent(props) {
           className="flex-row items-center px-6 py-4"
           onPress={() => props.navigation.navigate("AnalyticsAndInsight")}
         >
-          <FontAwesome5 name="chart-line" size={20} color="#ED2584" />
+          <Ionicons name="analytics-outline" size={22} color="#ED2584" />
           <Text
             className="ml-4 text-[15px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
@@ -83,16 +72,43 @@ export default function CustomDrawerContent(props) {
             Analytics and Insight
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           className="flex-row items-center px-6 py-4"
           onPress={() => props.navigation.navigate("VendorOffers")}
         >
-          <FontAwesome5 name="gift" size={20} color="#ED2584" />
+          <Ionicons name="pricetag-outline" size={22} color="#ED2584" />
           <Text
             className="ml-4 text-[15px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Offers
+          </Text>
+        </TouchableOpacity>
+        {/* Refer and Earn */}
+        <TouchableOpacity
+          className="flex-row items-center px-6 py-4"
+          onPress={() => props.navigation.navigate("Refer and Earn")}
+        >
+          <Ionicons name="gift-outline" size={22} color="#ED2584" />
+          <Text
+            className="ml-4 text-[15px] text-faintDark"
+            style={{ fontFamily: "poppinsRegular" }}
+          >
+            Refer and Earn
+          </Text>
+        </TouchableOpacity>
+        {/* Subscription */}
+        <TouchableOpacity
+          className="flex-row items-center px-6 py-4"
+          onPress={() => props.navigation.navigate("Subscription")}
+        >
+          <Ionicons name="card-outline" size={22} color="#ED2584" />
+          <Text
+            className="ml-4 text-[15px] text-faintDark"
+            style={{ fontFamily: "poppinsRegular" }}
+          >
+            Subscription
           </Text>
         </TouchableOpacity>
         {/* Notification */}
@@ -137,26 +153,6 @@ export default function CustomDrawerContent(props) {
       </View>
 
       {/* Logout Modal */}
-      <BottomModal
-        isVisible={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        backgroundcolor="#FCFCFC"
-      >
-        <View className="pt-10">
-          <OutlineButton
-            title="Are you a Client?"
-            onPress={handleClientSelect}
-            icon={<AntDesign name="user" size={20} color="#EB278D" />}
-            iconPosition="left"
-          />
-          <OutlineButton
-            title="Are you a Vendor?"
-            onPress={handleVendorSelect}
-            icon={<MaterialIcons name="storefront" size={20} color="#EB278D" />}
-            iconPosition="left"
-          />
-        </View>
-      </BottomModal>
     </DrawerContentScrollView>
   );
 }

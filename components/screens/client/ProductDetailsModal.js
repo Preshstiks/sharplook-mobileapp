@@ -12,6 +12,10 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { formatAmount } from "../../formatAmount";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import OutlinedButton from "../../reusuableComponents/buttons/OutlineButton";
+import { useNavigation } from "@react-navigation/native";
+import { useChatNavigation } from "../../../hooks/useChatNavigation";
+import { ChatConnectionLoader } from "../../reusuableComponents/ChatConnectionLoader";
+
 export default function ProductDetailsModal({
   visible,
   onClose,
@@ -21,6 +25,8 @@ export default function ProductDetailsModal({
   addingToCart = {},
 }) {
   const [quantity, setQuantity] = useState(1);
+  const navigation = useNavigation();
+  const { navigateToChat, isConnecting } = useChatNavigation();
 
   if (!product) return null;
 
@@ -37,28 +43,31 @@ export default function ProductDetailsModal({
     ? businessName.charAt(0).toUpperCase()
     : "M";
 
+  const handleChatVendor = () => {
+    const vendorId = product?.vendor?.id;
+    const vendorName = product?.vendor?.vendorOnboarding?.businessName;
+
+    if (vendorId) {
+      navigateToChat(navigation, {
+        vendorId: vendorId,
+        receiverName: vendorName,
+        chat: {
+          id: vendorId,
+          name: vendorName,
+          vendorId: vendorId,
+        },
+      });
+    }
+  };
+
   return (
-    <PageModal visible={visible} onClose={onClose} backgroundcolor="#FFFFFF">
+    <PageModal visible={visible} onClose={onClose}>
+      {/* Chat Connection Loader */}
+      <ChatConnectionLoader visible={isConnecting} />
+
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
-          {/* Product Image */}
-          <View style={{ marginBottom: 20 }} className="relative">
-            <View className="absolute top-5 right-5">
-              <TouchableOpacity
-                onPress={onClose}
-                style={{
-                  width: 32,
-                  zIndex: 10,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: "#F5F5F5",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Ionicons name="close" size={20} color="#EB278D" />
-              </TouchableOpacity>
-            </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View>
             <Image
               source={
                 product.picture
@@ -74,80 +83,28 @@ export default function ProductDetailsModal({
             />
           </View>
 
-          {/* Product Info */}
-          <View style={{ paddingHorizontal: 20 }}>
-            {/* Title and Quantity */}
+          <View className="px-4 pt-4">
+            <Text
+              style={{
+                fontFamily: "latoBold",
+                fontSize: 18,
+                color: "#000",
+                marginBottom: 8,
+              }}
+            >
+              {product.productName || product.title}
+            </Text>
+            <Text
+              style={{
+                fontFamily: "latoBold",
+                fontSize: 16,
+                color: "#EB278D",
+                marginBottom: 16,
+              }}
+            >
+              {formatAmount(product.price)}
+            </Text>
 
-            <View className="flex-row items-center justify-between mb-4">
-              <View>
-                <View style={{ flex: 1, marginRight: 16 }}>
-                  <Text
-                    style={{
-                      fontFamily: "poppinsMedium",
-                      fontSize: 16,
-                      color: "#000",
-                      lineHeight: 26,
-                    }}
-                  >
-                    {product.productName}
-                  </Text>
-                </View>
-                <Text
-                  style={{
-                    color: "#EB278D",
-                    marginTop: 6,
-                    fontFamily: "poppinsMedium",
-                    fontSize: 16,
-                    marginBottom: 8,
-                  }}
-                >
-                  {formatAmount(product.price)}
-                </Text>
-              </View>
-            </View>
-
-            {/* Rating and Reviews */}
-            <View className="flex-row items-center justify-between mb-4">
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                {[...Array(5)].map((_, i) => (
-                  <Ionicons
-                    key={i}
-                    name={
-                      i < Math.floor(product.rating || 0)
-                        ? "star"
-                        : "star-outline"
-                    }
-                    size={16}
-                    color="#FFC107"
-                  />
-                ))}
-                <Text
-                  style={{
-                    fontFamily: "latoRegular",
-                    fontSize: 12,
-                    marginLeft: 6,
-                    color: "#333",
-                  }}
-                >
-                  ({(product.reviews || 275).toLocaleString()} Reviews)
-                </Text>
-              </View>
-              <Text
-                style={{
-                  fontFamily: "latoRegular",
-                  fontSize: 12,
-                  color: "#00000066",
-                }}
-              >
-                {maxStock} pieces available in stock
-              </Text>
-            </View>
-            <View className="h-[0.8px] bg-[#E5E5E5]" />
             <View className="flex-row items-center justify-between mb-4">
               <Text
                 style={{
@@ -226,6 +183,7 @@ export default function ProductDetailsModal({
                 </Text>
               </View>
               <TouchableOpacity
+                onPress={handleChatVendor}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",

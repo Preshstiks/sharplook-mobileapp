@@ -6,6 +6,8 @@ import { formatAmount } from "../../formatAmount";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import PageModal from "../../reusuableComponents/PageModal";
 import { useNavigation } from "@react-navigation/native";
+import { useChatNavigation } from "../../../hooks/useChatNavigation";
+import { ChatConnectionLoader } from "../../reusuableComponents/ChatConnectionLoader";
 
 export default function ServiceDetailsModal({
   visible,
@@ -14,10 +16,34 @@ export default function ServiceDetailsModal({
   onBookNow,
 }) {
   if (!service) return null;
-  console.log({ service });
   const navigation = useNavigation();
+  const { navigateToChat, isConnecting } = useChatNavigation();
+
+  const handleChatVendor = () => {
+    const vendorId = service?.vendor?.id || service?.userId;
+    const vendorName =
+      service?.vendor?.vendorOnboarding?.businessName ||
+      service?.vendor?.businessName ||
+      "Vendor";
+
+    if (vendorId) {
+      navigateToChat(navigation, {
+        vendorId: vendorId,
+        receiverName: vendorName,
+        chat: {
+          id: vendorId,
+          name: vendorName,
+          vendorId: vendorId,
+        },
+      });
+    }
+  };
+
   return (
     <PageModal visible={visible} onClose={onClose}>
+      {/* Chat Connection Loader */}
+      <ChatConnectionLoader visible={isConnecting} />
+
       <ScrollView showsVerticalScrollIndicator={false}>
         <View>
           <View className="absolute top-5 right-5">
@@ -48,65 +74,32 @@ export default function ServiceDetailsModal({
               borderRadius: 12,
             }}
             resizeMode="cover"
+            defaultSource={require("../../../assets/img/service1.svg")}
           />
         </View>
-        <View style={{ paddingHorizontal: 18 }} className="mt-6">
+
+        <View className="px-4 pt-4">
           <Text
             style={{
-              fontFamily: "poppinsMedium",
-              fontSize: 14,
-              color: "#222",
-              marginBottom: 2,
+              fontFamily: "latoBold",
+              fontSize: 18,
+              color: "#000",
+              marginBottom: 8,
             }}
           >
             {service.serviceName}
           </Text>
           <Text
             style={{
+              fontFamily: "latoBold",
+              fontSize: 16,
               color: "#EB278D",
-              fontFamily: "poppinsMedium",
-              fontSize: 14,
-              marginBottom: 4,
+              marginBottom: 16,
             }}
           >
-            {formatAmount(service.servicePrice)}
+            {formatAmount(service.servicePrice || 0)}
           </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 4,
-            }}
-          >
-            {[...Array(5)].map((_, i) => (
-              <Ionicons
-                key={i}
-                name={
-                  i < Math.floor(service.rating || 0) ? "star" : "star-outline"
-                }
-                size={14}
-                color="#FFC107"
-              />
-            ))}
-            <Text
-              style={{
-                fontFamily: "latoRegular",
-                fontSize: 12,
-                marginLeft: 4,
-                color: "#A9A9A9",
-              }}
-            >
-              ({(service.reviews || 0).toLocaleString()} Reviews)
-            </Text>
-          </View>
 
-          <View
-            style={{
-              borderBottomWidth: 1,
-              borderBottomColor: "#F0F0F0",
-              marginVertical: 12,
-            }}
-          />
           <View className="flex-row items-center justify-between mb-4">
             <Text
               style={{
@@ -158,7 +151,11 @@ export default function ServiceDetailsModal({
                   color: "#666",
                 }}
               >
-                {(service?.vendor?.vendorOnboarding?.businessName).charAt(0)}
+                {(
+                  service?.vendor?.vendorOnboarding?.businessName ||
+                  service?.vendor?.businessName ||
+                  "V"
+                ).charAt(0)}
               </Text>
             </View>
             <View style={{ flex: 1 }}>
@@ -169,7 +166,9 @@ export default function ServiceDetailsModal({
                   color: "#000",
                 }}
               >
-                {service?.vendor?.vendorOnboarding?.businessName}
+                {service?.vendor?.vendorOnboarding?.businessName ||
+                  service?.vendor?.businessName ||
+                  "Vendor"}
               </Text>
               <Text
                 style={{
@@ -179,10 +178,13 @@ export default function ServiceDetailsModal({
                   color: "#A5A5A5",
                 }}
               >
-                {service?.vendor?.vendorOnboarding?.location}
+                {service?.vendor?.vendorOnboarding?.location ||
+                  service?.vendor?.location ||
+                  "Location not available"}
               </Text>
             </View>
             <TouchableOpacity
+              onPress={handleChatVendor}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -227,7 +229,7 @@ export default function ServiceDetailsModal({
               marginBottom: 100, // Extra space for the bottom button
             }}
           >
-            {service.description}
+            {service.description || "No description available"}
           </Text>
         </View>
       </ScrollView>

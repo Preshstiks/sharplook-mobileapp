@@ -7,6 +7,7 @@ import { HttpClient } from "../../../api/HttpClient";
 import EmptySVG from "../../../assets/img/empty.svg";
 import { formatAmount } from "../../formatAmount";
 import BottomModal from "../../reusuableComponents/BottomModal";
+import { EmptyData } from "../../reusuableComponents/EmptyData";
 function SkeletonLoader() {
   return (
     <View className="flex-row flex-wrap mt-10 justify-between px-1">
@@ -100,7 +101,6 @@ export default function MyProductsScreen({ navigation }) {
       const res = await HttpClient.get("/products/getVendorProducts");
       setProducts(res.data.data);
     } catch (error) {
-      console.log(error.response);
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         errorMsg =
@@ -114,8 +114,6 @@ export default function MyProductsScreen({ navigation }) {
     }
   };
 
-  console.log({ products });
-  console.log({ productToDelete });
   return (
     <ScrollView className="flex-1 bg-white">
       <View
@@ -148,77 +146,87 @@ export default function MyProductsScreen({ navigation }) {
           <SkeletonLoader />
         ) : products.length === 0 ? (
           <View className="items-center justify-center py-8">
-            <EmptySVG width={120} height={120} />
-            <Text
-              className="text-[14px] text-gray-400 mt-2"
-              style={{ fontFamily: "poppinsRegular" }}
-            >
-              No products found
-            </Text>
+            <EmptyData msg="No products yet." />
           </View>
         ) : (
           <View className="flex-row flex-wrap mt-10 justify-between">
-            {products.map((p) => (
-              <View
-                key={p.id}
-                className="bg-white rounded-[12px] w-[48%] mb-4 shadow border border-pinklight"
-              >
-                <Image
-                  source={{ uri: p.picture }}
-                  className="w-full h-[110px] rounded-t-[12px] mb-2"
-                  style={{ resizeMode: "cover" }}
-                />
-                <View className="p-3">
-                  <Text
-                    className="text-[14px]"
-                    style={{ fontFamily: "poppinsRegular" }}
-                  >
-                    {p.productName}
-                  </Text>
-                  <View>
-                    <View className="flex-row mt-1 items-center justify-between">
-                      <View>
-                        <Text
-                          className="text-primary text-[14px]"
-                          style={{ fontFamily: "latoBold" }}
-                        >
-                          {formatAmount(p.price)}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setShowModal(true);
-                          setProductToDelete(p.id);
-                        }}
+            {products
+              .filter(
+                (p) =>
+                  p.approvalStatus === "APPROVED" ||
+                  p.approvalStatus === "PENDING"
+              )
+              .map((p) => (
+                <View
+                  key={p.id}
+                  className="bg-white relative rounded-[12px] w-[48%] mb-4 shadow border border-pinklight"
+                >
+                  <Image
+                    source={{ uri: p.picture }}
+                    className="w-full h-[110px] rounded-t-[12px] mb-2"
+                    style={{ resizeMode: "cover" }}
+                  />
+                  {p.approvalStatus === "PENDING" && (
+                    <View className="bg-[#ffffffe8] absolute top-2 right-2 py-[2px] px-3 rounded-[10px] z-10">
+                      <Text
+                        className="text-[#ff0000] mt-1 text-[8px]"
+                        style={{ fontFamily: "poppinsMedium" }}
                       >
-                        <AntDesign name="delete" size={14} color="#E53935" />
-                      </TouchableOpacity>
+                        Not approved yet
+                      </Text>
                     </View>
-                    <View className="flex-row mt-2 items-center justify-between">
-                      <View>
-                        <Text
-                          className="text-[8px] mt-1 text-[#00000066] mb-1"
-                          style={{ fontFamily: "latoBold" }}
+                  )}
+                  <View className="p-3">
+                    <Text
+                      className="text-[14px]"
+                      style={{ fontFamily: "poppinsRegular" }}
+                    >
+                      {p.productName}
+                    </Text>
+                    <View>
+                      <View className="flex-row mt-1 items-center justify-between">
+                        <View>
+                          <Text
+                            className="text-primary text-[14px]"
+                            style={{ fontFamily: "latoBold" }}
+                          >
+                            {formatAmount(p.price)}
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setShowModal(true);
+                            setProductToDelete(p.id);
+                          }}
                         >
-                          {p.qtyAvailable} pieces remaining
-                        </Text>
+                          <AntDesign name="delete" size={14} color="#E53935" />
+                        </TouchableOpacity>
                       </View>
-                      <TouchableOpacity
-                        onPress={() =>
-                          navigation.navigate("EditProduct", { product: p })
-                        }
-                      >
-                        <MaterialIcons
-                          name="mode-edit"
-                          size={16}
-                          color="#eb278d"
-                        />
-                      </TouchableOpacity>
+                      <View className="flex-row mt-2 items-center justify-between">
+                        <View>
+                          <Text
+                            className="text-[8px] mt-1 text-[#00000066] mb-1"
+                            style={{ fontFamily: "latoBold" }}
+                          >
+                            {p.qtyAvailable} pieces remaining
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          onPress={() =>
+                            navigation.navigate("EditProduct", { product: p })
+                          }
+                        >
+                          <MaterialIcons
+                            name="mode-edit"
+                            size={16}
+                            color="#eb278d"
+                          />
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
-            ))}
+              ))}
           </View>
         )}
       </View>

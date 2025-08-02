@@ -8,7 +8,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "./components/ToastComponent/ToastConfig";
 import { CartProvider } from "./context/CartContext";
-import { PaystackProvider } from "react-native-paystack-webview";
+import { CallProvider } from "./context/CallContext";
 if (__DEV__) {
   global.XMLHttpRequest = global.originalXMLHttpRequest
     ? global.originalXMLHttpRequest
@@ -29,18 +29,18 @@ const linking = {
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <PaystackProvider publicKey="pk_test_7e789e881038b9ff8880ef8e6dac12be50defaf2">
-        <StatusBarProvider>
-          <StatusBar barStyle="light-content" backgroundColor="#EB278D" />
-          <AuthProvider>
-            <CartProvider>
+      <StatusBarProvider>
+        <StatusBar barStyle="light-content" backgroundColor="#EB278D" />
+        <AuthProvider>
+          <CartProvider>
+            <CallProvider>
               {/* Pass linking prop to AppNavigator */}
               <AppNavigator linking={linking} />
               <Toast config={toastConfig} />
-            </CartProvider>
-          </AuthProvider>
-        </StatusBarProvider>
-      </PaystackProvider>
+            </CallProvider>
+          </CartProvider>
+        </AuthProvider>
+      </StatusBarProvider>
     </GestureHandlerRootView>
   );
 }

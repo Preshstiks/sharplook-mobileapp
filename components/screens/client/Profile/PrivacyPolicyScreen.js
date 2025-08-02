@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  StatusBar,
 } from "react-native";
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -28,6 +29,7 @@ export default function PrivacyPolicyScreen() {
   return (
     <View className="flex-1 bg-white pb-[50px]">
       {/* Header */}
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={28} color="#222" />
@@ -43,7 +45,7 @@ export default function PrivacyPolicyScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         {policySections.map((section, idx) => (
           <TouchableOpacity

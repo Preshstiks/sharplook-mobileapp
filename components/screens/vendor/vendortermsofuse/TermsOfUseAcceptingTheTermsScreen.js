@@ -29,17 +29,31 @@ export default function TermsOfUseAcceptingTheTermsScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual terms content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          In accordance with the Nigeria Data Protection Act (NDPA) 2023 and
+          other applicable data protection laws, the processing of Personal Data
+          on the SharpLook App shall be carried out on the basis of one or more
+          of the following lawful grounds: Consent: Processing may be conducted
+          where the Data Subject has explicitly provided informed consent for a
+          specified purpose. Consent may be withdrawn at any time without
+          affecting the lawfulness of prior processing. Contractual Necessity:
+          Processing is required for the performance of a contract to which the
+          Data Subject is a party, or in order to take steps at the request of
+          the Data Subject prior to entering into such a contract. This includes
+          the provision and management of services through the SharpLook App.
+          Legal Obligation: Processing may be necessary to comply with a legal
+          obligation to which the Controller is subject, including statutory
+          reporting or regulatory requirements. Legitimate Interests: Processing
+          may be carried out where it is necessary for the pursuit of legitimate
+          business interests of the Controller or a Third Party—provided such
+          interests are not overridden by the fundamental rights and freedoms of
+          the Data Subject. This includes activities related to service
+          enhancement, fraud prevention, and security management.
         </Text>
       </ScrollView>
     </View>

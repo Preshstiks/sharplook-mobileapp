@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,60 +10,41 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { formatAmount } from "../../formatAmount";
+import AuthButton from "../../reusuableComponents/buttons/AuthButton";
+import { useAuth } from "../../../context/AuthContext";
+import {
+  getRelativeTime,
+  relativeTime,
+} from "../../reusuableComponents/RelativeTime";
+import { HttpClient } from "../../../api/HttpClient";
+import { showToast } from "../../ToastComponent/Toast";
 
 export default function VendorOfferDetailsScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { offer } = route.params || {};
+  const [loading, setLoading] = useState(false);
+  const offerDetails = offer;
 
-  // Use passed offer data or fallback to mock data
-  const offerDetails = offer || {
-    id: 1,
-    serviceType: "In-shop",
-    amountOffered: 8000,
-    vendor: "Hair by Ire",
-    service: "Hair",
-    status: "Accepted",
-    date: "June 15, 2024",
-    time: "09:00 AM",
-    clientImage: require("../../../assets/icon/avatar.png"),
-    serviceImage: require("../../../assets/img/product1.jpg"),
-    clientName: "Sarah Johnson",
-    clientPhone: "+234 801 234 5678",
-    clientEmail: "sarah.johnson@email.com",
-    serviceDescription:
-      "Professional hair styling with cornrow braids and twists, including elaborate eye makeup with vibrant purple eyeshadow and gold glitter accents.",
-    location: "Lagos, Nigeria",
-    duration: "2 hours",
-    specialRequests:
-      "Please use organic hair products and ensure the style is secure for a long day at work.",
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Accepted":
-        return "#ED2584";
-      case "Pending":
-        return "#8C8D8B";
-      default:
-        return "#9CA3AF";
-    }
-  };
-
-  const getStatusBgColor = (status) => {
-    switch (status) {
-      case "Accepted":
-        return "#FDF2F8";
-      case "Pending":
-        return "#E9E9E9";
-      default:
-        return "#F3F4F6";
+  const handleAcceptOffer = async () => {
+    setLoading(true);
+    try {
+      const response = await HttpClient.post("/offers/accept", {
+        offerId: offer.id,
+        price: offerDetails.offerAmount,
+      });
+      showToast.success(response.data.message);
+      navigation.goBack();
+    } catch (error) {
+      showToast.error(error.response.data.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <View style={{ flex: 1, backgroundColor: "#F9FAFB" }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
 
       {/* Header */}
       <View
@@ -74,9 +55,7 @@ export default function VendorOfferDetailsScreen() {
           paddingHorizontal: 20,
           paddingTop: 60,
           paddingBottom: 20,
-          backgroundColor: "#FFFFFF",
-          borderBottomWidth: 1,
-          borderBottomColor: "#F3F4F6",
+          backgroundColor: "#F9FAFB",
         }}
       >
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -97,32 +76,18 @@ export default function VendorOfferDetailsScreen() {
           <TouchableOpacity style={{ marginRight: 15 }}>
             <Ionicons name="notifications-outline" size={22} color="#1F2937" />
           </TouchableOpacity>
-          <Image
-            source={require("../../../assets/icon/avatar.png")}
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-              resizeMode: "cover",
-            }}
-          />
         </View>
       </View>
 
-      {/* Content */}
-      <ScrollView
-        style={{ flex: 1, backgroundColor: "#F9FAFB" }}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      >
-        {/* Service Type & Amount Offered */}
+      {/* Scrollable Content */}
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        {/* Main Content Card */}
         <View
           style={{
             backgroundColor: "#FFFFFF",
-            marginHorizontal: 16,
             marginTop: 16,
+            marginBottom: 40,
             borderRadius: 12,
-            padding: 16,
             shadowColor: "#000",
             shadowOffset: {
               width: 0,
@@ -133,305 +98,252 @@ export default function VendorOfferDetailsScreen() {
             elevation: 5,
           }}
         >
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: "poppinsRegular",
-                  color: "#8C8D8B",
-                  marginBottom: 4,
-                }}
-              >
-                Service Type
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontFamily: "poppinsMedium",
-                  color: "#1F2937",
-                }}
-              >
-                {offerDetails.serviceType}
-              </Text>
-            </View>
-            <View style={{ flex: 1, alignItems: "flex-end" }}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: "poppinsRegular",
-                  color: "#8C8D8B",
-                  marginBottom: 4,
-                }}
-              >
-                Amount Offered
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontFamily: "poppinsMedium",
-                  color: "#ED2584",
-                }}
-              >
-                {formatAmount(offerDetails.amountOffered)}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Vendor Information */}
-        <View
-          style={{
-            backgroundColor: "#FFFFFF",
-            marginHorizontal: 16,
-            marginTop: 12,
-            borderRadius: 12,
-            padding: 16,
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.1,
-            shadowRadius: 3.84,
-            elevation: 5,
-          }}
-        >
+          {/* Title */}
           <View
             style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
+              borderBottomWidth: 1,
+              borderLeftWidth: 1,
+              borderRightWidth: 1,
+              borderColor: "#EBEBEA",
+              paddingTop: 20,
+              paddingLeft: 20,
             }}
           >
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: "poppinsRegular",
-                  color: "#8C8D8B",
-                  marginBottom: 4,
-                }}
-              >
-                Vendor
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontFamily: "poppinsMedium",
-                  color: "#1F2937",
-                }}
-              >
-                {offerDetails.vendor}
-              </Text>
-            </View>
-            <View
+            <Text
               style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                backgroundColor: "#3B82F6",
-                alignItems: "center",
-                justifyContent: "center",
+                fontSize: 18,
+                fontFamily: "poppinsSemiBold",
+                color: "#242524",
+                marginBottom: 20,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: "poppinsMedium",
-                  color: "#FFFFFF",
-                }}
-              >
-                VIPER
-              </Text>
-            </View>
+              Service Offer Details
+            </Text>
           </View>
-        </View>
 
-        {/* Service Details & Status */}
-        <View
-          style={{
-            backgroundColor: "#FFFFFF",
-            marginHorizontal: 16,
-            marginTop: 12,
-            borderRadius: 12,
-            padding: 16,
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.1,
-            shadowRadius: 3.84,
-            elevation: 5,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              marginBottom: 16,
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: "poppinsRegular",
-                  color: "#8C8D8B",
-                  marginBottom: 4,
-                }}
-              >
-                Service
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontFamily: "poppinsMedium",
-                  color: "#1F2937",
-                }}
-              >
-                {offerDetails.service}
-              </Text>
-            </View>
-            <View style={{ alignItems: "flex-end" }}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: "poppinsRegular",
-                  color: "#8C8D8B",
-                  marginBottom: 4,
-                }}
-              >
-                Status
-              </Text>
+          <View style={{ paddingTop: 20 }}>
+            {/* Offer Details */}
+            <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
               <View
                 style={{
-                  backgroundColor: getStatusBgColor(offerDetails.status),
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: getStatusColor(offerDetails.status),
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 8,
                 }}
               >
                 <Text
                   style={{
                     fontSize: 12,
-                    fontFamily: "poppinsMedium",
-                    color: getStatusColor(offerDetails.status),
+                    fontFamily: "poppinsRegular",
+                    color: "#8C8D8B",
                   }}
                 >
-                  {offerDetails.status}
+                  Offer Amount:
+                </Text>
+                <Text
+                  className="text-primary"
+                  style={{
+                    fontSize: 14,
+                    fontFamily: "poppinsMedium",
+                  }}
+                >
+                  {formatAmount(offerDetails.offerAmount)}
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 8,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "poppinsRegular",
+                    color: "#8C8D8B",
+                  }}
+                >
+                  Service:
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontFamily: "poppinsMedium",
+                    color: "#242524",
+                  }}
+                >
+                  {offerDetails.serviceName}
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "poppinsRegular",
+                    color: "#8C8D8B",
+                  }}
+                >
+                  Service Type:
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontFamily: "poppinsMedium",
+                    color: "#242524",
+                  }}
+                >
+                  {offerDetails.serviceType === "HOME_SERVICE"
+                    ? "Home Service"
+                    : "In-Shop"}
                 </Text>
               </View>
             </View>
-          </View>
 
-          {/* Service Image */}
-          <Image
-            source={offerDetails.serviceImage}
-            style={{
-              width: "100%",
-              height: 200,
-              borderRadius: 8,
-              marginBottom: 16,
-              resizeMode: "cover",
-            }}
-          />
-
-          {/* Date and Time */}
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Ionicons name="calendar-outline" size={16} color="#8C8D8B" />
-              <Text
+            {/* Service Image */}
+            <View style={{ paddingHorizontal: 20 }}>
+              <Image
+                source={{ uri: offerDetails.serviceImage }}
                 style={{
-                  fontSize: 12,
-                  fontFamily: "poppinsRegular",
-                  color: "#8C8D8B",
-                  marginLeft: 4,
+                  width: "100%",
+                  height: 200,
+                  borderRadius: 8,
+                  marginBottom: 20,
+                  resizeMode: "cover",
+                }}
+              />
+            </View>
+
+            {/* Client and Posted Info */}
+            <View
+              style={{
+                padding: 20,
+                borderTopWidth: 1,
+                borderLeftWidth: 1,
+                borderRightWidth: 1,
+                borderColor: "#EBEBEA",
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "poppinsRegular",
+                    color: "#8C8D8B",
+                  }}
+                >
+                  Client:
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontFamily: "poppinsMedium",
+                    color: "#242524",
+                  }}
+                >
+                  {offerDetails.client.lastName} {offerDetails.client.firstName}
+                </Text>
+              </View>
+
+              <View style={{ alignItems: "flex-end" }}>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "poppinsRegular",
+                    color: "#8C8D8B",
+                  }}
+                >
+                  Posted:
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontFamily: "poppinsMedium",
+                    color: "#242524",
+                  }}
+                >
+                  {getRelativeTime(offerDetails.createdAt)}
+                </Text>
+              </View>
+            </View>
+
+            {/* Home Service Additional Info */}
+            {offerDetails.serviceType === "HOME_SERVICE" && (
+              <View
+                style={{
+                  padding: 20,
+                  borderTopWidth: 1,
+                  borderLeftWidth: 1,
+                  borderRightWidth: 1,
+                  borderColor: "#EBEBEA",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
                 }}
               >
-                Date: {offerDetails.date}
-              </Text>
-            </View>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Ionicons name="time-outline" size={16} color="#8C8D8B" />
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: "poppinsRegular",
-                  color: "#8C8D8B",
-                  marginLeft: 4,
-                }}
-              >
-                Time: {offerDetails.time}
-              </Text>
-            </View>
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontFamily: "poppinsRegular",
+                      color: "#8C8D8B",
+                    }}
+                  >
+                    Client:
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontFamily: "poppinsMedium",
+                      color: "#242524",
+                    }}
+                  >
+                    {offerDetails.client.lastName}{" "}
+                    {offerDetails.client.firstName}
+                  </Text>
+                </View>
+
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontFamily: "poppinsRegular",
+                      color: "#8C8D8B",
+                    }}
+                  >
+                    Client's Location:
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontFamily: "poppinsMedium",
+                      color: "#242524",
+                    }}
+                  >
+                    {getRelativeTime(offerDetails.createdAt)}
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>
 
-      {/* Bottom Action Buttons */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: "#FFFFFF",
-          paddingHorizontal: 16,
-          paddingVertical: 16,
-          borderTopWidth: 1,
-          borderTopColor: "#F3F4F6",
-          flexDirection: "row",
-          gap: 12,
-        }}
-      >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            backgroundColor: "#9CA3AF",
-            paddingVertical: 12,
-            borderRadius: 8,
-            alignItems: "center",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "poppinsMedium",
-              color: "#FFFFFF",
-            }}
-          >
-            Tip More
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            backgroundColor: "#FFFFFF",
-            paddingVertical: 12,
-            borderRadius: 8,
-            alignItems: "center",
-            borderWidth: 1,
-            borderColor: "#ED2584",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: "poppinsMedium",
-              color: "#ED2584",
-            }}
-          >
-            Cancel Offer
-          </Text>
-        </TouchableOpacity>
+      {/* Bottom Button */}
+      <View style={{ paddingHorizontal: 20, paddingBottom: 50 }}>
+        <AuthButton
+          title="Accept Offer"
+          onPress={handleAcceptOffer}
+          isloading={loading}
+        />
       </View>
     </View>
   );

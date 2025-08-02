@@ -29,17 +29,25 @@ export default function InformationRelatingToChildrenAndTeensScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: Jun 27, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual policy content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          We do not knowingly collect any Personal Information from children
+          under the age of 18. If you are under the age of 18, please do not
+          submit any Personal Information through our Mobile Application or
+          Service. We encourage parents and legal guardians to monitor their
+          children's Internet usage and to help enforce this Policy by
+          instructing their children never to provide Personal Information
+          through our Mobile Application or Service without their permission. If
+          you have reason to believe that a child under the age of 18 has
+          provided Personal Information to us through our Mobile Application or
+          Service, please contact us. You must also be at least 18 years of age
+          to consent to the processing of your Personal Information in your
+          country (in some countries we may allow your parent or guardian to do
+          so on your behalf).
         </Text>
       </ScrollView>
     </View>

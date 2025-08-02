@@ -29,17 +29,25 @@ export default function TermsOfUseYourAccessToAndUseOfOurServicesScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual terms content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          Personal Data may be collected through one or more of the following
+          methods: Direct Collection: We collect data that you voluntarily
+          provide when interacting with our platform, including but not limited
+          to account registration, profile updates, and service bookings and
+          inquiries. Automated Collection: Certain data may be collected
+          automatically as you use the SharpLook App. This includes
+          device-specific identifiers and system information, location data
+          (when enabled), and interaction logs, usage statistics, and diagnostic
+          data. Third-Party Integrations: We may also collect data via
+          integrated third-party services that support our operations, such as
+          payment processors, analytics platforms, and customer support tools.
+          These third parties may process your data on our behalf in accordance
+          with applicable data protection laws and safeguards.
         </Text>
       </ScrollView>
     </View>

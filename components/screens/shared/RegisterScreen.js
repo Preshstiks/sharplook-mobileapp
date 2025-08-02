@@ -88,6 +88,7 @@ export default function RegisterScreen({ navigation }) {
               password: "",
               role: "CLIENT",
               acceptedPersonalData: false,
+              referredByCode: "",
             }}
             validationSchema={clientRegisterSchema}
             onSubmit={handleSignup}
@@ -162,6 +163,15 @@ export default function RegisterScreen({ navigation }) {
                   touched={touched.confirmPassword}
                   secureTextEntry
                 />
+                <AuthInput
+                  label="Referral Code (optional)"
+                  value={values.referredByCode}
+                  onChangeText={handleChange("referredByCode")}
+                  onBlur={handleBlur("referredByCode")}
+                  error={errors.referredByCode}
+                  touched={touched.referredByCode}
+                  secureTextEntry
+                />
                 <View className="flex-row items-center justify-between mt-4 mb-2">
                   <View className="flex-row items-center">
                     <Pressable
@@ -215,7 +225,7 @@ export default function RegisterScreen({ navigation }) {
                       </Text>
                     </Pressable>
                   </View>
-                  <View className="flex-row justify-center gap-1 items-center mt-5">
+                  <View className="flex-row pb-10 justify-center gap-1 items-center mt-5">
                     <Pressable
                       onPress={() => navigation.navigate("VendorRegister")}
                     >

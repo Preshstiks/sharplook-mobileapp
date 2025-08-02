@@ -29,17 +29,22 @@ export default function PrivacyPolicyUpdateScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: Jun 27, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual policy content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          This privacy policy ("Policy") describes how SharpLook ("Mobile
+          Application", "we", "us" or "our") collects, protects and uses the
+          personally identifiable information ("Personal Information") you
+          ("User", "you" or "your") may provide in the SharpLook mobile
+          application and any of its products or services (collectively, "Mobile
+          Application" or "Services"). It also describes the choices available
+          to you regarding our use of your Personal Information and how you can
+          access and update this information. This Policy does not apply to the
+          practices of companies that we do not own or control, or to
+          individuals that we do not employ or manage.
         </Text>
       </ScrollView>
     </View>

@@ -79,11 +79,8 @@ export default function MyServicesScreen({ navigation }) {
     try {
       const res = await HttpClient.get("/vendorServices/my-services");
       setServices(res.data?.data || []);
-      console.log("API response:", res.data);
       const token = await AsyncStorage.getItem("token");
-      console.log("token", token);
     } catch (err) {
-      console.log("DEBUG: Error fetching services:", err.response?.data);
       setServices([]);
     } finally {
       setLoading(false);
@@ -106,7 +103,6 @@ export default function MyServicesScreen({ navigation }) {
       showToast.success(res.data.message);
       await fetchServices(); // Refresh the list after successful delete
     } catch (error) {
-      console.log(error.response);
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         errorMsg =
@@ -121,7 +117,6 @@ export default function MyServicesScreen({ navigation }) {
       setServiceToDelete(null);
     }
   };
-  console.log({ services });
   return (
     <ScrollView className="flex-1 bg-white">
       <View

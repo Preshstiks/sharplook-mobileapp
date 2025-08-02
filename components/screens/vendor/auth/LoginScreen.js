@@ -34,11 +34,8 @@ export default function VendorLoginScreen({ navigation }) {
         } else {
           showToast.error("Please Login with a Vendor account!");
         }
-        console.log("[DEBUG] handleLogin response:", userRole);
       }
     } catch (error) {
-      console.log("[DEBUG] handleLogin error:", error.response.data.message);
-      console.log("[DEBUG] handleLogin error:", error.response);
       if (error.response) {
         const status = error.response.status;
         const message = error.response.data.message;
@@ -73,7 +70,12 @@ export default function VendorLoginScreen({ navigation }) {
             email: values.email,
           });
         } else {
-          showToast.error(error.response.data.message);
+          showToast.error(
+            message ||
+              error.message ||
+              error.response.data.message ||
+              "An unknown error occurred"
+          );
         }
       } else {
         showToast.error(error.message || "An unknown error occurred");

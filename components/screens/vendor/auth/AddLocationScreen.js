@@ -89,8 +89,8 @@ export default function AddLocationScreen({ navigation }) {
     login,
     clearLastAttemptedCredentials,
     setIsAuthenticated,
+    user,
   } = useAuth();
-
   // Function to update service radius via API
   const updateServiceRadius = async (
     latitude,
@@ -99,16 +99,13 @@ export default function AddLocationScreen({ navigation }) {
   ) => {
     try {
       const payload = { serviceRadiusKm, latitude, longitude };
-      console.log("Sending payload to /vendor/update-service-radius:", payload);
 
       const response = await HttpClient.put(
         "/vendor/update-service-radius",
         payload
       );
 
-      console.log("API response:", response.data);
       showToast.success(response.data.message);
-      console.log(lastAttemptedCredentials);
       // If we have saved credentials, attempt login
       if (
         lastAttemptedCredentials &&
@@ -120,13 +117,12 @@ export default function AddLocationScreen({ navigation }) {
             email: lastAttemptedCredentials.email,
             password: lastAttemptedCredentials.password,
           });
-          console.log(loginResponse.data);
           if (loginResponse.data.token) {
             await login(loginResponse.data.token, "VENDOR");
             setIsAuthenticated(true);
             clearLastAttemptedCredentials();
             // Only navigate after login is successful
-            navigation.replace("Vendor", { screen: "Dashboard" });
+            navigation.replace("InitialSubscription");
             // navigation.replace("Home", { screen: "Dashboard" });
             return;
           } else {
@@ -148,7 +144,7 @@ export default function AddLocationScreen({ navigation }) {
         }
       } else {
         // No credentials, so navigate directly
-        navigation.replace("Vendor", { screen: "Dashboard" });
+        navigation.replace("InitialSubscription");
       }
     } catch (error) {
       console.error("API error:", error);
@@ -165,12 +161,10 @@ export default function AddLocationScreen({ navigation }) {
     setIsLoading(true);
     try {
       const location = await getCurrentLocation();
-      console.log("handleUseCurrentLocation - got location:", location);
       setCurrentLocation(location);
       setSelectedLocation(location);
 
       webviewRef.current.postMessage(JSON.stringify(location));
-      console.log("handleUseCurrentLocation - sent to WebView:", location);
 
       await updateServiceRadius(location.latitude, location.longitude);
     } catch (error) {
@@ -193,7 +187,9 @@ export default function AddLocationScreen({ navigation }) {
           <MaterialIcons name="arrow-back-ios" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Location</Text>
-        <TouchableOpacity onPress={() => navigation.replace("Home")}>
+        <TouchableOpacity
+        // onPress={() => navigation.replace("Home")}
+        >
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
       </View>
@@ -207,13 +203,22 @@ export default function AddLocationScreen({ navigation }) {
         />
       </View>
 
-      {/* Map */}
-      <View style={{ flex: 1 }}>
-        <WebView
-          ref={webviewRef}
-          originWhitelist={["*"]}
-          source={{
-            html: `
+      <View
+        style={{
+          height: 600,
+          marginVertical: 16,
+          borderRadius: 12,
+          overflow: "hidden",
+          borderWidth: 1,
+          borderColor: "#E9E9E9",
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          <WebView
+            ref={webviewRef}
+            originWhitelist={["*"]}
+            source={{
+              html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -262,11 +267,12 @@ export default function AddLocationScreen({ navigation }) {
           </body>
         </html>
       `,
-          }}
-          style={{ flex: 1 }}
-          javaScriptEnabled
-          domStorageEnabled
-        />
+            }}
+            style={{ flex: 1 }}
+            javaScriptEnabled
+            domStorageEnabled
+          />
+        </View>
       </View>
 
       {/* Bottom Sheet */}
@@ -285,7 +291,7 @@ export default function AddLocationScreen({ navigation }) {
               {isLoading ? "Updating..." : "Use my current location"}
             </Text>
           </TouchableOpacity>
-          {sampleLocations.map((location, index) => (
+          {/* {sampleLocations.map((location, index) => (
             <TouchableOpacity key={index} style={styles.locationOption}>
               <MaterialIcons name="location-on" size={22} color="#BDBDBD" />
               <Text style={styles.locationText}>
@@ -293,7 +299,7 @@ export default function AddLocationScreen({ navigation }) {
                 )
               </Text>
             </TouchableOpacity>
-          ))}
+          ))} */}
         </ScrollView>
       </View>
 

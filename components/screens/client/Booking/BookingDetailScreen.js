@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  StatusBar,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -34,7 +35,6 @@ export default function BookingDetailScreen() {
   const navigation = useNavigation();
   const [isloadingComplete, setIsloadingComplete] = useState(false);
   const { booking } = route.params || {};
-  console.log({ booking });
   const bookingId = booking?.id;
   const handleCompleteBooking = async () => {
     setIsloadingComplete(true);
@@ -43,10 +43,8 @@ export default function BookingDetailScreen() {
         bookingId,
       });
       showToast.success(res.data.message);
-      console.log(res.data);
       navigation.goBack();
     } catch (error) {
-      console.log(error.response);
     } finally {
       setIsloadingComplete(false);
     }
@@ -58,7 +56,7 @@ export default function BookingDetailScreen() {
   // Dispute form validation schema
   const disputeSchema = Yup.object().shape({
     reason: Yup.string().required("Please provide a reason for the dispute."),
-    image: Yup.mixed()
+    referencePhoto: Yup.mixed()
       .test("fileType", "Only JPEG images are allowed.", (value) => {
         if (!value) return true;
         return value.endsWith(".jpg") || value.endsWith(".jpeg");
@@ -76,16 +74,14 @@ export default function BookingDetailScreen() {
       const res = await HttpClient.post("/disputes/raiseDispute", {
         bookingId: booking?.id,
         reason: values.reason,
-        image: values.image,
+        referencePhoto: values.referencePhoto,
       });
-      console.log({ disputeRes: res.data });
       showToast.success(res.data.message);
       // Optionally show a toast or feedback here
       setShowDisputeModal(false);
       resetForm();
     } catch (error) {
       showToast.error(error.response.data.message);
-      console.log(error.response);
     } finally {
       setIsSubmittingDispute(false);
     }
@@ -98,13 +94,14 @@ export default function BookingDetailScreen() {
       quality: 1,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setFieldValue("image", result.assets[0].uri);
+      setFieldValue("referencePhoto", result.assets[0].uri);
     }
   };
 
   return (
     <View className="flex-1 pb-[40px] bg-secondary">
       {/* Header */}
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View
         className="flex-row items-center justify-between px-4 pt-[60px] pb-4 bg-secondary"
         style={{
@@ -242,16 +239,19 @@ export default function BookingDetailScreen() {
         {/* Static Map */}
 
         {/* Action Buttons */}
-
-        <AuthButton
-          title="Booking Completed"
-          isloading={isloadingComplete}
-          onPress={handleCompleteBooking}
-        />
-        <OutlineButton
-          title="Dispute Booking"
-          onPress={() => setShowDisputeModal(true)}
-        />
+        {booking?.status !== "COMPLETED" && booking?.dispute === null && (
+          <>
+            <AuthButton
+              title="Booking Completed"
+              isloading={isloadingComplete}
+              onPress={handleCompleteBooking}
+            />
+            <OutlineButton
+              title="Dispute Booking"
+              onPress={() => setShowDisputeModal(true)}
+            />
+          </>
+        )}
       </ScrollView>
       {/* Dispute Modal (local, not shared) */}
       <BottomModal
@@ -261,7 +261,7 @@ export default function BookingDetailScreen() {
         backgroundcolor="#fff"
       >
         <Formik
-          initialValues={{ reason: "", image: null }}
+          initialValues={{ reason: "", referencePhoto: null }}
           validationSchema={disputeSchema}
           onSubmit={handleDisputeSubmit}
         >
@@ -308,14 +308,14 @@ export default function BookingDetailScreen() {
                 </Text>
                 <Feather name="plus" size={16} color="#000" />
               </TouchableOpacity>
-              {values.image && (
+              {values.referencePhoto && (
                 <View className="mb-2 items-center">
                   <Image
-                    source={{ uri: values.image }}
+                    source={{ uri: values.referencePhoto }}
                     style={{ width: 120, height: 120, borderRadius: 8 }}
                   />
                   <TouchableOpacity
-                    onPress={() => setFieldValue("image", null)}
+                    onPress={() => setFieldValue("referencePhoto", null)}
                     style={{
                       position: "absolute",
                       top: 4,

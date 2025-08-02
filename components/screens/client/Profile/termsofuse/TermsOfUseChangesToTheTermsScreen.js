@@ -29,17 +29,25 @@ export default function TermsOfUseChangesToTheTermsScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual terms content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          We may update this Privacy Policy from time to time at our discretion.
+          When changes are made, we will revise the updated date at the bottom
+          of this page. We may also provide notice to you in other ways at our
+          discretion, such as through contact information you have provided. Any
+          updated version of this Privacy Policy will be effective immediately
+          upon the posting of the revised Privacy Policy and it is your
+          obligation to review the Privacy Policy from time to time. Your
+          continued use of the Mobile Application or Services after the
+          effective date of the revised Privacy Policy (or such other act
+          specified at that time) will constitute your consent to those changes.
+          However, we will not, without your consent, use your Personal Data in
+          a manner materially different than what was stated at the time your
+          Personal Data was collected.
         </Text>
       </ScrollView>
     </View>

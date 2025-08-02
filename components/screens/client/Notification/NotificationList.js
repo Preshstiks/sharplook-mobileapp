@@ -5,6 +5,7 @@ import {
   SectionList,
   TouchableOpacity,
   StyleSheet,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -36,8 +37,6 @@ export default function NotificationList() {
           } else {
             setNotifications([]);
           }
-
-          console.log("Processed notifications:", data);
         } catch (error) {
           console.error("Error fetching notifications:", error);
           setNotifications([]);
@@ -58,6 +57,7 @@ export default function NotificationList() {
           backgroundColor: "#FFFAFD",
         }}
       >
+        <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
         <View
           style={{
             backgroundColor: "#EB278D",

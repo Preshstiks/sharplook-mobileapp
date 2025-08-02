@@ -29,17 +29,26 @@ export default function TheSecurityOfYourInformationScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual policy content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          We secure information you provide on computer servers in a controlled,
+          secure environment, protected from unauthorized access, use, or
+          disclosure. We maintain reasonable administrative, technical, and
+          physical safeguards in an effort to protect against unauthorized
+          access, use, modification, and disclosure of Personal Information in
+          its control and custody. However, no data transmission over the
+          Internet or wireless network can be guaranteed. Therefore, while we
+          strive to protect your Personal Information, you acknowledge that (i)
+          there are security and privacy limitations of the Internet which are
+          beyond our control; (ii) the security, integrity, and privacy of any
+          and all information and data exchanged between you and our Mobile
+          Application cannot be guaranteed; and (iii) any such information and
+          data may be viewed or tampered with in transit by a third-party,
+          despite best efforts.
         </Text>
       </ScrollView>
     </View>

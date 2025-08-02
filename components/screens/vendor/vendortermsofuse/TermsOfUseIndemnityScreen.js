@@ -29,17 +29,21 @@ export default function TermsOfUseIndemnityScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual terms content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          You acknowledge that while using the Services, OTPs or other security
+          PINs may be sent to your contact information provided (e-mail, phone
+          number, etc) for authentication purposes, being part of your Personal
+          Information and you warrant that the contact information is true and
+          accessible to you alone. You therefore indemnify the us against any
+          loss suffered by us due to compromise or breach of information sent to
+          the contact details provided. You also indemnify us against any loss
+          suffered for inability to use the Services due to non-authentication
+          of your information.
         </Text>
       </ScrollView>
     </View>

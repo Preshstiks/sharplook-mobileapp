@@ -5,6 +5,7 @@ import {
   Text,
   Image,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import OutlineTextInput from "../../../reusuableComponents/inputFields/OutlineTextInput";
@@ -14,6 +15,7 @@ const UserProfileScreen = ({ navigation }) => {
   const { user } = useAuth();
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       {/* Header Section */}
       <View className="bg-primary rounded-b-[40px] items-center pt-[60px] pb-8 relative">
         {/* Back Button */}

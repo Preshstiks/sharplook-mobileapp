@@ -1,11 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import {
-  Ionicons,
-  MaterialCommunityIcons,
-  MaterialIcons,
-  Octicons,
-} from "@expo/vector-icons";
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+} from "react-native";
+import { Ionicons, MaterialIcons, Octicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 export default function LegalScreen() {
@@ -13,6 +14,7 @@ export default function LegalScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={28} color="#222" />

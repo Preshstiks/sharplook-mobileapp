@@ -25,7 +25,7 @@ export default function LoginScreen({ navigation }) {
     setIsLoading(true);
     try {
       const response = await HttpClient.post("/auth/login", values);
-      console.log("[DEBUG] handleLogin response:", response);
+
       const statusCode = response.data.statusCode || response.status;
       const userRole = response.data.user && response.data.user.role;
       const token = response.data.token;
@@ -36,14 +36,12 @@ export default function LoginScreen({ navigation }) {
             await login(token, userRole);
           }
           showToast.success(response.data.message);
-          navigation.replace("Client");
+          navigation.replace("ClientApp");
         } else {
           showToast.error("Please Login with a Client account!");
         }
-        console.log("[DEBUG] handleLogin response:", userRole);
       }
     } catch (error) {
-      console.log("[DEBUG] handleLogin error:", error);
       if (error.response) {
         const message = error.response.data && error.response.data.message;
         if (message === "No Location") {

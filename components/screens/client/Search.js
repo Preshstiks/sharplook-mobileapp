@@ -18,8 +18,10 @@ import HomeImg1 from "../../../assets/img/home1.svg";
 import HomeImg2 from "../../../assets/img/home2.svg";
 import HomeImg3 from "../../../assets/img/home3.svg";
 import HomeImg4 from "../../../assets/img/home4.svg";
+import { useChatNavigation } from "../../../hooks/useChatNavigation";
 
 export default function Search({ navigation }) {
+  const { navigateToChatList } = useChatNavigation();
   useEffect(() => {}, []);
 
   return (
@@ -29,7 +31,7 @@ export default function Search({ navigation }) {
           <OpenMenuBtn width={40} height={40} />
         </TouchableOpacity>
         <Logo width={80} height={80} />
-        <TouchableOpacity onPress={() => navigation.navigate("ChatListScreen")}>
+        <TouchableOpacity onPress={() => navigateToChatList(navigation)}>
           <OpenChatBtn width={40} height={40} />
         </TouchableOpacity>
       </View>
@@ -74,7 +76,22 @@ export default function Search({ navigation }) {
           return (
             <Pressable
               key={service.id}
-              onPress={() => navigation.navigate("VendorProfileScreen")}
+              onPress={() =>
+                navigation.navigate("VendorProfileScreen", {
+                  vendorData: {
+                    id: service.id,
+                    vendorOnboarding: {
+                      businessName: service.title,
+                      serviceType: "IN_SHOP",
+                      bio: "Professional beauty services",
+                      profilePicture: null,
+                    },
+                    rating: 4.5,
+                    vendorServices: [],
+                    products: [],
+                  },
+                })
+              }
               className="bg-[#FCDFEE] mb-6 rounded-2xl overflow-hidden shadow-md"
               style={{ elevation: 2 }}
             >

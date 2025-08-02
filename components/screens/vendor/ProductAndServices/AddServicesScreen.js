@@ -19,11 +19,13 @@ import { addServiceSchema } from "../../../../utils/validationSchemas";
 import Dropdown from "../../../reusuableComponents/inputFields/Dropdown";
 import { showToast } from "../../../ToastComponent/Toast";
 import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
+import { useCategories } from "../../../../hooks/useCategories";
 
 export default function AddServicesScreen({ navigation }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
+  const { categories, loading: categoriesLoading } = useCategories();
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -35,19 +37,13 @@ export default function AddServicesScreen({ navigation }) {
       setSelectedImage(result.assets[0].uri);
     }
   };
-  const SERVICE_OPTIONS = [
-    { label: "Nails", value: "Nails" },
-    { label: "Barbing Saloon", value: "Barbing Saloon" },
-    { label: "Makeup", value: "Makeup" },
-    { label: "Pedicure", value: "Pedicure" },
-    { label: "Manicure", value: "Manicure" },
-    { label: "Hair", value: "Hair" },
-    { label: "Massage", value: "Massage" },
-  ];
+  // Convert categories to dropdown options format
+  const SERVICE_OPTIONS = categories.map((category) => ({
+    label: category.name,
+    value: category.name,
+  }));
   const handleAddProduct = async (values) => {
     setLoading(true);
-    console.log("handleAddProduct called with values:", values);
-    console.log("Selected image:", selectedImage);
     try {
       const formData = new FormData();
       formData.append("serviceName", values.serviceName);
@@ -65,11 +61,6 @@ export default function AddServicesScreen({ navigation }) {
         });
       }
 
-      // Debug: log FormData keys and values
-      for (let pair of formData.entries()) {
-        console.log("FormData entry:", pair[0], pair[1]);
-      }
-
       const res = await HttpClient.post(
         "/vendorServices/addService",
         formData,
@@ -79,10 +70,8 @@ export default function AddServicesScreen({ navigation }) {
           },
         }
       );
-      console.log("handleAddProduct response:", res);
       setVisible(true);
     } catch (error) {
-      console.log("AddProduct error:", error, error.response.data);
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         errorMsg =

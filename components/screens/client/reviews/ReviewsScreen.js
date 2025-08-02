@@ -118,20 +118,22 @@ export default function ReviewsScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const vendorId = vendor?.[0].userId;
+  const hasReviewedThisProduct = reviews.some(
+    (review) => review.vendorId === vendorId
+  );
   useFocusEffect(
     useCallback(() => {
       const fetchReviews = async () => {
         setLoading(true);
         setError(null);
         try {
-          const res = await HttpClient.post(`/reviews/getAllReviews`, {
-            type: "VENDOR",
+          const res = await HttpClient.post("/reviews/getAllReviews", {
             vendorId,
+            type: "VENDOR",
           });
           setReviews(res.data?.data || []);
-          console.log(res.data);
         } catch (err) {
-          console.error(err.response);
+          console.error(err);
           setError("Failed to load reviews");
           setReviews([]);
         } finally {
@@ -205,23 +207,27 @@ export default function ReviewsScreen() {
               ))}
             </View>
           </View>
-          <TouchableOpacity
-            className="bg-primary flex-row items-center px-4 py-[10px] rounded-lg"
-            onPress={() => navigation.navigate("AddReviewScreen", { vendorId })}
-          >
-            <Ionicons
-              name="create-outline"
-              size={18}
-              color="#fff"
-              className="mr-1"
-            />
-            <Text
-              className="text-white mt-1 text-[12px] ml-2"
-              style={{ fontFamily: "poppinsRegular" }}
+          {!hasReviewedThisProduct && (
+            <TouchableOpacity
+              className="bg-primary flex-row items-center px-4 py-[10px] rounded-lg"
+              onPress={() =>
+                navigation.navigate("AddReviewScreen", { vendorId })
+              }
             >
-              Add Review
-            </Text>
-          </TouchableOpacity>
+              <Ionicons
+                name="create-outline"
+                size={18}
+                color="#fff"
+                className="mr-1"
+              />
+              <Text
+                className="text-white mt-1 text-[12px] ml-2"
+                style={{ fontFamily: "poppinsRegular" }}
+              >
+                Add Review
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
         {/* Loading/Error/Empty States */}
         {loading && (
@@ -241,15 +247,16 @@ export default function ReviewsScreen() {
           <View key={review.id || review._id} className="flex-row mb-6">
             <View className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden mr-3 items-center justify-center">
               {/* Use SVG or fallback to Image if SVG not supported */}
-              {review.avatarUrl ? (
-                <Image
-                  source={{ uri: review.avatarUrl }}
-                  style={{ width: 48, height: 48 }}
-                  resizeMode="cover"
-                />
-              ) : (
-                <Ionicons name="person-circle-outline" size={48} color="#ccc" />
-              )}
+
+              <Image
+                source={
+                  review?.client?.avatar
+                    ? { uri: review?.client?.avatar }
+                    : require("../../../../assets/icon/avatar.png")
+                }
+                style={{ width: 48, height: 48 }}
+                resizeMode="cover"
+              />
             </View>
             <View className="flex-1">
               <View className="flex-row items-center justify-between">
@@ -257,7 +264,7 @@ export default function ReviewsScreen() {
                   className="text-[12px] font-semibold text-faintDark"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
-                  {review.name || review.userName || "Anonymous"}
+                  {review?.client?.lastName} {review?.client?.firstName}
                 </Text>
                 <View className="flex-row items-center">
                   <Text

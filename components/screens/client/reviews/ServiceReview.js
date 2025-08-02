@@ -119,8 +119,7 @@ export default function ServiceReviewsScreen() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  console.log(vendor);
-  console.log(vendorId, serviceId);
+
   const hasReviewedThisService = reviews.some(
     (review) => review.serviceId === serviceId
   );
@@ -135,7 +134,6 @@ export default function ServiceReviewsScreen() {
             serviceId,
           });
           setReviews(res.data?.data || []);
-          console.log(res.data);
         } catch (err) {
           console.error(err.response);
           setError("Failed to load reviews");

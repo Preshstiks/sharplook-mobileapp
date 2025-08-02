@@ -9,6 +9,7 @@ import {
   FlatList,
   Modal,
   Animated,
+  StatusBar,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { formatAmount } from "../../formatAmount";
@@ -123,7 +124,6 @@ export default function TransactionHistoryScreen({ navigation }) {
       setAllTransactions(res.data || []);
       setCurrentPage(1); // Reset to first page when new data loads
     } catch (error) {
-      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -270,6 +270,7 @@ export default function TransactionHistoryScreen({ navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Header */}
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={28} color="#222" />

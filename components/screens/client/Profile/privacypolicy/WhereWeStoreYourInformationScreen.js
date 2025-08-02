@@ -29,17 +29,29 @@ export default function WhereWeStoreYourInformationScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual policy content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          Where Personal Data is transferred outside the territorial
+          jurisdiction of the Federal Republic of Nigeria, including to
+          countries that may not provide an equivalent level of data protection,
+          such transfers shall be carried out in accordance with applicable
+          laws, including the Nigeria Data Protection Act (NDPA) 2023 and, where
+          relevant, the General Data Protection Regulation (GDPR). To ensure the
+          continued protection of your Personal Data, we implement appropriate
+          safeguards, which may include: Data Processing Agreements (DPAs):
+          Contractual arrangements with third-party processors to ensure
+          compliance with privacy obligations. Standard Contractual Clauses
+          (SCCs): Adopted or approved clauses that guarantee adequate protection
+          and enforcement of data subject rights in jurisdictions outside
+          Nigeria. International Compliance Mechanisms: Where applicable, we may
+          rely on adequacy decisions or certifications recognized under the GDPR
+          or similar frameworks. All transfers are executed under strict legal
+          and technical controls to maintain the integrity, confidentiality, and
+          availability of your Personal Data.
         </Text>
       </ScrollView>
     </View>

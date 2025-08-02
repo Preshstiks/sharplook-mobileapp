@@ -1,61 +1,3 @@
-// import AsyncStorage from "@react-native-async-storage/async-storage";
-// import { createContext, useState, useContext } from "react";
-// import { HttpClient } from "../api/HttpClient";
-
-// const AuthContext = createContext();
-// export const useAuth = () => useContext(AuthContext);
-// export const AuthProvider = ({ children }) => {
-//   const [user, setUser] = useState(null);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [isAuthenticated, setIsAuthenticated] = useState(false);
-//   const [userId, setUserID] = useState(null); // Add userID state
-//   const [lastAttemptedCredentials, setLastAttemptedCredentials] =
-//     useState(null);
-//   const clearUserID = () => setUserID(null); // Add clearUserID function
-//   const clearLastAttemptedCredentials = () => setLastAttemptedCredentials(null);
-
-//   const login = async (token) => {
-//     try {
-//       await AsyncStorage.setItem("token", token);
-//       // Fetch user details after saving token
-//       const response = await HttpClient.get("/auth/me");
-//       if (response.data && response.data.user) {
-//         setUser(response.data.user);
-//       }
-//     } catch (error) {
-//       console.error("Error during login or fetching user details:", error);
-//     }
-//   };
-//   const logout = async () => {
-//     await AsyncStorage.removeItem("token");
-//     setUser(null);
-//     setIsAuthenticated(false);
-//     setUserID(null); // Clear userID on logout as well
-//   };
-//   return (
-//     <AuthContext.Provider
-//       value={{
-//         user,
-//         setUser,
-//         logout,
-//         isLoading,
-//         setIsLoading,
-//         isAuthenticated,
-//         setIsAuthenticated,
-//         userId, // Provide userID
-//         setUserID, // Provide setUserID
-//         clearUserID, // Provide clearUserID
-//         login, // Provide the enhanced login
-//         lastAttemptedCredentials,
-//         setLastAttemptedCredentials,
-//         clearLastAttemptedCredentials,
-//       }}
-//     >
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useState, useContext, useEffect } from "react";
 import { HttpClient } from "../api/HttpClient";
@@ -70,16 +12,48 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserID] = useState(null);
   const [userType, setUserType] = useState(null);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
   const [lastAttemptedCredentials, setLastAttemptedCredentials] =
     useState(null);
 
   const clearUserID = () => setUserID(null);
   const clearLastAttemptedCredentials = () => setLastAttemptedCredentials(null);
 
-  // Check authentication status on app start
+  // Check authentication status and onboarding status on app start
   useEffect(() => {
     checkAuthStatus();
+    checkOnboardingStatus();
   }, []);
+
+  const checkOnboardingStatus = async () => {
+    try {
+      const onboardingCompleted = await AsyncStorage.getItem(
+        "onboardingCompleted"
+      );
+      setHasSeenOnboarding(onboardingCompleted === "true");
+    } catch (error) {
+      console.error("Error checking onboarding status:", error);
+      setHasSeenOnboarding(false);
+    }
+  };
+
+  const markOnboardingAsCompleted = async () => {
+    try {
+      await AsyncStorage.setItem("onboardingCompleted", "true");
+      setHasSeenOnboarding(true);
+    } catch (error) {
+      console.error("Error marking onboarding as completed:", error);
+    }
+  };
+
+  const resetOnboardingStatus = async () => {
+    try {
+      await AsyncStorage.removeItem("onboardingCompleted");
+      setHasSeenOnboarding(false);
+    } catch (error) {
+      console.error("Error resetting onboarding status:", error);
+    }
+  };
 
   const checkAuthStatus = async () => {
     try {
@@ -152,6 +126,9 @@ export const AuthProvider = ({ children }) => {
       setUserID(null);
       setUserType(null);
       setLastAttemptedCredentials(null);
+
+      // Clear subscription data on logout
+      await clearSubscription();
     } catch (error) {
       console.error("Error during logout:", error);
     } finally {
@@ -190,6 +167,8 @@ export const AuthProvider = ({ children }) => {
         clearUserID,
         userType, // Add userType
         setUserType, // Add setUserType
+        hasSeenOnboarding, // Add onboarding status
+        markOnboardingAsCompleted, // Add method to mark onboarding as completed
         login,
         lastAttemptedCredentials,
         setLastAttemptedCredentials,
@@ -197,6 +176,7 @@ export const AuthProvider = ({ children }) => {
         checkAuthStatus, // Expose checkAuthStatus
         hasRole, // Helper for role checking
         canAccess, // Helper for access control
+        resetOnboardingStatus, // Add reset onboarding status
       }}
     >
       {children}

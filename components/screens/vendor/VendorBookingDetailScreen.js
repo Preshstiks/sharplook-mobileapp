@@ -31,17 +31,8 @@ export default function VendorBookingDetailScreen() {
   const [isLoadingComplete, setIsLoadingComplete] = React.useState(false);
   const [showDisputeModal, setShowDisputeModal] = React.useState(false);
   const [isSubmittingDispute, setIsSubmittingDispute] = React.useState(false);
-
-  // Example static data for demo (replace with real data as needed)
-  const bookingDetails = [
-    { name: "Facials", amount: 88528 },
-    { name: "Pedicure", amount: 100000 },
-  ];
-  const paymentDetails = [
-    { name: "Facials", amount: 18528 },
-    { name: "Pedicure", amount: 178000 },
-  ];
-
+  const [isAccepting, setIsAccepting] = React.useState(false);
+  const [isRejecting, setIsRejecting] = React.useState(false);
   const handleCompleteBooking = async () => {
     if (!booking?.id) return;
     setIsLoadingComplete(true);
@@ -65,7 +56,7 @@ export default function VendorBookingDetailScreen() {
   // Dispute form validation schema
   const disputeSchema = Yup.object().shape({
     reason: Yup.string().required("Please provide a reason for the dispute."),
-    image: Yup.mixed()
+    referencePhoto: Yup.mixed()
       .test("fileType", "Only JPEG images are allowed.", (value) => {
         if (!value) return true;
         return value.endsWith(".jpg") || value.endsWith(".jpeg");
@@ -83,16 +74,13 @@ export default function VendorBookingDetailScreen() {
       const res = await HttpClient.post("/disputes/raiseDispute", {
         bookingId: booking?.id,
         reason: values.reason,
-        image: values.image,
+        referencePhoto: values.referencePhoto,
       });
-      console.log(res.data);
       showToast.success(res.data.message);
       // Optionally show a toast or feedback here
       setShowDisputeModal(false);
       resetForm();
     } catch (error) {
-      // Optionally show error toast or feedback
-      console.log(error);
     } finally {
       setIsSubmittingDispute(false);
     }
@@ -105,10 +93,42 @@ export default function VendorBookingDetailScreen() {
       quality: 1,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setFieldValue("image", result.assets[0].uri);
+      setFieldValue("referencePhoto", result.assets[0].uri);
+    }
+  };
+  const handleAccept = async () => {
+    setIsAccepting(true);
+    try {
+      const res = await HttpClient.patch(`/bookings/status`, {
+        status: "ACCEPTED",
+        bookingId: booking.id,
+      });
+      showToast.success(res.data.message);
+      navigation.goBack();
+    } catch (err) {
+      console.error("Error accepting booking:", err.response);
+      showToast.error(err.response.data.message);
+    } finally {
+      setIsAccepting(false);
     }
   };
 
+  const handleReject = async () => {
+    setIsRejecting(true);
+    try {
+      const res = await HttpClient.patch(`/bookings/status`, {
+        status: "REJECTED",
+        bookingId: booking.id,
+      });
+      showToast.success(res.data.message);
+      navigation.goBack();
+    } catch (err) {
+      console.error("Error rejecting booking:", err.response);
+      showToast.error(err.response.data.message);
+    } finally {
+      setIsRejecting(false);
+    }
+  };
   return (
     <View className="flex-1 bg-white pb-[50px]">
       {/* Header */}
@@ -148,10 +168,10 @@ export default function VendorBookingDetailScreen() {
             <Text className="text-fadedDark">{HexConverter(booking?.id)}</Text>
           </Text>
           <Text
-            className={`text-[12px] ${booking?.status === "COMPLETED" ? "text-success" : "text-pending"}`}
+            className={`text-[12px] ${booking?.dispute !== null ? "text-[#ff0000]" : booking?.status === "ACCEPTED" ? "text-[#0D9488]" : booking?.status === "COMPLETED" ? "text-success" : "text-pending"}`}
             style={{ fontFamily: "poppinsMedium" }}
           >
-            {booking?.status}
+            {booking?.dispute === null ? booking?.status : "DISPUTED"}
           </Text>
         </View>
         {/* Booking Details */}
@@ -214,14 +234,14 @@ export default function VendorBookingDetailScreen() {
             style={{ fontFamily: "poppinsMedium" }}
             className="text-[16px] mb-1"
           >
-            Payment Summary
+            Cost Summary
           </Text>
-          <Text
+          {/* <Text
             className="text-primary text-[12px] mb-1"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Payment Date: 23-03-2024
-          </Text>
+          </Text> */}
           <View className="h-[1px] mt-3 mb-4 bg-[#00000013]" />
           <View className="flex-row justify-between mb-1">
             <Text
@@ -309,7 +329,22 @@ export default function VendorBookingDetailScreen() {
             </Text>
           </View>
         </View>
-        {booking?.status === "PENDING" && (
+        {booking?.status === "PENDING" && booking?.dispute === null ? (
+          <View className="mt-2 mb-1">
+            <AuthButton
+              title="Accept"
+              onPress={handleAccept}
+              isloading={isAccepting}
+              loadingMsg="Accepting"
+            />
+            <OutlineButton
+              title="Reject"
+              onPress={handleReject}
+              isloading={isRejecting}
+              loadingMsg="Rejecting"
+            />
+          </View>
+        ) : booking?.status === "ACCEPTED" && booking?.dispute === null ? (
           <View className="mt-2 mb-1">
             <AuthButton
               title="Complete Booking"
@@ -322,7 +357,7 @@ export default function VendorBookingDetailScreen() {
               onPress={() => setShowDisputeModal(true)}
             />
           </View>
-        )}
+        ) : null}
       </ScrollView>
       {/* Dispute Modal (local, not shared) */}
       <BottomModal
@@ -332,7 +367,7 @@ export default function VendorBookingDetailScreen() {
         backgroundcolor="#fff"
       >
         <Formik
-          initialValues={{ reason: "", image: null }}
+          initialValues={{ reason: "", referencePhoto: "" }}
           validationSchema={disputeSchema}
           onSubmit={handleDisputeSubmit}
         >
@@ -379,14 +414,14 @@ export default function VendorBookingDetailScreen() {
                 </Text>
                 <Feather name="plus" size={16} color="#000" />
               </TouchableOpacity>
-              {values.image && (
+              {values.referencePhoto && (
                 <View className="mb-2 items-center">
                   <Image
-                    source={{ uri: values.image }}
+                    source={{ uri: values.referencePhoto }}
                     style={{ width: 120, height: 120, borderRadius: 8 }}
                   />
                   <TouchableOpacity
-                    onPress={() => setFieldValue("image", null)}
+                    onPress={() => setFieldValue("referencePhoto", null)}
                     style={{
                       position: "absolute",
                       top: 4,

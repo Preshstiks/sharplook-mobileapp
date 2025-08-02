@@ -12,7 +12,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAuth } from "../../../context/AuthContext";
 import { HttpClient } from "../../../api/HttpClient";
 import EmptySVG from "../../../assets/img/empty.svg";
-import { ActivityIndicator } from "react-native";
 import { formatAmount } from "../../formatAmount";
 import { HexConverter } from "../../reusuableComponents/HexConverter";
 import { DateConverter } from "../../reusuableComponents/DateConverter";
@@ -99,7 +98,7 @@ export default function VendorBookingsScreen() {
         setLoading(true);
         try {
           const res = await HttpClient.get("/bookings/getBookings");
-          console.log(res.data.data);
+
           setBookings(res.data.data);
         } catch (err) {
           setBookings([]);
@@ -112,13 +111,31 @@ export default function VendorBookingsScreen() {
   );
 
   const filteredBookings = bookings.filter((b) => {
-    if (tab === "ALL") return true;
-    return b.status === tab;
+    // Exclude REJECTED bookings
+    if (b.status === "REJECTED") return false;
+
+    // Filter by tab
+    const tabFilter = tab === "ALL" ? true : b.status === tab;
+
+    // Filter by search term (client name)
+    const searchFilter =
+      search.trim() === "" ||
+      (b?.client?.firstName &&
+        b.client.firstName.toLowerCase().includes(search.toLowerCase())) ||
+      (b?.client?.lastName &&
+        b.client.lastName.toLowerCase().includes(search.toLowerCase())) ||
+      (b?.client?.firstName &&
+        b?.client?.lastName &&
+        `${b.client.firstName} ${b.client.lastName}`
+          .toLowerCase()
+          .includes(search.toLowerCase()));
+
+    return tabFilter && searchFilter;
   });
 
-  const totalBookings = bookings.length;
-  const totalAmount = bookings.reduce((sum, b) => sum + b.price, 0);
-  console.log({ bookings });
+  const totalBookings = filteredBookings.length;
+  const totalAmount = filteredBookings.reduce((sum, b) => sum + b.price, 0);
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -186,16 +203,16 @@ export default function VendorBookingsScreen() {
         </View>
       </View>
       {/* Tabs */}
-      <View className="flex-row justify-between mb-2 px-4 gap-3">
-        {["ALL", "COMPLETED", "PENDING"].map((t) => (
+      <View className="flex-row mb-2 px-3 gap-2">
+        {["ALL", "PENDING", "ACCEPTED", "COMPLETED"].map((t) => (
           <Pressable
             key={t}
-            className={`px-6 py-[10px] rounded-[8px] ${tab === t ? "bg-primary" : "bg-white border border-[#FCDFEE]"}`}
+            className={`flex-1 px-3 py-[10px] rounded-[8px] ${tab === t ? "bg-primary" : "bg-white border border-[#FCDFEE]"}`}
             onPress={() => setTab(t)}
           >
             <Text
               style={{ fontFamily: "latoBold" }}
-              className={`text-[12px] uppercase ${tab === t ? "text-white" : "text-fadedDark"}`}
+              className={`text-[10px] uppercase text-center ${tab === t ? "text-white" : "text-fadedDark"}`}
             >
               {t}
             </Text>
@@ -242,10 +259,10 @@ export default function VendorBookingsScreen() {
                   {HexConverter(b?.id)} {DateConverter(b.date)} {b.time}
                 </Text>
                 <Text
-                  className={`text-[12px] ${b.status === "COMPLETED" ? "text-success" : "text-pending"}`}
+                  className={`text-[12px] ${b.dispute !== null ? "text-[#ff0000]" : b.status === "ACCEPTED" ? "text-[#0D9488]" : b.status === "COMPLETED" ? "text-success" : "text-pending"}`}
                   style={{ fontFamily: "latoBold" }}
                 >
-                  {b?.status}
+                  {b?.dispute !== null ? "DISPUTED" : b?.status}
                 </Text>
               </View>
               <Text

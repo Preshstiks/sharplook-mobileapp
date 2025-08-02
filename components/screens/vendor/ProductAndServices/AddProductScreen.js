@@ -36,8 +36,6 @@ export default function AddProductScreen({ navigation }) {
   };
   const handleAddProduct = async (values) => {
     setLoading(true);
-    console.log("handleAddProduct called with values:", values);
-    console.log("Selected image:", selectedImage);
     try {
       const formData = new FormData();
       formData.append("productName", values.productName);
@@ -56,11 +54,6 @@ export default function AddProductScreen({ navigation }) {
         });
       }
 
-      // Debug: log FormData keys and values
-      for (let pair of formData.entries()) {
-        console.log("FormData entry:", pair[0], pair[1]);
-      }
-
       const res = await HttpClient.post(
         "/products/vendor/addProducts",
         formData,
@@ -70,10 +63,8 @@ export default function AddProductScreen({ navigation }) {
           },
         }
       );
-      console.log("handleAddProduct response:", res);
       setVisible(true);
     } catch (error) {
-      console.log("AddProduct error:", error, error.response);
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         errorMsg =

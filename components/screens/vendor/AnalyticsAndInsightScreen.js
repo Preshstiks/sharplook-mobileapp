@@ -149,8 +149,6 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
     }, [])
   );
 
-  console.log({ analytics });
-
   // Skeleton Loader Component
   const SkeletonBox = ({ width, height, style }) => {
     const animatedOpacity = shimmerAnim.interpolate({

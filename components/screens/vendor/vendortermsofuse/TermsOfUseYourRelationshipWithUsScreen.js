@@ -29,17 +29,28 @@ export default function TermsOfUseYourRelationshipWithUsScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual terms content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          We are committed to maintaining the confidentiality, integrity, and
+          availability of your Personal Data. In accordance with the Nigeria
+          Data Protection Act (NDPA) 2023 and industry best practices, we
+          implement a combination of technical and organizational security
+          measures to guard against unauthorized access, alteration, disclosure,
+          or destruction of Personal Data. The Mechanism adopted for these
+          measures include but are not limited to: Data Encryption: All
+          sensitive data is encrypted both in transit and at rest using
+          industry-standard encryption protocols. Secure Infrastructure: Our
+          systems are built on secure, cloud-based infrastructure with multiple
+          layers of protection. Role Based Access Control: Access to personal
+          data is restricted to authorized personnel only, with strict
+          authentication and authorization protocols. Periodic Security Updates
+          and Risk-assessments: We regularly update our security measures and
+          conduct comprehensive risk assessments to identify and address
+          potential vulnerabilities.
         </Text>
       </ScrollView>
     </View>

@@ -2,7 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { EXPO_PUBLIC_API_BASE_URL } from "@env";
 export const HttpClient = axios.create({
-  baseURL: EXPO_PUBLIC_API_BASE_URL,
+  // baseURL: EXPO_PUBLIC_API_BASE_URL,
+  baseURL: "https://sharplook-backend-2l7j.onrender.com/api/v1",
   headers: {
     "Content-Type": "application/json",
   },

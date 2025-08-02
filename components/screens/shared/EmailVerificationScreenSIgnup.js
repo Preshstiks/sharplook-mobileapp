@@ -177,13 +177,13 @@ export default function EmailVerificationScreenSignup({ navigation, route }) {
               className="flex-row gap-3 justify-center items-center mt-[50px] mb-8"
               onPress={() => alert("Switch to phone number verification")}
             >
-              <Feather name="phone" size={20} color="#EB278D" />
-              <Text
+              {/* <Feather name="phone" size={20} color="#EB278D" /> */}
+              {/* <Text
                 style={{ fontFamily: "poppinsRegular" }}
                 className="text-primary text-[12px]"
               >
                 Verify with Phone Number instead
-              </Text>
+              </Text> */}
             </TouchableOpacity>
             <View className="flex-1" />
             <View className="mb-8">
@@ -192,7 +192,6 @@ export default function EmailVerificationScreenSignup({ navigation, route }) {
                 disabled={loading}
                 loadingMsg="Verifying"
                 onPress={() => {
-                  console.log("Submit button pressed");
                   handleSubmit();
                 }}
                 isloading={loading}

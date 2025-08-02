@@ -24,23 +24,42 @@ import EmailVerificationScreenSignup from "./components/screens/shared/EmailVeri
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/reusuableComponents/ProtectedRoute";
 import AddLocationScreen from "./components/screens/vendor/auth/AddLocationScreen";
+import CallScreen from "./components/screens/client/GlobalScreens/CallScreen";
+import IncomingCallNotification from "./components/reusuableComponents/IncomingCallNotification";
+import InitialSubscriptionScreen from "./components/screens/vendor/auth/InitialSubscriptionScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator({ linking }) {
   const { isAuthenticated, userType, isLoading } = useAuth();
   const fontsLoaded = useCustomFonts();
-  if (!fontsLoaded) {
+
+  if (!fontsLoaded || isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#EB278D" />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#EB278D",
+        }}
+      >
+        <ActivityIndicator size="large" color="white" />
       </View>
     );
   }
 
   return (
     <NavigationContainer linking={linking}>
-      <Stack.Navigator initialRouteName="Splash">
+      <Stack.Navigator
+        initialRouteName={
+          isAuthenticated
+            ? userType === "CLIENT"
+              ? "ClientApp"
+              : "VendorApp"
+            : "Splash"
+        }
+      >
         {isAuthenticated ? (
           <>
             {userType === "CLIENT" ? (
@@ -52,6 +71,11 @@ export default function AppNavigator({ linking }) {
                     </ProtectedRoute>
                   )}
                 </Stack.Screen>
+                <Stack.Screen
+                  name="CallScreen"
+                  component={CallScreen}
+                  options={{ headerShown: false }}
+                />
               </>
             ) : (
               <>
@@ -126,6 +150,11 @@ export default function AppNavigator({ linking }) {
             <Stack.Screen
               name="AddLocation"
               component={AddLocationScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="InitialSubscription"
+              component={InitialSubscriptionScreen}
               options={{ headerShown: false }}
             />
             <Stack.Screen

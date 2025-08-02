@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, Image, Pressable, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  ScrollView,
+  StatusBar,
+} from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Empty from "../../../../assets/img/empty.svg";
 import { HttpClient } from "../../../../api/HttpClient";
@@ -22,7 +29,7 @@ export default function BookingsScreen() {
         setError(null);
         try {
           const response = await HttpClient.get("/bookings/getBookings");
-          console.log("API response:", response.data);
+
           setBookings(response.data.data || []);
         } catch (err) {
           setError("Failed to load bookings.");
@@ -35,7 +42,7 @@ export default function BookingsScreen() {
   );
 
   const filteredBookings = bookings.filter((b) => b.status === tab);
-  console.log({ filteredBookings });
+
   const EmptyState = () => (
     <View className="flex-1 justify-center items-center px-8">
       <Empty width={150} height={150} />
@@ -121,6 +128,7 @@ export default function BookingsScreen() {
 
   return (
     <View className="flex-1 bg-secondary">
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View className="bg-primary pt-[60px] pb-4 px-4">
         <Text
           style={{ fontFamily: "poppinsMedium" }}

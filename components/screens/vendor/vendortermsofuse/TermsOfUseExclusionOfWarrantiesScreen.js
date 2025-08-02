@@ -29,17 +29,24 @@ export default function TermsOfUseExclusionOfWarrantiesScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual terms content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          The Company reserves the right to amend, revise, or update the terms
+          of this Agreement at its sole discretion and at any time. Any such
+          modifications shall become effective upon publication within the
+          SharpLook App, or upon direct communication to users via electronic
+          means, including email or in-app notifications. Your continued access
+          or use of the SharpLook App following the notification of any changes
+          shall constitute your binding acceptance of the revised terms. This
+          Agreement, including its interpretation, validity, performance, and
+          enforcement, shall be governed by and construed in accordance with the
+          laws of the Federal Republic of Nigeria. The Parties hereby submit to
+          the exclusive jurisdiction of the courts of Nigeria for the resolution
+          of any dispute arising under or in connection with this Agreement.
         </Text>
       </ScrollView>
     </View>

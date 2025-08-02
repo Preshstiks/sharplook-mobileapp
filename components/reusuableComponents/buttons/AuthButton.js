@@ -14,8 +14,8 @@ export default function AuthButton({
     <TouchableOpacity
       disabled={disabled}
       onPress={onPress}
-      className={`mt-2 rounded-[12px] border h-[52px] flex items-center justify-center w-full 
-bg-primary border-primary ${isloading ? "cursor-not-allowed bg-[#d77eac]" : ""}`}
+      className={`mt-2 rounded-[12px] border h-[52px] flex items-center justify-center w-full  
+bg-primary border-primary ${isloading ? "cursor-not-allowed bg-[#c681a5]" : ""} ${disabled ? "bg-[#ffddef]  border-[#ffddef] text-white cursor-not-allowed" : ""}`}
     >
       {isloading ? (
         <View className="flex-row items-center gap-2">
@@ -31,7 +31,7 @@ bg-primary border-primary ${isloading ? "cursor-not-allowed bg-[#d77eac]" : ""}`
           {iconLeft && <View className="mr-2">{iconLeft}</View>}
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-center text-[13px] text-white"
+            className={`text-center text-[13px] ${disabled ? "text-white" : "text-white"}`}
           >
             {title}
           </Text>

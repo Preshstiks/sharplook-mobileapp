@@ -9,6 +9,7 @@ import {
   Pressable,
   Animated,
   Easing,
+  StatusBar,
 } from "react-native";
 import {
   Entypo,
@@ -25,10 +26,6 @@ import { useCart } from "../../../../context/CartContext";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Menu from "../../../../assets/icon/homemenubtn.svg";
 import OptionsIcon from "../../../../assets/icon/options.svg";
-import NailIcon from "../../../../assets/icon/nail.svg";
-import MakeupIcon from "../../../../assets/icon/makeupicon.svg";
-import BarbingSaloonIcon from "../../../../assets/icon/clipper.svg";
-import HairIcon from "../../../../assets/icon/hairicon.svg";
 import ProductOne from "../../../../assets/img/product1.jpg";
 import ProductTwo from "../../../../assets/img/product2.jpg";
 import ProductThree from "../../../../assets/img/product3.jpg";
@@ -40,28 +37,9 @@ import { HttpClient } from "../../../../api/HttpClient";
 import DefaultAvatar from "../../../../assets/icon/avatar.png";
 import { useStatusBar } from "../../../../context/StatusBarContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-const categories = [
-  {
-    label: "Nails",
-    icon: <NailIcon width={24} height={24} color="#EB278D" />,
-  },
-  {
-    label: "Makeup",
-    icon: <MakeupIcon width={24} height={24} color="#EB278D" />,
-  },
-  {
-    label: "Barbing Saloon",
-    icon: <BarbingSaloonIcon width={24} height={24} color="#EB278D" />,
-  },
-  {
-    label: "Hair",
-    icon: <HairIcon width={24} height={24} color="#EB278D" />,
-  },
-  {
-    label: "Other",
-    icon: <OptionsIcon width={28} height={28} color="#EB278D" />,
-  },
-];
+import { useChatNavigation } from "../../../../hooks/useChatNavigation";
+import { useCategories } from "../../../../hooks/useCategories";
+// Categories will be populated dynamically from API
 
 const recommendedProducts = [
   { image: ProductOne },
@@ -143,6 +121,8 @@ export default function HomeScreen() {
   const [allServices, setAllServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const searchInputRef = React.useRef(null); // <-- add ref
+  const { navigateToChatList } = useChatNavigation();
+  const { categories, loading: categoriesLoading } = useCategories();
   const toggleSearchBar = () => {
     setIsSearchBarActive(!isSearchBarActive);
     setSearchInput(""); // Reset search input when toggling
@@ -157,23 +137,22 @@ export default function HomeScreen() {
       const fetchRecommendedProducts = async () => {
         setLoadingProducts(true);
         try {
-          const res = await HttpClient.get("/user/products/top-selling");
+          const res = await HttpClient.get(
+            "/user/products/top-selling?limit=5"
+          );
           setRecommendedProducts(res.data.data);
         } catch (error) {
-          console.log("Error fetching recommended products:", error);
         } finally {
           setLoadingProducts(false);
         }
       };
       const fetchTopVendors = async () => {
         const token = await AsyncStorage.getItem("token");
-        console.log("token", token);
         setLoadingVendors(true);
         try {
           const res = await HttpClient.get("/user/topVendors");
           setTopVendors(res.data.data);
         } catch (error) {
-          console.log("Error fetching top vendors:", error);
         } finally {
           setLoadingVendors(false);
         }
@@ -182,11 +161,8 @@ export default function HomeScreen() {
         setLoadingServices(true);
         try {
           const res = await HttpClient.get("/client/services");
-          console.log("API response:", res.data);
           setAllServices(res.data.data); // Adjust if your API response structure differs
         } catch (error) {
-          console.log("Error fetching all services:", error.response);
-          console.log("Error fetching all services data:", error.response.data);
         } finally {
           setLoadingServices(false);
         }
@@ -209,10 +185,10 @@ export default function HomeScreen() {
     }
   }, [searchInput, topVendors]);
 
-  console.log({ topVendors });
   const currentUser = user.user;
   return (
     <View className="flex-1 bg-secondary" style={{ position: "relative" }}>
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <ScrollView showsVerticalScrollIndicator={false} style={{ zIndex: 20 }}>
         {/* Header */}
         <View className="px-5 pt-[40px] items-center justify-between flex-row">
@@ -233,12 +209,12 @@ export default function HomeScreen() {
           <View className="items-center flex-row gap-[12px]">
             <TouchableOpacity
               className="relative"
-              onPress={() => navigation.navigate("ChatListScreen")}
+              onPress={() => navigateToChatList(navigation)}
             >
               <Entypo name="chat" size={24} color="#EB278D" />
-              <View className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary items-center justify-center">
+              {/* <View className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary items-center justify-center">
                 <Text className="text-[8px] text-white font-medium">2</Text>
-              </View>
+              </View> */}
             </TouchableOpacity>
             <TouchableOpacity
               className="relative"
@@ -284,9 +260,9 @@ export default function HomeScreen() {
             />
           </View>
 
-          <TouchableOpacity onPress={() => navigation.navigate("Filter")}>
+          {/* <TouchableOpacity onPress={() => navigation.navigate("Filter")}>
             <FilterBtn width={35} height={35} color="#fff" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         {/* Categories or Search Results */}
         {isSearchBarActive ? (
@@ -374,38 +350,42 @@ export default function HomeScreen() {
             )}
           </ScrollView>
         ) : (
-          <View>
+          <View className="pb-10">
             <View className="flex-row justify-between mt-6 px-2">
-              {categories.map((cat, idx) => (
-                <TouchableOpacity
-                  key={cat.label}
-                  className="items-center flex-1"
-                  onPress={() => {
-                    if (cat.label !== "Other") {
-                      // Filter services by category
-                      const filteredServices = allServices.filter(
-                        (service) => service.serviceName === cat.label
-                      );
-                      navigation.navigate("Categories", {
-                        category: cat.label,
-                        services: filteredServices,
-                      });
-                    } else {
-                      navigation.navigate("OtherScreen", { allServices });
-                    }
-                  }}
-                >
-                  <View className="rounded-full h-[54px] w-[54px] items-center justify-center mb-1 border border-primary">
-                    {cat.icon}
-                  </View>
-                  <Text
-                    style={{ fontFamily: "latoRegular" }}
-                    className="text-[10px] text-faintDark text-center mt-0.5"
-                  >
-                    {cat.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {categoriesLoading
+                ? // Show skeleton loading for categories
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <View key={idx} className="items-center flex-1">
+                      <View className="rounded-full h-[54px] w-[54px] items-center justify-center mb-1 border border-gray-200 bg-gray-100" />
+                      <View className="w-8 h-2 bg-gray-200 rounded mt-1" />
+                    </View>
+                  ))
+                : categories.slice(0, 5).map((cat, idx) => (
+                    <TouchableOpacity
+                      key={cat.id}
+                      className="items-center flex-1"
+                      onPress={() => {
+                        // Filter services by category
+                        const filteredServices = allServices.filter(
+                          (service) => service.serviceName === cat.name
+                        );
+                        navigation.navigate("Categories", {
+                          category: cat.name,
+                          services: filteredServices,
+                        });
+                      }}
+                    >
+                      <View className="rounded-full h-[54px] w-[54px] items-center justify-center mb-1 border border-primary">
+                        <Ionicons name="sparkles" size={24} color="#EB278D" />
+                      </View>
+                      <Text
+                        style={{ fontFamily: "latoRegular" }}
+                        className="text-[10px] text-faintDark text-center mt-0.5"
+                      >
+                        {cat.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
             </View>
             {/* Top Vendors */}
             <View className="flex-row items-center justify-between mt-8 mb-4 px-5">
@@ -469,14 +449,14 @@ export default function HomeScreen() {
                         style={{ fontFamily: "poppinsRegular" }}
                         className="text-[12px] text-fadedDark mt-0.5"
                       >
-                        {vendor?.vendorOnboarding.businessName}
+                        {vendor?.vendorOnboarding?.businessName}
                       </Text>
                       <View className="bg-primary rounded-[4px] my-1 px-3 self-start">
                         <Text
                           style={{ fontFamily: "poppinsRegular" }}
                           className="text-[8px] mt-1 text-white"
                         >
-                          {vendor?.vendorOnboarding.serviceType ===
+                          {vendor?.vendorOnboarding?.serviceType ===
                           "HOME_SERVICE"
                             ? "Home Service"
                             : "In-shop"}
@@ -487,7 +467,7 @@ export default function HomeScreen() {
                           <Ionicons
                             key={i}
                             name={
-                              i < Math.round(vendor.rating)
+                              i < Math.round(vendor?.rating)
                                 ? "star"
                                 : "star-outline"
                             }
@@ -499,7 +479,7 @@ export default function HomeScreen() {
                           style={{ fontFamily: "poppinsRegular" }}
                           className="text-[12px] text-fadedDark mt-1 ml-1"
                         >
-                          {vendor.rating.toFixed(1)}
+                          {vendor?.rating?.toFixed(1)}
                         </Text>
                       </View>
                     </View>
@@ -516,14 +496,14 @@ export default function HomeScreen() {
               >
                 Recommended Products
               </Text>
-              <TouchableOpacity>
+              {/* <TouchableOpacity>
                 <Text
                   style={{ fontFamily: "poppinsRegular" }}
                   className="text-primary text-[12px]"
                 >
                   View all
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             {loadingProducts ? (
               <ScrollView
@@ -600,7 +580,7 @@ export default function HomeScreen() {
               </ScrollView>
             )}
             {/* Best Offers */}
-            <View className="mt-8 px-5 pb-[40px]">
+            {/* <View className="mt-8 px-5 pb-[40px]">
               <Text
                 style={{ fontFamily: "poppinsMedium" }}
                 className="text-[16px] text-fadedDark"
@@ -638,7 +618,7 @@ export default function HomeScreen() {
                   ))}
                 </View>
               </ScrollView>
-            </View>
+            </View> */}
           </View>
         )}
       </ScrollView>

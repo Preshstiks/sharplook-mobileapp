@@ -17,12 +17,10 @@ export default function AddServiceReviewScreen() {
   const route = useRoute();
   const vendorId = route.params?.vendorId;
   const serviceId = route.params?.serviceId;
-  console.log({ vendorId, serviceId });
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const { user } = useAuth();
   const clientId = user.id;
-  console.log({ user });
   const handleAddReview = async (values) => {
     setLoading(true);
     const payload = {
@@ -33,7 +31,6 @@ export default function AddServiceReviewScreen() {
       comment: values.comment,
       rating: values.rating,
     };
-    console.log(payload);
     try {
       const res = await HttpClient.post("/reviews/postReview", {
         type: "SERVICE",
@@ -44,11 +41,8 @@ export default function AddServiceReviewScreen() {
         rating: values.rating,
       });
       showToast.success(res.data.message);
-
-      console.log(res.data);
     } catch (error) {
       showToast.error(error.response.data.message);
-      console.log(error.response);
     } finally {
       setLoading(false);
     }

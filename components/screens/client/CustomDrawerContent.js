@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import {
   DrawerContentScrollView,
@@ -6,9 +6,6 @@ import {
 } from "@react-navigation/drawer";
 import { MaterialIcons } from "@expo/vector-icons";
 import CloseNavBtn from "../../../assets/icon/closenav.svg";
-import BottomModal from "../../reusuableComponents/BottomModal";
-import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
-import { AntDesign } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function CustomDrawerContent(props) {
@@ -16,7 +13,6 @@ export default function CustomDrawerContent(props) {
   const handleLogout = async () => {
     await logout();
   };
-  console.log({ user });
 
   return (
     <DrawerContentScrollView

@@ -7,6 +7,7 @@ import {
   Alert,
   Modal,
   StyleSheet,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -34,11 +35,8 @@ export default function BookAppointmentScreen() {
   const [paymentReference, setPaymentReference] = useState("");
   const { id } = route.params;
   const [pendingBookingValues, setPendingBookingValues] = useState({});
-  console.log("service at render:", service);
-  console.log({ vendorData });
+
   const handleBookNow = async (values) => {
-    console.log("[DEBUG] handleBookNow called with values:", values);
-    console.log("service in handleBookNow:", service);
     try {
       const res = await HttpClient.post("/bookings/bookVendor", {
         vendorId: id,
@@ -51,7 +49,8 @@ export default function BookAppointmentScreen() {
         reference: values.reference,
         paymentMethod: values.paymentMethod,
       });
-      console.log("[DEBUG] handleBookNow response:", res.data);
+      showToast.success(res.data.message);
+      navigation.goBack();
     } catch (error) {
       if (error.response.data.message === "Insufficient wallet balance") {
         showToast.error(error.response.data.message);
@@ -62,12 +61,9 @@ export default function BookAppointmentScreen() {
           error.response.message;
         showToast.error(message);
       }
-      console.log("[DEBUG] handleBookNow error:", error?.response || error);
     }
   };
-  console.log({ service });
   const checkout = async (values) => {
-    console.log("[DEBUG] checkout called with values:", values);
     try {
       const res = await HttpClient.post("/payment/paystack/initiate", {
         paymentFor: "BOOKING",
@@ -77,9 +73,7 @@ export default function BookAppointmentScreen() {
       setPaystackPaymentUrl(res.data.paymentUrl);
       setPaymentReference(res.data.reference);
       setPaystackModalVisible(true);
-    } catch (error) {
-      console.log("[DEBUG] checkout error:", error?.response || error);
-    }
+    } catch (error) {}
   };
   const paymentMethods = [
     { label: "Paystack", value: "PAYSTACK" },
@@ -114,7 +108,6 @@ export default function BookAppointmentScreen() {
       const verifyRes = await HttpClient.get(
         `/payment/paystack/verify/${reference}`
       );
-      console.log("[DEBUG] Paystack verify response:", verifyRes.data);
 
       const appointmentData = new Date(selectedDate).toISOString();
       if (verifyRes.data.transaction.status === "paid") {
@@ -129,13 +122,11 @@ export default function BookAppointmentScreen() {
           reference,
           paymentMethod: "PAYSTACK",
         };
-        console.log("[DEBUG] Booking payload:", bookingPayload);
 
         const bookRes = await HttpClient.post(
           "/bookings/bookVendor",
           bookingPayload
         );
-        console.log("[DEBUG] Booking response:", bookRes.data);
         showToast.success(bookRes.data.message);
         navigation.goBack();
       } else {
@@ -143,28 +134,21 @@ export default function BookAppointmentScreen() {
       }
       setPaystackModalVisible(false);
     } catch (error) {
-      console.log(error.response);
       const message =
         error?.response?.data?.message ||
         error?.message ||
         "Payment verification or booking failed.";
       showToast.error(message);
-
-      console.log(
-        "[DEBUG] handlePaystackVerificationAndBooking error:",
-        error?.response || error
-      );
     } finally {
       setLoading(false);
       setPaymentReference("");
     }
   };
 
-  console.log({ paymentReference });
-
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View className="bg-primary pt-[60px] pb-4 flex-row items-center justify-between px-4">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />
@@ -182,13 +166,32 @@ export default function BookAppointmentScreen() {
         validationSchema={inshopvalidationSchema}
         onSubmit={async (values) => {
           setLoading(true);
-          console.log("[DEBUG] Form submitted with values:", values);
           try {
             if (values.paymentMethod === "SHARP-PAY") {
               const reference = `SHARP-PAY-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
+              // Convert 12-hour time to 24-hour format
+              const convertTo24Hour = (time12h) => {
+                const [time, modifier] = time12h.split(/(?=[AP]M)/);
+                let [hours, minutes] = time.split(":");
+                hours = parseInt(hours);
+
+                if (modifier === "PM" && hours !== 12) {
+                  hours += 12;
+                } else if (modifier === "AM" && hours === 12) {
+                  hours = 0;
+                }
+
+                return `${hours.toString().padStart(2, "0")}:${minutes}`;
+              };
+
+              const time24Hour = convertTo24Hour(values.time);
+
               const payload = {
                 vendorId: vendorData?.id || id,
-                date: new Date(`${selectedDate}T${values.time}:00.000Z`),
+                date: new Date(
+                  `${selectedDate}T${time24Hour}:00.000Z`
+                ).toISOString(),
                 time: values.time,
                 paymentMethod: values.paymentMethod,
                 reference,
@@ -197,16 +200,35 @@ export default function BookAppointmentScreen() {
                 serviceName: service.serviceName,
                 serviceId: service.id,
               };
-              console.log("[DEBUG] sharpPay payload:", payload);
-              await handleBookNow(payload);
+
+              // Make the API call directly for SharpPay
+              try {
+                const res = await HttpClient.post(
+                  "/bookings/bookVendor",
+                  payload
+                );
+                showToast.success(res.data.message);
+                navigation.goBack();
+              } catch (error) {
+                if (
+                  error.response?.data?.message ===
+                  "Insufficient wallet balance"
+                ) {
+                  showToast.error(error.response.data.message);
+                } else {
+                  const message =
+                    error?.response?.data?.message ||
+                    error?.message ||
+                    error.response?.message;
+                  showToast.error(message);
+                }
+              }
             } else if (values.paymentMethod === "PAYSTACK") {
               setPendingBookingValues(values); // Save for use after payment
               await checkout(values);
             } else {
-              console.log("[DEBUG] No payment method selected.");
             }
           } catch (error) {
-            console.log("[DEBUG] onSubmit error:", error);
           } finally {
             setLoading(false);
           }

@@ -87,11 +87,9 @@ export default function ClientAddLocationScreen({ navigation }) {
   const updateServiceRadius = async (latitude, longitude, radiusKm = 10) => {
     try {
       const payload = { radiusKm, latitude, longitude };
-      console.log("Sending payload to /user/location:", payload);
 
       const response = await HttpClient.put("/user/location", payload);
 
-      console.log("API response:", response.data);
       showToast.success(response.data.message);
 
       if (
@@ -104,12 +102,11 @@ export default function ClientAddLocationScreen({ navigation }) {
             email: lastAttemptedCredentials.email,
             password: lastAttemptedCredentials.password,
           });
-          console.log(loginResponse.data);
           if (loginResponse.data.token) {
             await login(loginResponse.data.token, "CLIENT");
             setIsAuthenticated(true);
             clearLastAttemptedCredentials();
-            navigation.replace("Client");
+            navigation.replace("ClientApp");
             return;
           } else {
             showToast.error(
@@ -129,7 +126,7 @@ export default function ClientAddLocationScreen({ navigation }) {
         }
       } else {
         // No credentials, so navigate directly
-        navigation.replace("Client");
+        navigation.replace("ClientApp");
       }
     } catch (error) {
       console.error("API error:", error);
@@ -146,12 +143,10 @@ export default function ClientAddLocationScreen({ navigation }) {
     setIsLoading(true);
     try {
       const location = await getCurrentLocation();
-      console.log("handleUseCurrentLocation - got location:", location);
       setCurrentLocation(location);
       setSelectedLocation(location);
 
       webviewRef.current.postMessage(JSON.stringify(location));
-      console.log("handleUseCurrentLocation - sent to WebView:", location);
 
       await updateServiceRadius(location.latitude, location.longitude);
     } catch (error) {
@@ -174,7 +169,9 @@ export default function ClientAddLocationScreen({ navigation }) {
           <MaterialIcons name="arrow-back-ios" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Location</Text>
-        <TouchableOpacity onPress={() => navigation.replace("Client")}>
+        <TouchableOpacity
+        // onPress={() => navigation.replace("ClientApp")}
+        >
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
       </View>
@@ -192,7 +189,7 @@ export default function ClientAddLocationScreen({ navigation }) {
 
       <View
         style={{
-          height: 300,
+          height: 600,
           marginVertical: 16,
           borderRadius: 12,
           overflow: "hidden",
@@ -284,7 +281,7 @@ export default function ClientAddLocationScreen({ navigation }) {
               />
             )}
           </TouchableOpacity>
-          {sampleLocations.map((location, index) => (
+          {/* {sampleLocations.map((location, index) => (
             <TouchableOpacity key={index} style={styles.locationOption}>
               <MaterialIcons name="location-on" size={22} color="#BDBDBD" />
               <Text style={styles.locationText}>
@@ -292,7 +289,7 @@ export default function ClientAddLocationScreen({ navigation }) {
                 )
               </Text>
             </TouchableOpacity>
-          ))}
+          ))} */}
         </ScrollView>
       </View>
       <LoaderOverlay visible={isLoading} />

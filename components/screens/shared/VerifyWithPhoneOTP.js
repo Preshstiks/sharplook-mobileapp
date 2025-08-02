@@ -45,7 +45,7 @@ export default function VerifyWithPhoneOTP({ navigation, route }) {
 
   const handleVerify = () => {
     // On successful OTP verification, navigate to the Vendor dashboard
-    navigation.replace("Client");
+    navigation.replace("ClientApp");
   };
 
   // Mask phone number

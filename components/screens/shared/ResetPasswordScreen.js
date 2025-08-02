@@ -12,10 +12,27 @@ import Logo from "../../../assets/img/logo/sharplooklogo.svg";
 import { Formik } from "formik";
 import { resetPasswordSchema } from "../../../utils/validationSchemas";
 import SuccessModal from "../../Modal/SuccessModal";
-export default function ResetPasswordScreen({ navigation }) {
+import { showToast } from "../../ToastComponent/Toast";
+import { HttpClient } from "../../../api/HttpClient";
+export default function ResetPasswordScreen({ navigation, route }) {
+  const { email } = route.params;
   const [visible, setVisible] = useState(false);
-  const handleProceed = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const handleReset = async (values) => {
     setVisible(false);
+    setIsLoading(true);
+    try {
+      const res = await HttpClient.post("/auth/reset-password", values);
+      if (res.status === 200) {
+        setVisible(true);
+      }
+    } catch (error) {
+      showToast.error(error.response.data.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleProceed = () => {
     navigation.replace("Login");
   };
   return (
@@ -45,12 +62,9 @@ export default function ResetPasswordScreen({ navigation }) {
             </View>
           </View>
           <Formik
-            initialValues={{ newPassword: "", confirmPassword: "" }}
+            initialValues={{ newPassword: "", token: "", email: email }}
             validationSchema={resetPasswordSchema}
-            onSubmit={(values) => {
-              console.log(values);
-              setVisible(true);
-            }}
+            onSubmit={handleReset}
           >
             {({
               handleChange,
@@ -72,19 +86,19 @@ export default function ResetPasswordScreen({ navigation }) {
                     secureTextEntry
                   />
                   <AuthInput
-                    label="Confirm Password"
-                    value={values.confirmPassword}
-                    onChangeText={handleChange("confirmPassword")}
-                    onBlur={handleBlur("confirmPassword")}
-                    error={errors.confirmPassword}
-                    touched={touched.confirmPassword}
+                    label="OTP"
+                    value={values.token}
+                    onChangeText={handleChange("token")}
+                    onBlur={handleBlur("token")}
+                    error={errors.token}
+                    touched={touched.token}
                     secureTextEntry
                   />
                 </View>
                 <View className="pb-[60px]">
                   <AuthButton
                     title="Create New Password"
-                    isloading={false}
+                    isloading={isLoading}
                     onPress={handleSubmit}
                   />
                 </View>

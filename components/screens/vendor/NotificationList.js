@@ -48,7 +48,6 @@ export default function NotificationList() {
           const notificationsData = res.data?.data || [];
           const sections = convertToSections(notificationsData);
           setNotifications(sections);
-          console.log(res.data);
         } catch (error) {
           console.error("Error fetching notifications:", error);
           setNotifications([]);

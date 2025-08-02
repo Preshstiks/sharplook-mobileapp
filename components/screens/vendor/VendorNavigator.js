@@ -53,35 +53,119 @@ import JurisdictionSpecificScreen from "./vendorprivacypolicy/JurisdictionSpecif
 import AddProductScreen from "./ProductAndServices/AddProductScreen";
 import AddServicesScreen from "./ProductAndServices/AddServicesScreen";
 import EditProductScreen from "./ProductAndServices/EditProduct";
-import WithdrawScreen from "./WithdrawScreen";
+import WithdrawScreen from "./Dashboard/WithdrawScreen";
 import EditServicesScreen from "./ProductAndServices/EditService";
-import FundVendorWalletScreen from "./FundVendorWallet";
-import VendorTransactionHistory from "./VendorTransactionHistory";
+import FundVendorWalletScreen from "./Dashboard/FundVendorWallet";
+import VendorTransactionHistory from "./Dashboard/VendorTransactionHistory";
 import VendorOffersScreen from "./VendorOffersScreen";
 import VendorOfferDetailsScreen from "./VendorOfferDetailsScreen";
-
+import SubscriptionScreen from "./SubscriptionScreen";
+import VendorReferAndEarnScreen from "./VendorReferAndEarnScreen";
+import { Ionicons } from "@expo/vector-icons";
 // import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
-function VendorDashboardDrawer() {
+function VendorMainDrawer() {
   return (
     <Drawer.Navigator
+      initialRouteName="Main"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
-        drawerPosition: "left",
         headerShown: false,
-        drawerType: "front",
-        overlayColor: "rgba(0,0,0,0.2)",
-        drawerStyle: { width: 280 },
+        drawerStyle: { backgroundColor: "#d6c0ad", width: 300 },
+        drawerActiveTintColor: "#BF6A37",
+        drawerInactiveTintColor: "#3c2a1e",
+        drawerLabelStyle: { fontFamily: "poppinsRegular", fontSize: 16 },
+        swipeEnabled: false,
+        drawerPosition: "left",
       }}
     >
-      <Drawer.Screen name="Dashboard" component={VendorBottomNav} />
       <Drawer.Screen
-        name="AnalyticsAndInsight"
+        name="Main"
+        component={VendorBottomNav}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
+
+      <Drawer.Screen
+        name="Analytics & Insights"
         component={AnalyticsAndInsightScreen}
-        options={{ title: "Analytics and Insight" }}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="analytics-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Store Management"
+        component={StoreManagementScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="storefront-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Refer and Earn"
+        component={VendorReferAndEarnScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="gift-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Notifications"
+        component={NotificationList}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="notifications-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Chat"
+        component={VendorChatListScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="chatbubbles-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Settings"
+        component={VendorSettingsScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Help & Support"
+        component={VendorHelpSupportScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="help-circle-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Legal"
+        component={VendorLegalScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="document-text-outline" size={size} color={color} />
+          ),
+        }}
       />
     </Drawer.Navigator>
   );
@@ -97,7 +181,7 @@ export default function VendorNavigator() {
       />
       <Stack.Screen
         name="Home"
-        component={VendorDashboardDrawer}
+        component={VendorMainDrawer}
         options={{ title: "Home", headerShown: false }}
       />
 
@@ -557,9 +641,20 @@ export default function VendorNavigator() {
         component={VendorOffersScreen}
         options={{ headerShown: false }}
       />
+
       <Stack.Screen
         name="VendorOfferDetails"
         component={VendorOfferDetailsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Subscription"
+        component={SubscriptionScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorReferAndEarn"
+        component={VendorReferAndEarnScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

@@ -29,17 +29,26 @@ export default function TermsOfUseYourAccountWithUsScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual terms content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          SharpLook is committed to safeguarding your Personal Data and does
+          not, under any circumstances, sell your information to third parties.
+          However, in limited and clearly defined contexts, Personal Data may be
+          shared as follows: Regulatory and Law Enforcement Authorities: We may
+          disclose Personal Data to competent governmental, regulatory, or law
+          enforcement bodies where such disclosure is mandated by applicable law
+          or valid legal process. Service Delivery Purposes: Personal Data may
+          be shared with other registered users where required to fulfil the
+          core functions of the platform including enabling service visibility,
+          confirming appointments and facilitating in-app communications.
+          Third-Party Safeguards: All third-party recipients of your Personal
+          Data are contractually bound to uphold confidentiality, security, and
+          data handling obligations in alignment with this Agreement and the
+          Nigeria Data Protection Act (NDPA) 2023.
         </Text>
       </ScrollView>
     </View>

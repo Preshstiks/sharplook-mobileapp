@@ -10,6 +10,7 @@ import {
   Modal,
   StyleSheet,
   Alert,
+  StatusBar,
 } from "react-native";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -51,7 +52,8 @@ export default function BookingHomeServiceAppointScreen() {
   const [paymentReference, setPaymentReference] = useState("");
   const [pendingBookingValues, setPendingBookingValues] = useState({});
   const service = route.params?.service;
-  console.log({ user });
+  const vendorId = route.params?.id; // Get vendorId from route params
+
   const locationOption = [
     {
       label: "No",
@@ -73,20 +75,19 @@ export default function BookingHomeServiceAppointScreen() {
       setReferencePhoto(result.assets[0].uri);
     }
   };
+
   const fetchCurrentLocation = async () => {
     if (!currentLocation || !selectedLocation) return;
-
     setIsLoading(true);
     try {
       const payload = {
         clientLat: currentLocation.latitude,
         clientLng: currentLocation.longitude,
-        vendorLat: selectedLocation.latitude,
-        vendorLng: selectedLocation.longitude,
+        vendorId: service.userId || vendorId, // Use service.userId as fallback
       };
-      console.log(payload);
+
       const response = await HttpClient.post("/distance/calcDistance", payload);
-      console.log("API response:", response.data);
+
       setDistanceApart(response.data.distanceKm);
     } catch (error) {
       console.error("API error:", error);
@@ -128,15 +129,13 @@ export default function BookingHomeServiceAppointScreen() {
     setIsLoading(true);
     try {
       const location = await getCurrentLocation();
-      console.log("handleUseCurrentLocation - got location:", location);
+
       setCurrentLocation(location);
       setSelectedLocation(location);
 
       webviewRef.current.postMessage(JSON.stringify(location));
       fetchCurrentLocation();
-      console.log("handleUseCurrentLocation - sent to WebView:", location);
     } catch (error) {
-      console.error("handleUseCurrentLocation error:", error);
       if (error.response && error.response.data) {
         const errorMessage =
           error.response.data.message || "An unknown error occurred";
@@ -147,28 +146,38 @@ export default function BookingHomeServiceAppointScreen() {
     }
   };
 
-  console.log(currentLocation);
-  console.log(selectedOption);
-  console.log({ service });
-
   const handleBookNow = async (
     values,
     paymentReference,
     paymentMethod = "SHARP-PAY"
   ) => {
-    console.log("[DEBUG] handleBookNow called with values:", values);
-    console.log("[DEBUG] referencePhoto:", referencePhoto);
-
     try {
+      // Convert 12-hour time to 24-hour format
+      const convertTo24Hour = (time12h) => {
+        const [time, modifier] = time12h.split(/(?=[AP]M)/);
+        let [hours, minutes] = time.split(":");
+        hours = parseInt(hours);
+
+        if (modifier === "PM" && hours !== 12) {
+          hours += 12;
+        } else if (modifier === "AM" && hours === 12) {
+          hours = 0;
+        }
+
+        return `${hours.toString().padStart(2, "0")}:${minutes}`;
+      };
+
+      const time24Hour = convertTo24Hour(values.time);
+
       const payload = {
         clientId: user.id,
-        vendorId: service.userId,
+        vendorId: service.userId || vendorId, // Use service.userId as fallback
         serviceId: service.id,
         serviceName: service.serviceName,
         paymentMethod: paymentMethod,
         price: service.servicePrice,
         totalAmount: service.servicePrice + calculatePrice(distanceApart),
-        date: selectedDate, // Add this missing field
+        date: new Date(`${selectedDate}T${time24Hour}:00.000Z`).toISOString(),
         time: values.time,
         reference: paymentReference,
         serviceType: "HOME_SERVICE",
@@ -180,8 +189,6 @@ export default function BookingHomeServiceAppointScreen() {
 
       // Handle reference photo if present
       if (referencePhoto) {
-        console.log("[DEBUG] Uploading with photo:", referencePhoto);
-
         const formData = new FormData();
 
         // Add all payload fields to FormData
@@ -200,8 +207,6 @@ export default function BookingHomeServiceAppointScreen() {
           type,
         });
 
-        console.log("[DEBUG] FormData created with photo");
-
         const res = await HttpClient.post(
           "/bookings/createHomeServiceBooking",
           formData,
@@ -212,18 +217,20 @@ export default function BookingHomeServiceAppointScreen() {
           }
         );
 
-        showToast.success(res.data.message);
-        console.log("[DEBUG] handleBookNow response with photo:", res.data);
-        navigation.goBack();
+        if (res.data.data.message === "Insufficient wallet balance") {
+          showToast.error(res.data.data.message);
+        } else {
+          showToast.success(res.data.message);
+          navigation.goBack();
+        }
       } else {
-        console.log("[DEBUG] Booking without photo");
         // No photo, use JSON payload
         const res = await HttpClient.post(
           "/bookings/createHomeServiceBooking",
           payload
         );
         showToast.success(res.data.message);
-        console.log("[DEBUG] handleBookNow response:", res.data);
+
         navigation.goBack();
       }
     } catch (error) {
@@ -236,12 +243,9 @@ export default function BookingHomeServiceAppointScreen() {
           "Booking failed. Please try again.";
         showToast.error(message);
       }
-      console.log("[DEBUG] handleBookNow error:", error?.response || error);
     }
   };
-  console.log({ service });
   const checkout = async (values) => {
-    console.log("[DEBUG] checkout called with values:", values);
     try {
       const res = await HttpClient.post("/payment/paystack/initiate", {
         paymentFor: "BOOKING",
@@ -251,9 +255,7 @@ export default function BookingHomeServiceAppointScreen() {
       setPaystackPaymentUrl(res.data.paymentUrl);
       setPaymentReference(res.data.reference);
       setPaystackModalVisible(true);
-    } catch (error) {
-      console.log("[DEBUG] checkout error:", error?.response || error);
-    }
+    } catch (error) {}
   };
   const paymentMethods = [
     { label: "Paystack", value: "PAYSTACK" },
@@ -288,7 +290,6 @@ export default function BookingHomeServiceAppointScreen() {
       const verifyRes = await HttpClient.get(
         `/payment/paystack/verify/${reference}`
       );
-      console.log("[DEBUG] Paystack verify response:", verifyRes.data);
 
       if (verifyRes.data.transaction.status === "paid") {
         await handleBookNow(bookingValues, reference, "PAYSTACK");
@@ -297,17 +298,11 @@ export default function BookingHomeServiceAppointScreen() {
       }
       setPaystackModalVisible(false);
     } catch (error) {
-      console.log(error.response);
       const message =
         error?.response?.data?.message ||
         error?.message ||
         "Payment verification or booking failed.";
       showToast.error(message);
-
-      console.log(
-        "[DEBUG] handlePaystackVerificationAndBooking error:",
-        error?.response || error
-      );
     } finally {
       setLoading(false);
       setPaymentReference("");
@@ -321,6 +316,7 @@ export default function BookingHomeServiceAppointScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View className="bg-primary pt-[60px] pb-4 flex-row items-center justify-between px-4">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />
@@ -355,10 +351,8 @@ export default function BookingHomeServiceAppointScreen() {
               setPendingBookingValues(values);
               await checkout(values);
             } else {
-              console.log("[DEBUG] No payment method selected.");
             }
           } catch (error) {
-            console.log("[DEBUG] onSubmit error:", error);
           } finally {
             setLoading(false);
             setSubmitting(false);

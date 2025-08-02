@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  StatusBar,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -41,7 +42,6 @@ export default function WalletScreen() {
   //     fetchTransactions();
   //   }, [])
   // );
-  console.log({ transactions });
   const getWalletBalance = async () => {
     setLoading(true);
     try {
@@ -52,12 +52,10 @@ export default function WalletScreen() {
       setWalletInfo(walletRes.data.wallet);
       setTransactions(transactionsRes.data);
     } catch (error) {
-      console.log(error);
     } finally {
       setLoading(false);
     }
   };
-  console.log({ walletInfo });
   useFocusEffect(
     useCallback(() => {
       getWalletBalance();
@@ -84,8 +82,9 @@ export default function WalletScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate("Client")}>
+        <TouchableOpacity onPress={() => navigation.navigate("ClientApp")}>
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>SharpPay</Text>

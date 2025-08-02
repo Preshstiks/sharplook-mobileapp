@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import OutlineTextInput from "../../reusuableComponents/inputFields/OutlineTextInput";
@@ -9,51 +9,108 @@ import * as Yup from "yup";
 import { HttpClient } from "../../../api/HttpClient";
 import { showToast } from "../../ToastComponent/Toast";
 
-const bankOptions = [
-  { label: "Access Bank", value: "Access Bank" },
-  { label: "Citibank", value: "Citibank" },
-  { label: "Ecobank", value: "Ecobank" },
-  { label: "Fidelity Bank", value: "Fidelity Bank" },
-  { label: "First Bank", value: "First Bank" },
-  {
-    label: "First City Monument Bank (FCMB)",
-    value: "First City Monument Bank (FCMB)",
-  },
-  { label: "Globus Bank", value: "Globus Bank" },
-  { label: "Guaranty Trust Bank (GTB)", value: "Guaranty Trust Bank (GTB)" },
-  { label: "Heritage Bank", value: "Heritage Bank" },
-  { label: "Keystone Bank", value: "Keystone Bank" },
-  { label: "Polaris Bank", value: "Polaris Bank" },
-  { label: "Providus Bank", value: "Providus Bank" },
-  { label: "Stanbic IBTC Bank", value: "Stanbic IBTC Bank" },
-  { label: "Standard Chartered Bank", value: "Standard Chartered Bank" },
-  { label: "Sterling Bank", value: "Sterling Bank" },
-  { label: "Suntrust Bank", value: "Suntrust Bank" },
-  { label: "Union Bank", value: "Union Bank" },
-  {
-    label: "United Bank for Africa (UBA)",
-    value: "United Bank for Africa (UBA)",
-  },
-  { label: "Unity Bank", value: "Unity Bank" },
-  { label: "Wema Bank", value: "Wema Bank" },
-  { label: "Zenith Bank", value: "Zenith Bank" },
-];
-
 const validationSchema = Yup.object().shape({
   amount: Yup.number()
     .typeError("Amount must be a number")
     .positive("Amount must be greater than zero")
     .required("Amount is required"),
-  reason: Yup.string().required("Reason is required"),
-  accountName: Yup.string().required("Account name is required"),
-  accountNumber: Yup.string()
+  bankAccountNumber: Yup.string()
     .matches(/^\d{10}$/, "Account number must be 10 digits")
     .required("Account number is required"),
-  bankName: Yup.string().required("Bank name is required"),
+  bankCode: Yup.string().required("Bank is required"),
 });
 
 export default function ClientWithdrawScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [bankOptions, setBankOptions] = useState([]);
+  const [selectedBankName, setSelectedBankName] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [accountVerified, setAccountVerified] = useState(false);
+
+  const getBankList = async () => {
+    setIsFetching(true);
+    try {
+      const res = await HttpClient.get("/withdrawals/getBanksList");
+
+      if (res.data.success) {
+        const banks = res.data.data.map((bank) => ({
+          label: bank.name,
+          value: bank.code,
+        }));
+        setBankOptions(banks);
+      } else {
+        showToast("error", "Failed to fetch banks");
+      }
+    } catch (error) {
+      showToast("error", "Failed to fetch banks");
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  const verifyAccount = async (accountNumber, bankCode) => {
+    if (!accountNumber || !bankCode || accountNumber.length !== 10) {
+      setAccountName("");
+      setAccountVerified(false);
+      return;
+    }
+
+    // Clear previous account name and start verification
+    setAccountName("");
+    setAccountVerified(false);
+    setIsVerifying(true);
+    try {
+      const res = await HttpClient.post("/withdrawals/verifyAcct", {
+        bankAccountNumber: accountNumber,
+        bankCode: bankCode,
+      });
+
+      if (res.data.message === "Account resolved successfully") {
+        setAccountName(res.data.data.account_name);
+        setAccountVerified(true);
+      } else {
+        setAccountName("Account does not exist");
+        setAccountVerified(false);
+      }
+    } catch (error) {
+      setAccountName("Account does not exist");
+      setAccountVerified(false);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  useEffect(() => {
+    getBankList();
+  }, []);
+
+  const handleSubmit = async (values) => {
+    setIsSubmitting(true);
+    try {
+      // Submit withdrawal request with correct parameters
+      const withdrawalData = {
+        resolvedAccountName: accountName,
+        amount: Number(values.amount),
+        bankAccountNumber: Number(values.bankAccountNumber),
+        bankCode: Number(values.bankCode),
+      };
+
+      const response = await HttpClient.post(
+        "/withdrawals/requestWithdrawals",
+        withdrawalData
+      );
+
+      showToast.success(response.data.message);
+      navigation.goBack();
+    } catch (error) {
+      showToast.error(error.response.data.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <View className="flex-1 pb-10 bg-white">
@@ -73,44 +130,12 @@ export default function ClientWithdrawScreen({ navigation }) {
 
       <Formik
         initialValues={{
+          bankAccountNumber: "",
+          bankCode: "",
           amount: "",
-          reason: "",
-          method: "bank_transfer",
-          accountName: "",
-          accountNumber: "",
-          bankName: "",
         }}
         validationSchema={validationSchema}
-        onSubmit={async (values, { setSubmitting, setErrors, resetForm }) => {
-          setLoading(true);
-          try {
-            const payload = {
-              amount: Number(values.amount),
-              reason: values.reason,
-              method: "BANK_TRANSFER",
-              metadata: {
-                accountName: values.accountName,
-                accountNumber: values.accountNumber,
-                bankName: values.bankName,
-              },
-            };
-            console.log(payload);
-            const res = await HttpClient.post(
-              "/withdrawals/requestWithdrawals",
-              payload
-            );
-            showToast.success(res.data.message);
-            resetForm();
-            navigation.goBack();
-          } catch (error) {
-            const message = error.response.data.message || error.message;
-            showToast.error(message);
-            console.log(error.response);
-          } finally {
-            setLoading(false);
-            setSubmitting(false);
-          }
-        }}
+        onSubmit={handleSubmit}
       >
         {({
           handleChange,
@@ -120,7 +145,7 @@ export default function ClientWithdrawScreen({ navigation }) {
           errors,
           touched,
           setFieldValue,
-          isSubmitting,
+          isSubmitting: formikSubmitting,
         }) => (
           <>
             <ScrollView
@@ -134,6 +159,61 @@ export default function ClientWithdrawScreen({ navigation }) {
                 Please fill the details below
               </Text>
 
+              {/* Account Number */}
+              <OutlineTextInput
+                label="Account Number"
+                value={values.bankAccountNumber}
+                onChangeText={(text) => {
+                  handleChange("bankAccountNumber")(text);
+                  // Verify account when account number is 10 digits and bank is selected
+                  if (text.length === 10 && values.bankCode) {
+                    verifyAccount(text, values.bankCode);
+                  } else if (text.length !== 10) {
+                    setAccountName("");
+                    setAccountVerified(false);
+                  }
+                }}
+                onBlur={handleBlur("bankAccountNumber")}
+                keyboardType="numeric"
+                error={errors.bankAccountNumber}
+                touched={touched.bankAccountNumber}
+              />
+
+              {/* Bank Name */}
+              <Dropdown
+                label="Select Bank"
+                value={values.bankCode}
+                options={bankOptions}
+                onValueChange={(val) => {
+                  setFieldValue("bankCode", val);
+                  // Find the selected bank name for display
+                  const selectedBank = bankOptions.find(
+                    (bank) => bank.value === val
+                  );
+                  setSelectedBankName(selectedBank ? selectedBank.label : "");
+
+                  // Verify account if account number is already 10 digits
+                  if (values.bankAccountNumber.length === 10) {
+                    verifyAccount(values.bankAccountNumber, val);
+                  }
+                }}
+                placeholder="Select Bank"
+                error={errors.bankCode}
+                touched={touched.bankCode}
+                disabled={isFetching}
+              />
+
+              {(accountName || isVerifying) && (
+                <View className="-mt-3">
+                  <Text
+                    style={{ fontFamily: "poppinsRegular" }}
+                    className={`text-[11px] ${isVerifying ? "text-[#666666]" : accountVerified ? "text-primary" : "text-[#ff0000]"}`}
+                  >
+                    {isVerifying ? "Verifying account..." : accountName}
+                  </Text>
+                </View>
+              )}
+
               {/* Amount */}
               <OutlineTextInput
                 label="Enter Amount"
@@ -143,46 +223,9 @@ export default function ClientWithdrawScreen({ navigation }) {
                 keyboardType="numeric"
                 error={errors.amount}
                 touched={touched.amount}
-              />
-              {/* Reason */}
-              <OutlineTextInput
-                label="Reason for Withdrawal"
-                value={values.reason}
-                onChangeText={handleChange("reason")}
-                onBlur={handleBlur("reason")}
-                error={errors.reason}
-                touched={touched.reason}
+                editable={!isVerifying}
               />
 
-              {/* Account Name */}
-              <OutlineTextInput
-                label="Account Name"
-                value={values.accountName}
-                onChangeText={handleChange("accountName")}
-                onBlur={handleBlur("accountName")}
-                error={errors.accountName}
-                touched={touched.accountName}
-              />
-              {/* Account Number */}
-              <OutlineTextInput
-                label="Account Number"
-                value={values.accountNumber}
-                onChangeText={handleChange("accountNumber")}
-                onBlur={handleBlur("accountNumber")}
-                keyboardType="numeric"
-                error={errors.accountNumber}
-                touched={touched.accountNumber}
-              />
-              {/* Bank Name */}
-              <Dropdown
-                label="Select Bank"
-                value={values.bankName}
-                options={bankOptions}
-                onValueChange={(val) => setFieldValue("bankName", val)}
-                placeholder="Select Bank"
-                error={errors.bankName}
-                touched={touched.bankName}
-              />
               {errors.submit && (
                 <Text className="text-red-500 mt-2 mb-2 text-center">
                   {errors.submit}
@@ -192,10 +235,16 @@ export default function ClientWithdrawScreen({ navigation }) {
             </ScrollView>
             <View className="px-4 pb-6 bg-white">
               <AuthButton
-                isloading={loading}
-                title={"Withdraw"}
+                isloading={isSubmitting}
+                title="Withdraw"
                 onPress={handleSubmit}
-                disabled={loading || isSubmitting}
+                disabled={
+                  loading ||
+                  isSubmitting ||
+                  formikSubmitting ||
+                  isFetching ||
+                  !accountVerified
+                }
               />
             </View>
           </>

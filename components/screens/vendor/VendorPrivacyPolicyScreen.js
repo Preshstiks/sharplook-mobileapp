@@ -43,7 +43,7 @@ export default function PrivacyPolicyScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         {policySections.map((section, idx) => (
           <TouchableOpacity

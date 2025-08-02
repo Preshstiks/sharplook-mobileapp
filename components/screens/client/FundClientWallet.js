@@ -8,6 +8,7 @@ import {
   Linking,
   Modal,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import OutlineTextInput from "../../reusuableComponents/inputFields/OutlineTextInput";
@@ -39,7 +40,6 @@ export default function FundClientWalletScreen({ navigation }) {
         amount: Number(values.amount),
       });
       setPendingReference(res.data.data.reference);
-      console.log(res.data);
       setPendingReference(res.data.data.reference);
       setPaystackPaymentUrl(res.data.data.authorization_url);
       setPaystackModalVisible(true);
@@ -52,30 +52,35 @@ export default function FundClientWalletScreen({ navigation }) {
       //   setApiError("Failed to initialize payment. Please try again.");
       // }
     } catch (error) {
-      console.log(error.response);
     } finally {
       setLoading(false);
     }
   };
-  console.log({ paystackPaymentUrl });
-  console.log({ pendingReference });
+  const [isVerifying, setIsVerifying] = React.useState(false);
+
   const handleVerifyPayment = async () => {
+    if (isVerifying) return; // Prevent multiple calls
+
+    setIsVerifying(true);
     setLoading(true);
+
     try {
       const res = await HttpClient.post("/wallet/verify", {
         reference: pendingReference,
       });
 
-      showToast.success("Wallet funded successfully");
+      showToast.success(res.data.message);
       navigation.goBack();
-      console.log(res.data);
     } catch (error) {
-      console.log(error);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Payment verification failed.";
+      showToast.error(message);
     } finally {
       setLoading(false);
     }
   };
-  console.log({ pendingReference });
   return (
     <View className="flex-1 pb-10 bg-white">
       {/* Header */}
@@ -84,7 +89,7 @@ export default function FundClientWalletScreen({ navigation }) {
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text
-          className="flex-1 text-center text-[18px]"
+          className="flex-1 text-center text-[14px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           FundWallet
@@ -172,10 +177,8 @@ export default function FundClientWalletScreen({ navigation }) {
                   setPaystackModalVisible(false);
                   setPaystackPaymentUrl("");
                   if (reference) {
-                    handlePaystackVerificationAndBooking(
-                      reference,
-                      pendingPaymentValues
-                    );
+                    setPendingReference(reference);
+                    handleVerifyPayment();
                   } else {
                     Alert.alert(
                       "Payment",

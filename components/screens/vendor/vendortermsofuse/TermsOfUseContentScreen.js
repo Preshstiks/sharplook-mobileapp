@@ -29,17 +29,35 @@ export default function TermsOfUseContentScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual terms content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          This Data Protection Agreement ("Agreement") is entered into between
+          FranBoss Dammy Nigeria Limited, a company incorporated in Nigeria with
+          its registered office at ……("Company", "we", "us", or "our"), the
+          owner and operator of the Sharp Look mobile application ("SharpLook
+          App"), AND You, a user of the SharpLook App, either as a
+          beauty/wellness service provider (e.g., hairstylist, barber, nail
+          technician, pedicurist, massage therapist) or as a client ("User",
+          "you", or "your"). This Agreement outlines how personal data
+          collected, stored, processed, and shared through the SharpLook App is
+          protected and managed in compliance with the Nigeria Data Protection
+          Act (NDPA) 2023 and other applicable data privacy laws. In the course
+          of providing and facilitating services through our platform, we may
+          collect and process the following categories of Personal Data: Data
+          Relating to Clients: Personal Data collected from or about clients may
+          include full name, contact details (e.g., email address, phone
+          number), residential or geolocation data (where consented), profile
+          photograph (optional), appointment history and service preferences,
+          and payment information. Data Relating to Service Providers: Personal
+          Data collected from service providers may include full name, business
+          and professional credentials, contact details, official identification
+          documents, professional certifications and licenses, availability
+          schedule/calendar, geolocation data (subject to consent), and ratings,
+          reviews, and feedback received from clients.
         </Text>
       </ScrollView>
     </View>

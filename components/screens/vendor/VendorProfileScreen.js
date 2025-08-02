@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Image,
   SafeAreaView,
@@ -8,34 +8,16 @@ import {
 } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import BottomModal from "../../reusuableComponents/BottomModal";
-import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 
 const VendorProfileScreen = () => {
   const navigation = useNavigation();
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth();
-
-  useEffect(() => {
-    // setBarType("primary"); // This line is removed as per the edit hint.
-  }, []);
 
   const handleLogout = async () => {
     await logout();
   };
 
-  const handleClientSelect = () => {
-    setShowLogoutModal(false);
-    navigation.replace("Login");
-  };
-
-  const handleVendorSelect = () => {
-    setShowLogoutModal(false);
-    navigation.replace("VendorLogin");
-  };
-  console.log({ user });
   return (
     <SafeAreaView className="flex-1 bg-secondary">
       {/* Header with logo, name, badge, address */}
@@ -67,7 +49,7 @@ const VendorProfileScreen = () => {
             </Text>
           </View>
         </View>
-        <View className="flex-row w-[70%] mt-2">
+        <View className="flex-row justify-center w-[70%] mt-2">
           <Ionicons name="location-sharp" size={14} color="#fff" />
           <Text
             className="text-white text-center text-[12px] ml-1"
@@ -112,7 +94,7 @@ const VendorProfileScreen = () => {
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
         </TouchableOpacity>
         {/* Help and Support */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
           onPress={() => navigation.navigate("VendorHelpSupportScreen")}
         >
@@ -126,7 +108,7 @@ const VendorProfileScreen = () => {
             Help and Support
           </Text>
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         {/* Legal */}
         <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
@@ -160,7 +142,7 @@ const VendorProfileScreen = () => {
           </Text>
         </TouchableOpacity>
         {/* Delete Account */}
-        <TouchableOpacity className="flex-row items-center bg-white rounded-xl px-4 py-4 shadow-sm">
+        {/* <TouchableOpacity className="flex-row items-center bg-white rounded-xl px-4 py-4 shadow-sm">
           <View className="bg-[#FF0000] p-2 rounded-full mr-4">
             <Ionicons name="trash" size={24} color="#fff" />
           </View>
@@ -170,30 +152,8 @@ const VendorProfileScreen = () => {
           >
             Delete Account
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
-
-      {/* Logout Modal */}
-      <BottomModal
-        isVisible={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        backgroundcolor="#FCFCFC"
-      >
-        <View className="pt-10">
-          <OutlineButton
-            title="Are you a Client?"
-            onPress={handleClientSelect}
-            icon={<AntDesign name="user" size={20} color="#EB278D" />}
-            iconPosition="left"
-          />
-          <OutlineButton
-            title="Are you a Vendor?"
-            onPress={handleVendorSelect}
-            icon={<MaterialIcons name="storefront" size={20} color="#EB278D" />}
-            iconPosition="left"
-          />
-        </View>
-      </BottomModal>
     </SafeAreaView>
   );
 };

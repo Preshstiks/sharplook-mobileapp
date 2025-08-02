@@ -1,7 +1,19 @@
-import React from "react";
-import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  StatusBar,
+  Modal,
+  Dimensions,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import WhiteChatIcon from "../../../../assets/icon/whitechat.svg";
+import SkeletonBox from "../../../reusuableComponents/SkeletonLoader";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const portfolioImages = [
   require("../../../../assets/img/makeuppromo.png"),
@@ -12,19 +24,75 @@ const portfolioImages = [
 ];
 
 export default function VendorPortfolioScreen({ navigation, route }) {
-  // const { vendorId } = route.params; // For future use
+  const portfolioImg = route.params.portfolio;
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    // Simulate loading time for images
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleImagePress = (imageUri, index) => {
+    setSelectedImage(imageUri);
+    setCurrentImageIndex(index);
+    setImageModalVisible(true);
+  };
+
+  const closeImageModal = () => {
+    setImageModalVisible(false);
+    setSelectedImage(null);
+    setCurrentImageIndex(0);
+  };
+
+  const goToNextImage = () => {
+    if (currentImageIndex < portfolioImg.length - 1) {
+      const nextIndex = currentImageIndex + 1;
+      setCurrentImageIndex(nextIndex);
+      setSelectedImage(portfolioImg[nextIndex]);
+    }
+  };
+
+  const goToPreviousImage = () => {
+    if (currentImageIndex > 0) {
+      const prevIndex = currentImageIndex - 1;
+      setCurrentImageIndex(prevIndex);
+      setSelectedImage(portfolioImg[prevIndex]);
+    }
+  };
+
+  const PortfolioSkeleton = () => (
+    <View className="flex-row flex-wrap justify-between">
+      {Array.from({ length: 6 }).map((_, idx) => (
+        <View
+          key={idx}
+          className="w-[31%] aspect-square rounded-lg overflow-hidden mb-4"
+        >
+          <SkeletonBox width="100%" height="100%" borderRadius={8} />
+        </View>
+      ))}
+    </View>
+  );
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <View className="bg-primary pt-12 pb-4 flex-row items-center justify-between px-4">
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
+      <View className="bg-primary pt-[50px] pb-4 flex-row items-center justify-between px-4">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
-          className="text-white text-[18px] font-semibold flex-1 text-center -ml-6"
+          className="text-white text-[14px] font-semibold flex-1 text-center -ml-6"
           style={{ fontFamily: "poppinsMedium" }}
         >
-          Vendor’s Portfolio
+          Vendor's Portfolio
         </Text>
         <TouchableOpacity
           onPress={() => navigation.navigate("ChatDetailScreenHardcoded")}
@@ -32,23 +100,107 @@ export default function VendorPortfolioScreen({ navigation, route }) {
           <WhiteChatIcon width={28} height={28} />
         </TouchableOpacity>
       </View>
+
       {/* Portfolio Grid */}
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <View className="flex-row flex-wrap justify-between">
-          {portfolioImages.map((img, idx) => (
-            <View
-              key={idx}
-              className="w-[31%] aspect-square rounded-lg overflow-hidden mb-4 bg-gray-100"
-            >
-              <Image
-                source={img}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            </View>
-          ))}
-        </View>
+        {loading ? (
+          <PortfolioSkeleton />
+        ) : (
+          <View className="flex-row flex-wrap justify-between">
+            {portfolioImg.map((img, idx) => (
+              <TouchableOpacity
+                key={idx}
+                className="w-[31%] aspect-square rounded-lg overflow-hidden mb-4 bg-gray-100"
+                onPress={() => handleImagePress(img, idx)}
+                activeOpacity={0.8}
+              >
+                <Image
+                  source={{ uri: img }}
+                  className="w-full h-full"
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </ScrollView>
+
+      {/* Full Screen Image Preview Modal with Background Overlay */}
+      <Modal
+        visible={imageModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeImageModal}
+        statusBarTranslucent={true}
+      >
+        {/* Background Overlay */}
+        <View className="flex-1 bg-black bg-opacity-95">
+          {/* Gradient Overlay for Better Contrast */}
+          <View className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black opacity-60" />
+
+          {/* Top Controls */}
+          <View className="absolute top-0 left-0 right-0 z-20 flex-row justify-between items-center p-4 pt-12">
+            <TouchableOpacity
+              className="bg-black bg-opacity-70 rounded-full p-3"
+              onPress={closeImageModal}
+            >
+              <Ionicons name="close" size={24} color="#fff" />
+            </TouchableOpacity>
+            <View className="flex-row items-center bg-black bg-opacity-70 rounded-full px-4 py-2">
+              <Text className="text-white text-lg font-medium mr-2">
+                {currentImageIndex + 1}
+              </Text>
+              <Text className="text-white text-lg opacity-60">
+                / {portfolioImg.length}
+              </Text>
+            </View>
+            <View className="w-12" /> {/* Spacer for centering */}
+          </View>
+
+          {/* Image Container */}
+          <View className="flex-1 justify-center items-center">
+            {selectedImage && (
+              <Image
+                source={{ uri: selectedImage }}
+                className="w-full h-full"
+                resizeMode="contain"
+              />
+            )}
+          </View>
+
+          {/* Bottom Controls */}
+          <View className="absolute bottom-0 left-0 right-0 z-20 flex-row justify-between items-center p-4 pb-8">
+            <TouchableOpacity
+              className={`bg-black bg-opacity-70 rounded-full p-3 ${
+                currentImageIndex === 0 ? "opacity-40" : ""
+              }`}
+              onPress={goToPreviousImage}
+              disabled={currentImageIndex === 0}
+            >
+              <Ionicons name="chevron-back" size={24} color="#fff" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className={`bg-black bg-opacity-70 rounded-full p-3 ${
+                currentImageIndex === portfolioImg.length - 1
+                  ? "opacity-40"
+                  : ""
+              }`}
+              onPress={goToNextImage}
+              disabled={currentImageIndex === portfolioImg.length - 1}
+            >
+              <Ionicons name="chevron-forward" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Tap to close hint */}
+          <TouchableOpacity
+            className="absolute inset-0 z-10"
+            onPress={closeImageModal}
+            activeOpacity={1}
+          />
+        </View>
+      </Modal>
     </View>
   );
 }

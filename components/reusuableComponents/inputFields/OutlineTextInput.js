@@ -11,6 +11,7 @@ export default function OutlineTextInput({
   label,
   error,
   touched,
+  editable = true,
   ...props
 }) {
   const [isFocused, setIsFocused] = useState(false);
@@ -33,6 +34,7 @@ export default function OutlineTextInput({
         placeholderTextColor="#C4C4C4"
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
+        editable={editable}
         style={[
           { fontFamily: "poppinsRegular", textAlignVertical: "top" },
           style,

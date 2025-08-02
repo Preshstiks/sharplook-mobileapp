@@ -177,7 +177,7 @@ export default function FilterScreen({ navigation }) {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={[
               styles.locationChip,
               selectedLocation === "Sagamu" && styles.locationChipActive,
@@ -243,7 +243,7 @@ export default function FilterScreen({ navigation }) {
             >
               Lekki-Epe (24km)
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </ScrollView>
       </View>
 

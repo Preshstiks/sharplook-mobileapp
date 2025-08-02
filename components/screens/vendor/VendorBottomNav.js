@@ -9,11 +9,12 @@ import {
   AntDesign,
 } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import DashboardScreen from "./DashboardScreen";
+import DashboardScreen from "./Dashboard/DashboardScreen";
 import MyProductsScreen from "./MyProductsScreen";
 import VendorBookingsScreen from "./VendorBookingsScreen";
 import VendorProfileScreen from "./VendorProfileScreen";
 import MyServicesScreen from "./MyServicesScreen";
+import DashboardStack from "./Dashboard/DashboardStack";
 
 function Bookings() {
   return (
@@ -67,7 +68,7 @@ export default function VendorBottomNav() {
           } else if (route.name === "Bookings") {
             return <MaterialIcons name="event" size={size} color={color} />;
           } else if (route.name === "My Products") {
-            return <FontAwesome5 name="box-open" size={size} color={color} />;
+            return <MaterialIcons name="inventory" size={size} color={color} />;
           } else if (route.name === "My Services") {
             return <MaterialIcons name="face" size={size} color={color} />;
           } else if (route.name === "Profile") {
@@ -81,7 +82,7 @@ export default function VendorBottomNav() {
         tabBarPressOpacity: 0.7,
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="Dashboard" component={DashboardStack} />
       <Tab.Screen name="Bookings" component={VendorBookingsScreen} />
       <Tab.Screen name="My Products" component={MyProductsScreen} />
       <Tab.Screen name="My Services" component={MyServicesScreen} />

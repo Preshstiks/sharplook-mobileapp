@@ -7,18 +7,21 @@ import {
   TouchableOpacity,
   Image,
   Pressable,
+  StatusBar,
 } from "react-native";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { useStatusBar } from "../../../../context/StatusBarContext";
 import { EmptyData } from "../../../reusuableComponents/EmptyData";
 import { useAuth } from "../../../../context/AuthContext";
 import { HttpClient } from "../../../../api/HttpClient";
 import { getCurrentLocation } from "../../../../utils/locationUtils";
 import ServiceDetailsModal from "../ServiceDetailsModal";
+import DefaultAvatar from "../../../../assets/icon/avatar.png";
 
 export default function CategoriesScreen() {
   const route = useRoute();
+  const navigation = useNavigation();
   const { user } = useAuth();
   const { setBarType } = useStatusBar();
   useEffect(() => {
@@ -35,27 +38,86 @@ export default function CategoriesScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
 
+  // Handle book now function
+  const handleBookNow = (service) => {
+    const vendorServiceType =
+      service?.vendor?.vendorOnboarding?.serviceType || "IN_SHOP";
+
+    if (vendorServiceType === "HOME_SERVICE") {
+      navigation.navigate("BookingHomeServiceAppointScreen", {
+        service,
+        vendorData: service?.vendor,
+        id: service?.vendor?.id,
+      });
+    } else {
+      navigation.navigate("BookAppointmentScreen", {
+        service,
+        vendorData: service?.vendor,
+      });
+    }
+  };
+
   useEffect(() => {
     const fetchNearbyVendors = async () => {
       setLoadingNearby(true);
       setErrorNearby(null);
       try {
-        const location = await getCurrentLocation();
+        // Get current location with better error handling
+        let location;
+        try {
+          location = await getCurrentLocation();
+        } catch (locationError) {
+          console.error("Location error:", locationError);
+          setErrorNearby(
+            "Unable to get your location. Please check location permissions."
+          );
+          setNearbyVendors([]);
+          setLoadingNearby(false);
+          return;
+        }
+
         const latitude = location.latitude;
         const longitude = location.longitude;
-        const res = await HttpClient.get(
-          `/user/nearby-vendors?latitude=${latitude}&longitude=${longitude}`
-        );
-        setNearbyVendors(res.data?.data || []);
+
+        // Use the services endpoint to get all services with vendor information
+        const res = await HttpClient.get("/client/services");
+
+        // Filter services by category
+        let filteredServices = res.data?.data || [];
+        if (category && filteredServices.length > 0) {
+          filteredServices = filteredServices.filter(
+            (service) => service.serviceName === category
+          );
+        }
+
+        // Extract unique vendors from the filtered services
+        const vendorMap = new Map();
+        filteredServices.forEach((service) => {
+          if (service.vendor && !vendorMap.has(service.vendor.id)) {
+            vendorMap.set(service.vendor.id, {
+              ...service.vendor,
+              serviceName: service.serviceName,
+              servicePrice: service.servicePrice,
+              serviceImage: service.serviceImage,
+              description: service.description,
+            });
+          }
+        });
+
+        const uniqueVendors = Array.from(vendorMap.values());
+
+        setNearbyVendors(uniqueVendors);
       } catch (err) {
-        setErrorNearby("Failed to fetch nearby vendors.");
+        console.error("Error fetching services:", err);
+
+        setErrorNearby("Failed to fetch vendors. Please try again.");
         setNearbyVendors([]);
       } finally {
         setLoadingNearby(false);
       }
     };
     fetchNearbyVendors();
-  }, []);
+  }, [category]); // Add category as dependency
 
   // Filter services by search
   const filteredServices = services.filter((service) =>
@@ -64,13 +126,30 @@ export default function CategoriesScreen() {
 
   // Vendors on Sharplook: all others (not nearby)
   const vendorsOnSharplook = filteredServices.filter(
-    (service) => !(service.vendorNear === true || service.distance <= 3)
+    (service) => !(service.vendorNear === true || service.distance <= 5)
   );
-  const handleServicePress = (service) => {
-    setSelectedService(service);
+  const handleServicePress = (vendor) => {
+    // Transform vendor data to match ServiceDetailsModal expected structure
+    let transformedService = {
+      serviceName: vendor.serviceName || category,
+      servicePrice: vendor.servicePrice || "Contact for pricing",
+      serviceImage: vendor.serviceImage || vendor.avatar || DefaultAvatar,
+      description:
+        vendor.description ||
+        `${category} service by ${vendor?.vendorOnboarding?.businessName}`,
+      vendor: {
+        id: vendor.id,
+        businessName: vendor?.vendorOnboarding?.businessName || "Vendor",
+        location: "Location not available",
+        vendorOnboarding: vendor.vendorOnboarding,
+      },
+      rating: vendor.rating || 0,
+    };
+
+    setSelectedService(transformedService);
     setModalVisible(true);
   };
-  console.log({ nearbyVendors });
+
   // Skeleton loader card for vendor
   const SkeletonCard = ({ horizontal }) => (
     <View
@@ -137,6 +216,7 @@ export default function CategoriesScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View className="bg-primary pt-12 pb-4 px-4 flex-row items-center justify-between">
         <TouchableOpacity>
           <Ionicons name="chevron-back" size={24} color="#fff" />
@@ -164,9 +244,9 @@ export default function CategoriesScreen() {
           />
         </View>
 
-        <TouchableOpacity className="ml-3 bg-primary p-2 rounded-lg">
+        {/* <TouchableOpacity className="ml-3 bg-primary p-2 rounded-lg">
           <Feather name="sliders" size={18} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       {/* Vendors Near You */}
       <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
@@ -174,7 +254,7 @@ export default function CategoriesScreen() {
           className="text-[14px] mt-2 mb-2"
           style={{ fontFamily: "poppinsMedium" }}
         >
-          {category} Vendors near you (3km away)
+          {category} Vendors near you
         </Text>
         {loadingNearby ? (
           <View className="pb-6">
@@ -194,7 +274,7 @@ export default function CategoriesScreen() {
           </View>
         ) : nearbyVendors.length === 0 ? (
           <View className="pb-6">
-            <EmptyData msg="No vendors near you." />
+            <EmptyData msg={`No ${category} vendors available.`} />
           </View>
         ) : (
           <ScrollView
@@ -202,17 +282,19 @@ export default function CategoriesScreen() {
             showsHorizontalScrollIndicator={false}
             className="mb-4"
           >
-            {nearbyVendors.map((service) => (
+            {nearbyVendors.map((vendor) => (
               <Pressable
-                onPress={() => handleServicePress(service)}
-                key={service.id}
+                onPress={() => handleServicePress(vendor)}
+                key={vendor.id}
                 className="w-[140px] mr-3 bg-white rounded-xl shadow-sm border border-[#F6F6F6]"
               >
                 <Image
                   source={
-                    service?.avatar
-                      ? { uri: service?.avatar }
-                      : require("../../../../assets/icon/avatar.png")
+                    vendor.serviceImage
+                      ? { uri: vendor.serviceImage }
+                      : vendor.avatar
+                        ? { uri: vendor.avatar }
+                        : DefaultAvatar
                   }
                   className="w-full h-[90px] rounded-t-lg"
                   resizeMode="cover"
@@ -221,15 +303,16 @@ export default function CategoriesScreen() {
                   <Text
                     className="mt-2 text-[12px]"
                     style={{ fontFamily: "poppinsRegular" }}
+                    numberOfLines={1}
                   >
-                    {service.businessName}
+                    {vendor?.vendorOnboarding?.businessName || "Vendor"}
                   </Text>
                   <View className="bg-primary rounded-[4px] my-1 px-3 self-start">
                     <Text
                       style={{ fontFamily: "poppinsRegular" }}
                       className="text-[8px] mt-1 text-white"
                     >
-                      {service.serviceType === "HOME_SERVICE"
+                      {vendor?.vendorOnboarding?.serviceType === "HOME_SERVICE"
                         ? "Home Service"
                         : "In-shop"}
                     </Text>
@@ -241,14 +324,14 @@ export default function CategoriesScreen() {
                         name="star"
                         size={14}
                         color={
-                          i <= Math.round(service.rating || 0)
+                          i <= Math.round(vendor.rating || 0)
                             ? "#FFD700"
                             : "#E0E0E0"
                         }
                       />
                     ))}
                     <Text className="ml-1 text-[12px] text-[#444]">
-                      {(service.rating || 0).toFixed(1)}
+                      {(vendor.rating || 0).toFixed(1)}
                     </Text>
                   </View>
                 </View>
@@ -336,6 +419,7 @@ export default function CategoriesScreen() {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         service={selectedService}
+        onBookNow={handleBookNow}
       />
     </View>
   );

@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -19,17 +20,15 @@ export default function NotificationDetailScreen() {
   const { id } = route.params;
   const notificationId = id;
   const handleDeleteNotification = async () => {
-    console.log(id);
     setLoading(true);
     try {
       const res = await HttpClient.delete(
         `/notifications/delete/${notificationId}`
       );
       showToast.success(res.data.message);
-      console.log(res.data);
+
       navigation.goBack();
     } catch (error) {
-      console.log(error.response);
     } finally {
       setLoading(false);
     }
@@ -37,6 +36,7 @@ export default function NotificationDetailScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={28} color="#fff" />

@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Pressable,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import WhiteChatIcon from "../../../../assets/icon/whitechat.svg";
@@ -24,8 +25,23 @@ import { HttpClient } from "../../../../api/HttpClient"; // Added missing import
 import { showToast } from "../../../ToastComponent/Toast";
 import VendorProfileProductDetails from "./VendorProfileProductDetails";
 import VendorProfileServiceDetails from "./VendorProfileServiceDetails";
+import { useChatNavigation } from "../../../../hooks/useChatNavigation";
+import { ChatConnectionLoader } from "../../../reusuableComponents/ChatConnectionLoader";
+import { EmptyData } from "../../../reusuableComponents/EmptyData";
 
 const { width } = Dimensions.get("window");
+
+// Utility function to convert 24-hour time to 12-hour format
+const convertTo12HourFormat = (time24) => {
+  if (!time24) return "";
+
+  const [hours, minutes] = time24.split(":");
+  const hour = parseInt(hours);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+
+  return `${hour12}:${minutes}${ampm}`;
+};
 
 export default function VendorProfileScreen({ navigation, route }) {
   const vendorData = route.params?.vendorData;
@@ -36,6 +52,7 @@ export default function VendorProfileScreen({ navigation, route }) {
   const [selectedService, setSelectedService] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [addingToCart, setAddingToCart] = useState({});
+  const { navigateToChat, isConnecting } = useChatNavigation();
 
   const handleDebitCardPayment = () => {
     setShowPaymentModal(false);
@@ -73,7 +90,6 @@ export default function VendorProfileScreen({ navigation, route }) {
       showToast.success(res.data.message);
       await fetchCart(); // Refresh cart after adding
     } catch (error) {
-      console.log("Error adding to cart:", error.response);
       const message =
         error?.response?.data?.message ||
         error?.response?.message ||
@@ -93,7 +109,6 @@ export default function VendorProfileScreen({ navigation, route }) {
     }
     setModalVisibleProduct(false); // Fixed: was setModalVisible
   };
-  console.log({ vendorData });
 
   // Complete renderProduct function
   const renderProduct = (item, index) => {
@@ -163,10 +178,12 @@ export default function VendorProfileScreen({ navigation, route }) {
     );
   };
 
-  console.log({ vendorData });
-
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }} className="pb-[60px]">
+      {/* Chat Connection Loader */}
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
+      <ChatConnectionLoader visible={isConnecting} />
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -180,7 +197,10 @@ export default function VendorProfileScreen({ navigation, route }) {
         </Text>
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate("ChatDetailScreen", {
+            navigateToChat(navigation, {
+              vendorId: vendorData?.id,
+              receiverName: vendorData?.vendorOnboarding?.businessName,
+              vendorPhone: vendorData?.phone, // Pass the vendor's phone number
               chat: {
                 id: vendorData?.id,
                 name: vendorData?.vendorOnboarding?.businessName,
@@ -196,7 +216,17 @@ export default function VendorProfileScreen({ navigation, route }) {
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
         {/* Main Image */}
         <View style={styles.mainImgWrap}>
-          <SpaImg width={width} height={180} />
+          <Image
+            source={
+              vendorData?.avatar
+                ? {
+                    uri: vendorData?.avatar,
+                  }
+                : require("../../../../assets/icon/avatar.png")
+            }
+            style={{ width: "100%", height: 180, resizeMode: "cover" }}
+            defaultSource={require("../../../../assets/img/vendorprof.svg")}
+          />
         </View>
         {/* Vendor Info */}
         <View style={styles.vendorInfoWrap}>
@@ -265,7 +295,7 @@ export default function VendorProfileScreen({ navigation, route }) {
               className="border border-primary rounded-lg py-2 px-4 flex-row items-center"
               onPress={() =>
                 navigation.navigate("VendorPortfolioScreen", {
-                  vendorId: vendorData?.id,
+                  portfolio: vendorData?.vendorOnboarding?.portfolioImages,
                 })
               }
             >
@@ -289,34 +319,38 @@ export default function VendorProfileScreen({ navigation, route }) {
           <Text style={{ fontFamily: "poppinsMedium" }} className="text-[16px]">
             Availability
           </Text>
-          <View style={styles.availabilityRow} className="mt-3">
-            <Text
-              style={{ fontFamily: "poppinsRegular" }}
-              className="text-[14px]"
-            >
-              Mon - Fri
-            </Text>
-            <Text
-              style={{ fontFamily: "poppinsMedium" }}
-              className="text-[14px] text-primary"
-            >
-              9:00AM - 10:00PM
-            </Text>
-          </View>
-          <View style={styles.availabilityRow}>
-            <Text
-              style={{ fontFamily: "poppinsRegular" }}
-              className="text-[14px]"
-            >
-              Sat - Sun
-            </Text>
-            <Text
-              style={{ fontFamily: "poppinsMedium" }}
-              className="text-[14px] text-primary"
-            >
-              1:00PM - 6:00PM
-            </Text>
-          </View>
+          {vendorData?.vendorAvailability?.days.length > 0 ? (
+            <View className="mt-3">
+              {vendorData?.vendorAvailability?.days?.map((item, index) => (
+                <View key={index} style={styles.availabilityRow}>
+                  <Text
+                    style={{ fontFamily: "poppinsRegular" }}
+                    className="text-[14px]"
+                  >
+                    {item}
+                  </Text>
+                  <Text
+                    style={{ fontFamily: "poppinsMedium" }}
+                    className="text-[14px] text-primary"
+                  >
+                    {convertTo12HourFormat(
+                      vendorData?.vendorAvailability?.fromTime
+                    )}{" "}
+                    -{" "}
+                    {convertTo12HourFormat(
+                      vendorData?.vendorAvailability?.toTime
+                    )}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View className="mt-3">
+              <Text className="text-[14px] text-primary">
+                No availability set
+              </Text>
+            </View>
+          )}
         </View>
         <View className="h-[1px] bg-[#0000001A] mx-4" />
 
@@ -326,90 +360,106 @@ export default function VendorProfileScreen({ navigation, route }) {
           <Text style={{ fontFamily: "poppinsMedium" }} className="text-[16px]">
             Our Services
           </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-              marginTop: 16,
-            }}
-          >
-            {vendorData?.vendorServices.map((service, idx) => (
-              <Pressable
-                onPress={() => handleServicePress(service)}
-                key={idx}
-                style={{ width: (width - 48) / 2, marginBottom: 20 }}
-              >
-                <View
-                  style={{
-                    borderRadius: 4,
-                    overflow: "hidden",
-                    backgroundColor: "#fff",
-                    height: 120,
-                    width: "100%",
-                  }}
+          {vendorData?.vendorServices.length > 0 ? (
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                marginTop: 16,
+              }}
+            >
+              {vendorData?.vendorServices.map((service, idx) => (
+                <Pressable
+                  onPress={() => handleServicePress(service)}
+                  key={idx}
+                  style={{ width: (width - 48) / 2, marginBottom: 20 }}
                 >
-                  <Image
-                    source={{ uri: service.serviceImage }}
-                    style={{ width: "100%", height: 120, resizeMode: "cover" }}
+                  <View
+                    style={{
+                      borderRadius: 4,
+                      overflow: "hidden",
+                      backgroundColor: "#fff",
+                      height: 120,
+                      width: "100%",
+                    }}
+                  >
+                    <Image
+                      source={{ uri: service.serviceImage }}
+                      style={{
+                        width: "100%",
+                        height: 120,
+                        resizeMode: "cover",
+                      }}
+                    />
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginTop: 10,
+                    }}
+                  >
+                    <Text
+                      style={{ fontFamily: "poppinsRegular" }}
+                      className="text-[12px]"
+                    >
+                      {service.serviceName}
+                    </Text>
+                    <Text
+                      style={{ fontFamily: "poppinsRegular" }}
+                      className="text-[12px] text-primary"
+                    >
+                      {formatAmount(service.servicePrice)}
+                    </Text>
+                  </View>
+                  <CTAbtn
+                    title="Book Now"
+                    onPress={() => {
+                      if (vendorServiceType === "HOME_SERVICE") {
+                        navigation.navigate("BookingHomeServiceAppointScreen", {
+                          service,
+                          vendorData,
+                          id: vendorData?.id,
+                        });
+                      } else {
+                        navigation.navigate("BookAppointmentScreen", {
+                          service,
+                          vendorData,
+                        });
+                      }
+                    }}
                   />
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: 10,
-                  }}
-                >
-                  <Text
-                    style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[12px]"
-                  >
-                    {service.serviceName}
-                  </Text>
-                  <Text
-                    style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[12px] text-primary"
-                  >
-                    {formatAmount(service.servicePrice)}
-                  </Text>
-                </View>
-                <CTAbtn
-                  title="Book Now"
-                  onPress={() => {
-                    if (vendorServiceType === "HOME_SERVICE") {
-                      navigation.navigate("BookingHomeServiceAppointScreen", {
-                        service,
-                        vendorData,
-                        id: vendorData?.id,
-                      });
-                    } else {
-                      navigation.navigate("BookAppointmentScreen", {
-                        service,
-                        vendorData,
-                      });
-                    }
-                  }}
-                />
-              </Pressable>
-            ))}
-          </View>
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <View className="mt-3">
+              <EmptyData msg="No services yet." />
+            </View>
+          )}
         </View>
 
         <View style={styles.sectionWrap}>
           <Text style={{ fontFamily: "poppinsMedium" }} className="text-[16px]">
             Our Products
           </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginTop: 12 }}
-          >
-            {vendorData?.products.map((product, idx) =>
-              renderProduct(product, idx)
-            )}
-          </ScrollView>
+          {vendorData?.products.length > 0 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginTop: 12 }}
+            >
+              {vendorData?.products.map((product, idx) =>
+                renderProduct(product, idx)
+              )}
+            </ScrollView>
+          ) : (
+            <View className="mt-3">
+              <EmptyData msg="No products yet." />
+            </View>
+          )}
         </View>
       </ScrollView>
       {/* Payment Modal */}

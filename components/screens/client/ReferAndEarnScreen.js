@@ -9,6 +9,7 @@ import {
   Clipboard,
   Linking,
   Share,
+  StatusBar,
 } from "react-native";
 import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
@@ -17,6 +18,7 @@ import { HttpClient } from "../../../api/HttpClient";
 import { useFocusEffect } from "@react-navigation/native";
 import { EmptyData } from "../../reusuableComponents/EmptyData";
 import { formatAmount } from "../../formatAmount";
+import { formatDateTime } from "../../reusuableComponents/DateConverter";
 
 export default function ReferAndEarnScreen() {
   const [inputCode, setInputCode] = useState("");
@@ -63,7 +65,6 @@ export default function ReferAndEarnScreen() {
       setReferralTransactions(referralHistory.data.data);
       setAnalytics(referralAnalytics.data.data);
     } catch (error) {
-      console.log(error.response);
     } finally {
       setIsLoading(false);
     }
@@ -75,8 +76,9 @@ export default function ReferAndEarnScreen() {
   );
   return (
     <View className="flex-1 bg-white">
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate("Client")}>
+        <TouchableOpacity onPress={() => navigation.navigate("ClientApp")}>
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text style={styles.title}>Refer and Earn</Text>
@@ -130,21 +132,6 @@ export default function ReferAndEarnScreen() {
             <MaterialIcons name="content-copy" size={12} color="#fff" />
             <Text style={styles.copyBtnText}>Copy Code</Text>
           </TouchableOpacity>
-          <View style={styles.shareRow}>
-            <Ionicons
-              name="chatbubble-ellipses-outline"
-              size={20}
-              color="#22C55E"
-              style={styles.shareIcon}
-            />
-
-            <Feather
-              name="share-2"
-              size={20}
-              color="#A855F7"
-              style={styles.shareIcon}
-            />
-          </View>
         </View>
 
         <View style={styles.card}>
@@ -177,7 +164,7 @@ export default function ReferAndEarnScreen() {
           </View>
         </View>
 
-        <View style={styles.card}>
+        <View className="mb-10" style={styles.card}>
           <Text style={styles.sectionTitle}>Referral History</Text>
           {referralTransactions.length > 0 ? (
             referralTransactions.map((tx, idx) => (
@@ -191,49 +178,22 @@ export default function ReferAndEarnScreen() {
                   style={{ marginRight: 8 }}
                 />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.txDesc}>{tx.desc}</Text>
-                  <Text style={styles.txDate}>{tx.date}</Text>
+                  <Text
+                    style={styles.txDesc}
+                  >{`Friend ${tx.referredUser.firstName} joined with your referral code`}</Text>
+                  <Text style={styles.txDate}>
+                    {formatDateTime(tx.createdAt)}
+                  </Text>
                 </View>
-                <Text
-                  style={[
-                    styles.txAmount,
-                    { color: tx.amount > 0 ? "#EB278D" : "#EF4444" },
-                  ]}
-                >
+                <Text style={[styles.txAmount, { color: "#EB278D" }]}>
                   {" "}
-                  {tx.amount > 0 ? "+" : ""}₦{Math.abs(tx.amount)}
+                  {tx.amountEarned > 0 ? "+" : ""}₦{Math.abs(tx.amountEarned)}
                 </Text>
               </View>
             ))
           ) : (
             <EmptyData msg="No Referral yet" />
           )}
-        </View>
-
-        <Text style={styles.forNewUsers}>For New Users</Text>
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Have a referral code?</Text>
-          <Text style={styles.sectionDesc}>
-            Enter your friend's code to get a bonus!
-          </Text>
-          <TextInput
-            style={styles.input}
-            className="border border-[#EBEBEA]"
-            placeholder="Enter code here"
-            value={inputCode}
-            onChangeText={setInputCode}
-          />
-          <View style={styles.btnRow}>
-            <TouchableOpacity
-              style={styles.pasteBtn}
-              onPress={() => setInputCode(referralCode)}
-            >
-              <Text style={styles.pasteBtnText}>Paste Code</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.applyBtn}>
-              <Text style={styles.applyBtnText}>Apply Code</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
     </View>
@@ -375,7 +335,6 @@ const styles = StyleSheet.create({
   },
   txRow: {
     flexDirection: "row",
-    alignItems: "center",
     marginBottom: 10,
   },
   txDesc: {

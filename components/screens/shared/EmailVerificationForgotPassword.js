@@ -145,7 +145,6 @@ export default function EmailVerificationForgotPassword({ navigation, route }) {
                 disabled={loading}
                 loadingMsg="Verifying"
                 onPress={() => {
-                  console.log("Submit button pressed");
                   handleSubmit();
                 }}
                 isloading={loading}

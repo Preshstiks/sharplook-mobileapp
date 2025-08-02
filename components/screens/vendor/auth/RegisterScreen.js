@@ -30,7 +30,6 @@ export default function VendorRegisterScreen({ navigation }) {
 
   const handleSignup = async (values) => {
     setLoading(true);
-    console.log("handleSignup called with values:", values);
     try {
       const formData = new FormData();
       formData.append("firstName", values.firstName);
@@ -58,7 +57,6 @@ export default function VendorRegisterScreen({ navigation }) {
       showToast.success(res.data.message);
       navigation.navigate("VendorEmailVerification", { email: values.email });
     } catch (error) {
-      console.log("Debug: error", error.response);
       if (error.response && error.response.data) {
         const errorMessage = error.response.data.error;
         showToast.error(errorMessage);
@@ -207,6 +205,22 @@ export default function VendorRegisterScreen({ navigation }) {
                   touched={touched.serviceType}
                   options={SERVICE_OPTIONS}
                 />
+                <View className="-mt-3">
+                  <Text
+                    style={{
+                      fontFamily: "poppinsRegular",
+                      fontSize: 10,
+                      color: "#888",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {values.serviceType === "IN_SHOP"
+                      ? "A payment subscription will be accepted from in-shop vendors to have access to full functionality of the app"
+                      : values.serviceType === "HOME_SERVICE"
+                        ? "We take 5% of the price of any home-service charge listed"
+                        : null}
+                  </Text>
+                </View>
                 {/* Document Upload Box */}
                 <Pressable
                   onPress={async () => {
@@ -227,12 +241,9 @@ export default function VendorRegisterScreen({ navigation }) {
                         result.assets.length > 0
                       ) {
                         const selectedFile = result.assets[0];
-                        console.log("[DEBUG] Selected file:", selectedFile);
                         setFieldValue("identityImage", selectedFile);
                       }
-                    } catch (error) {
-                      console.log("[DEBUG] Document picker error:", error);
-                    }
+                    } catch (error) {}
                   }}
                   style={{
                     borderWidth: 1,
@@ -325,7 +336,7 @@ export default function VendorRegisterScreen({ navigation }) {
                       </Text>
                     </Pressable>
                   </View>
-                  <View className="flex-row justify-center gap-1 items-center mt-5">
+                  <View className="flex-row pb-10 justify-center gap-1 items-center mt-5">
                     <Pressable onPress={() => navigation.navigate("Register")}>
                       <Text
                         className="text-sm text-primary"

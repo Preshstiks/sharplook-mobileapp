@@ -25,6 +25,7 @@ export const clientRegisterSchema = Yup.object().shape({
     [true],
     "You must accept personal data processing"
   ),
+  referredByCode: Yup.string().optional(),
 });
 // Register validation schema
 export const registerSchema = Yup.object().shape({
@@ -63,9 +64,7 @@ export const resetPasswordSchema = Yup.object().shape({
       "Password must contain at least one uppercase letter, one lowercase letter, and one number"
     )
     .required("New password is required"),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref("newPassword"), null], "Passwords must match")
-    .required("Please confirm your password"),
+  token: Yup.string().required("OTP is required"),
 });
 
 // Email verification schema

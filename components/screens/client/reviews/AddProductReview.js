@@ -21,7 +21,6 @@ export default function AddProductReviewScreen() {
   const navigation = useNavigation();
   const { user } = useAuth();
   const clientId = user.id;
-  console.log({ user });
   const handleAddReview = async (values) => {
     setLoading(true);
     const payload = {
@@ -32,7 +31,6 @@ export default function AddProductReviewScreen() {
       comment: values.comment,
       rating: values.rating,
     };
-    console.log(payload);
     try {
       const res = await HttpClient.post("/reviews/postReview", {
         type: "PRODUCT",
@@ -45,7 +43,6 @@ export default function AddProductReviewScreen() {
       showToast.success(res.data.message);
       navigation.goBack();
     } catch (error) {
-      console.log(error.response);
     } finally {
       setLoading(false);
     }

@@ -18,7 +18,6 @@ export const CartProvider = ({ children }) => {
       setCartItems(res.data.data || []);
     } catch (err) {
       setError("Failed to load cart");
-      console.log(err.response);
       setCartItems([]);
     } finally {
       setLoading(false);

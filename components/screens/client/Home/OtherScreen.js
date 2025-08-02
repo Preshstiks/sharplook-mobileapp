@@ -5,52 +5,24 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import NailIcon from "../../../../assets/icon/nail.svg";
-import MakeupIcon from "../../../../assets/icon/makeupicon.svg";
-import BarbingSaloonIcon from "../../../../assets/icon/clipper.svg";
-import HairIcon from "../../../../assets/icon/hairicon.svg";
-import OptionsIcon from "../../../../assets/icon/options.svg";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import { useCategories } from "../../../../hooks/useCategories";
 
-const categories = [
-  { label: "Nails", icon: <NailIcon width={36} height={36} color="#EB278D" /> },
-  {
-    label: "Makeup",
-    icon: <MakeupIcon width={36} height={36} color="#EB278D" />,
-  },
-  {
-    label: "Barbing Saloon",
-    icon: <BarbingSaloonIcon width={36} height={36} color="#EB278D" />,
-  },
-  { label: "Hair", icon: <HairIcon width={36} height={36} color="#EB278D" /> },
-  {
-    label: "Pedicure",
-    icon: <NailIcon width={36} height={36} color="#EB278D" />,
-  },
-  {
-    label: "Facials",
-    icon: <MakeupIcon width={36} height={36} color="#EB278D" />,
-  },
-  {
-    label: "Manicure",
-    icon: <BarbingSaloonIcon width={36} height={36} color="#EB278D" />,
-  },
-  {
-    label: "Massage",
-    icon: <HairIcon width={36} height={36} color="#EB278D" />,
-  },
-];
+// Categories will be populated dynamically from API
 
 export default function OtherScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const allServices = route.params?.allServices || [];
+  const { categories, loading: categoriesLoading } = useCategories();
 
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
+      <StatusBar backgroundColor="#EB278D" barStyle="dark-content" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={28} color="#222" />
@@ -67,37 +39,54 @@ export default function OtherScreen() {
         }}
       >
         <View className="flex-row flex-wrap">
-          {categories.map((cat, idx) => (
-            <TouchableOpacity
-              onPress={() => {
-                const filteredServices = allServices.filter(
-                  (service) => service.serviceName === cat.label
-                );
-                navigation.navigate("Categories", {
-                  category: cat.label,
-                  services: filteredServices,
-                });
-              }}
-              key={cat.label + idx}
-              className="w-1/3 px-1 mb-2"
-              style={{ minHeight: 120 }}
-            >
-              <View
-                className="bg-pinklight rounded-[12px] items-center justify-center p-2"
-                style={{ minHeight: 120 }}
-              >
-                <View className="rounded-full h-[64px] w-[64px] items-center justify-center mb-2 border border-primary">
-                  {cat.icon}
-                </View>
-                <Text
-                  className="text-[10px] text-faintDark text-center mt-1"
-                  style={{ fontFamily: "poppinsRegular" }}
+          {categoriesLoading
+            ? // Show skeleton loading for categories
+              Array.from({ length: 8 }).map((_, idx) => (
+                <View
+                  key={idx}
+                  className="w-1/3 px-1 mb-2"
+                  style={{ minHeight: 120 }}
                 >
-                  {cat.label}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+                  <View
+                    className="bg-gray-100 rounded-[12px] items-center justify-center p-2"
+                    style={{ minHeight: 120 }}
+                  >
+                    <View className="rounded-full h-[64px] w-[64px] items-center justify-center mb-2 border border-gray-200 bg-gray-200" />
+                    <View className="w-12 h-3 bg-gray-200 rounded mt-1" />
+                  </View>
+                </View>
+              ))
+            : categories.map((cat, idx) => (
+                <TouchableOpacity
+                  onPress={() => {
+                    const filteredServices = allServices.filter(
+                      (service) => service.serviceName === cat.name
+                    );
+                    navigation.navigate("Categories", {
+                      category: cat.name,
+                      services: filteredServices,
+                    });
+                  }}
+                  key={cat.id}
+                  className="w-1/3 px-1 mb-2"
+                  style={{ minHeight: 120 }}
+                >
+                  <View
+                    className="bg-pinklight rounded-[12px] items-center justify-center p-2"
+                    style={{ minHeight: 120 }}
+                  >
+                    <View className="rounded-full h-[64px] w-[64px] items-center justify-center mb-2 border border-primary">
+                      <Ionicons name="sparkles" size={36} color="#EB278D" />
+                    </View>
+                    <Text
+                      className="text-[10px] text-faintDark text-center mt-1"
+                      style={{ fontFamily: "poppinsRegular" }}
+                    >
+                      {cat.name}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
         </View>
       </ScrollView>
     </View>

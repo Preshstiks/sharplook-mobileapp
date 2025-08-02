@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Image,
   SafeAreaView,
@@ -213,10 +213,11 @@ const StoreManagementScreen = () => {
   const navigation = useNavigation();
   const { user, setUser } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [selectedImages, setSelectedImages] = useState([]);
   const [selectedDays, setSelectedDays] = useState([]);
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const daysOfWeek = [
     "Monday",
@@ -227,18 +228,6 @@ const StoreManagementScreen = () => {
     "Saturday",
     "Sunday",
   ];
-
-  const dayOptions = daysOfWeek.map((day) => ({ label: day, value: day }));
-
-  const toggleDay = (day) => {
-    if (selectedDays.includes(day)) {
-      setSelectedDays(selectedDays.filter((d) => d !== day));
-    } else {
-      setSelectedDays([...selectedDays, day]);
-    }
-  };
-
-  const isDaySelected = (day) => selectedDays.includes(day);
 
   // Initialize availability from existing user data
   useEffect(() => {
@@ -254,100 +243,13 @@ const StoreManagementScreen = () => {
         setToTime(availability.toTime);
       }
     }
-
-    // Initialize selected images from existing portfolio images
-    if (
-      user?.vendorOnboarding?.portfolioImages &&
-      user.vendorOnboarding.portfolioImages.length > 0
-    ) {
-      setSelectedImages(user.vendorOnboarding.portfolioImages);
-    }
   }, [user]);
 
-  // Validation function for time range
-  const validateTimeRange = (startTime, endTime) => {
-    if (!startTime || !endTime) return null;
-
-    const [startHour, startMinute] = startTime.split(":").map(Number);
-    const [endHour, endMinute] = endTime.split(":").map(Number);
-
-    const startMinutes = startHour * 60 + startMinute;
-    const endMinutes = endHour * 60 + endMinute;
-
-    if (startMinutes >= endMinutes) {
-      return "End time must be after start time";
-    }
-
-    return null;
-  };
-
-  const pickImage = async () => {
-    // Check if maximum images reached
-    if (selectedImages.length >= 6) {
-      showToast.error(
-        "Maximum 6 images allowed. Please remove some images first."
-      );
-      return;
-    }
-
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-      allowsMultipleSelection: true,
-      selectionLimit: 6 - selectedImages.length,
-    });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const newImages = result.assets.map((asset) => asset.uri);
-      const totalImages = selectedImages.length + newImages.length;
-
-      if (totalImages > 6) {
-        showToast.error(
-          "Maximum 6 images allowed. Only the first images will be added."
-        );
-        const remainingSlots = 6 - selectedImages.length;
-        setSelectedImages([
-          ...selectedImages,
-          ...newImages.slice(0, remainingSlots),
-        ]);
-      } else {
-        setSelectedImages([...selectedImages, ...newImages]);
-      }
-    }
-  };
-
-  const removeImage = (index) => {
-    const newImages = selectedImages.filter((_, i) => i !== index);
-    setSelectedImages(newImages);
-  };
-
-  const renderImageItem = ({ item, index }) => (
-    <View className="relative mb-2 mr-2" style={{ width: "30%" }}>
-      <Image
-        source={{ uri: item }}
-        style={{ width: "100%", height: 100, borderRadius: 8 }}
-        resizeMode="cover"
-      />
-      <TouchableOpacity
-        onPress={() => removeImage(index)}
-        style={{
-          position: "absolute",
-          top: 4,
-          right: 4,
-          backgroundColor: "rgba(255,255,255,0.9)",
-          borderRadius: 12,
-          padding: 4,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <AntDesign name="close" size={12} color="#E53935" />
-      </TouchableOpacity>
-    </View>
+  const isDaySelected = useCallback(
+    (day) => selectedDays.includes(day),
+    [selectedDays]
   );
 
-  console.log({ user });
   const initialValues = {
     businessName: user?.vendorOnboarding?.businessName || "",
     bio:
@@ -365,7 +267,6 @@ const StoreManagementScreen = () => {
       user?.vendorOnboarding?.registerationNumber ||
       "",
     portfolioImages: user?.vendorOnboarding?.portfolioImages || [],
-    // Add availability to initial values
     availability: {
       days: user?.vendorOnboarding?.availability?.days || [],
       fromTime: user?.vendorOnboarding?.availability?.fromTime || "",
@@ -374,8 +275,6 @@ const StoreManagementScreen = () => {
   };
 
   const handleUpdate = async (values, { setSubmitting, setFieldError }) => {
-    console.log("handleUpdate called with values:", values);
-
     setLoading(true);
 
     try {
@@ -385,7 +284,6 @@ const StoreManagementScreen = () => {
       formData.append("location", values.location);
       formData.append("registerationNumber", values.registerationNumber);
 
-      // Use availability from form values
       const availabilityData = {
         days: values.availability.days,
         fromTime: values.availability.fromTime,
@@ -393,7 +291,6 @@ const StoreManagementScreen = () => {
       };
       formData.append("availability", JSON.stringify(availabilityData));
 
-      // Append all selected images - use values.portfolioImages instead of selectedImages
       values.portfolioImages.forEach((imageUri, index) => {
         const filename = imageUri.split("/").pop();
         const match = /\.(\w+)$/.exec(filename ?? "");
@@ -405,18 +302,14 @@ const StoreManagementScreen = () => {
         });
       });
 
-      console.log("FormData entries:");
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-
-      const res = await HttpClient.put("/vendor/profile/edit", formData);
+      const res = await HttpClient.put("/vendor/profile/edit", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       showToast.success(res.data.message || "Profile updated successfully");
       if (res.data.user) setUser(res.data.user);
-
-      console.log(res.data);
     } catch (error) {
-      console.log("[DEBUG] Error updating store profile:", error.response);
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         errorMsg =
@@ -430,30 +323,81 @@ const StoreManagementScreen = () => {
       setSubmitting(false);
     }
   };
-  useEffect(() => {
-    if (user?.vendorOnboarding?.availability) {
-      const availability = user.vendorOnboarding.availability;
-      if (availability.days) {
-        setSelectedDays(availability.days);
-      }
-      if (availability.fromTime) {
-        setFromTime(availability.fromTime);
-      }
-      if (availability.toTime) {
-        setToTime(availability.toTime);
-      }
-    }
 
-    if (
-      user?.vendorOnboarding?.portfolioImages &&
-      user.vendorOnboarding.portfolioImages.length > 0
-    ) {
-      setSelectedImages(user.vendorOnboarding.portfolioImages);
+  const pickImage = async () => {
+    try {
+      // Request permissions
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        showToast.error(
+          "Sorry, we need camera roll permissions to make this work!"
+        );
+        return;
+      }
+
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedImage(result.assets[0].uri);
+        await uploadImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      showToast.error("Error selecting image. Please try again.");
     }
-  }, [user]);
+  };
+
+  const uploadImage = async (imageUri) => {
+    setIsUploadingImage(true);
+    try {
+      // Create form data
+      const formData = new FormData();
+      formData.append("avatar", {
+        uri: imageUri,
+        type: "image/jpeg",
+        name: "profile-image.jpg",
+      });
+
+      const response = await HttpClient.put("/user/avatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (response.data) {
+        setUser(response.data.user);
+        showToast.success(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Error uploading image";
+      showToast.error(message);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  // Get the current image source
+  const getImageSource = () => {
+    if (selectedImage) {
+      return { uri: selectedImage };
+    }
+    if (user?.avatar) {
+      return { uri: user.avatar };
+    }
+    return require("../../../assets/icon/avatar.png");
+  };
 
   return (
-    <SafeAreaView className="flex-1 pb-[50px] bg-secondary">
+    <SafeAreaView className="flex-1 bg-secondary">
       {/* Header with logo, name, badge, address */}
       <View className="bg-primary rounded-b-[40px] items-center pt-[60px] pb-8">
         <TouchableOpacity
@@ -462,14 +406,23 @@ const StoreManagementScreen = () => {
         >
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Image
-          source={
-            user?.avatar
-              ? { uri: user.avatar }
-              : require("../../../assets/icon/avatar.png")
-          }
-          className="w-24 h-24 rounded-full mb-4 bg-white"
-        />
+        <View>
+          <Image
+            source={getImageSource()}
+            className="w-24 h-24 rounded-full mb-4 bg-white"
+          />
+          <TouchableOpacity
+            className="absolute bottom-2 right-2 bg-white p-1 rounded-full border border-gray-200"
+            onPress={pickImage}
+            disabled={isUploadingImage}
+          >
+            {isUploadingImage ? (
+              <View className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+            ) : (
+              <Feather name="edit" size={18} color="#000" />
+            )}
+          </TouchableOpacity>
+        </View>
         <Text
           className="text-white text-[16px] text-center"
           style={{ fontFamily: "poppinsMedium" }}
@@ -499,15 +452,18 @@ const StoreManagementScreen = () => {
           </Text>
         </View>
       </View>
-      {/* Form Body with KeyboardAvoidingView and ScrollView */}
+
+      {/* Form Body */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
         <ScrollView
-          contentContainerStyle={{ paddingBottom: 40 }}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 100 }}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <Formik
             initialValues={initialValues}
@@ -525,7 +481,6 @@ const StoreManagementScreen = () => {
               isSubmitting,
               setFieldValue,
             }) => {
-              // Sync availability changes with form values
               const updateAvailabilityDays = (newDays) => {
                 setSelectedDays(newDays);
                 setFieldValue("availability.days", newDays);
@@ -551,8 +506,7 @@ const StoreManagementScreen = () => {
                 updateAvailabilityDays(newDays);
               };
 
-              // --- Sync Formik portfolioImages with selectedImages ---
-              const pickImage = async () => {
+              const pickPortfolioImage = async () => {
                 if (values.portfolioImages.length >= 6) {
                   showToast.error(
                     "Maximum 6 images allowed. Please remove some images first."
@@ -591,12 +545,10 @@ const StoreManagementScreen = () => {
                     updatedImages = [...values.portfolioImages, ...newImages];
                   }
 
-                  // Update Formik field value
                   setFieldValue("portfolioImages", updatedImages);
                 }
               };
 
-              // Remove image function - properly synced with Formik
               const removeImage = (index) => {
                 const updatedImages = values.portfolioImages.filter(
                   (_, i) => i !== index
@@ -666,14 +618,13 @@ const StoreManagementScreen = () => {
 
                   {/* Portfolio Images Section */}
                   <View className="mb-4">
-                    {/* Upload Button */}
                     <TouchableOpacity
                       className={`border border-dashed rounded-lg py-3 px-4 flex-row items-center justify-center ${
                         values.portfolioImages.length >= 6
                           ? "border-gray-300 bg-gray-100"
                           : "border-[#F9BCDC] bg-white"
                       }`}
-                      onPress={pickImage}
+                      onPress={pickPortfolioImage}
                       disabled={values.portfolioImages.length >= 6}
                     >
                       <Text
@@ -704,7 +655,6 @@ const StoreManagementScreen = () => {
                       more than 2MB (Maximum of 6 images)
                     </Text>
 
-                    {/* Images Grid */}
                     {values.portfolioImages.length > 0 && (
                       <View className="flex-row flex-wrap mb-4">
                         {values.portfolioImages.map((imageUri, index) => (
@@ -746,6 +696,7 @@ const StoreManagementScreen = () => {
                       </View>
                     )}
                   </View>
+
                   <View className="mb-6">
                     <View className="border-t border-x rounded-t-[8px] pt-4 pb-3 px-4 border-[#E9E9E9]">
                       <Text
@@ -757,7 +708,6 @@ const StoreManagementScreen = () => {
                     </View>
 
                     <View className="bg-white border rounded-b-[8px] border-[#E9E9E9] p-4">
-                      {/* Days Selection */}
                       <View className="mb-4">
                         <Text
                           className="text-[12px] mb-2 text-gray-600"
@@ -800,7 +750,6 @@ const StoreManagementScreen = () => {
                           )}
                       </View>
 
-                      {/* Time Inputs Row */}
                       <View className="flex-row gap-3">
                         <TimePicker
                           label="Opening Time"
@@ -819,12 +768,16 @@ const StoreManagementScreen = () => {
                       </View>
                     </View>
                   </View>
-                  <AuthButton
-                    title="Save Changes"
-                    isloading={loading || isSubmitting}
-                    loadingMsg="Saving..."
-                    onPress={handleSubmit}
-                  />
+
+                  {/* Fixed position button container */}
+                  <View className="mb-20">
+                    <AuthButton
+                      title="Save Changes"
+                      isloading={loading || isSubmitting}
+                      loadingMsg="Saving..."
+                      onPress={handleSubmit}
+                    />
+                  </View>
                 </View>
               );
             }}

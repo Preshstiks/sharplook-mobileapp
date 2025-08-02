@@ -17,6 +17,7 @@ import { StyleSheet as RNStyleSheet } from "react-native";
 import BottomModal from "../../reusuableComponents/BottomModal";
 import OutlineButton from "../../reusuableComponents/buttons/OutlineButton";
 import { AntDesign } from "@expo/vector-icons";
+import { useAuth } from "../../../context/AuthContext";
 
 const steps = [
   {
@@ -42,11 +43,14 @@ const steps = [
 export default function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const navigation = useNavigation();
+  const { markOnboardingAsCompleted } = useAuth();
   const progress = useRef(new Animated.Value(0)).current;
   const [isModalVisible, setModalVisible] = useState(false);
+
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
+
   React.useEffect(() => {
     Animated.timing(progress, {
       toValue: (step + 1) / steps.length,
@@ -65,6 +69,17 @@ export default function OnboardingScreen() {
 
   const handleSkip = () => {
     toggleModal();
+  };
+
+  const handleUserTypeSelection = async (userType) => {
+    // Mark onboarding as completed before navigating
+    await markOnboardingAsCompleted();
+
+    if (userType === "client") {
+      navigation.navigate("Register");
+    } else {
+      navigation.navigate("VendorRegister");
+    }
   };
 
   const size = 64;
@@ -124,14 +139,14 @@ export default function OnboardingScreen() {
       >
         <View className="pt-10">
           <OutlineButton
-            title="Are you a Client?"
-            onPress={() => navigation.navigate("Login")}
+            title="Register as a Client"
+            onPress={() => handleUserTypeSelection("client")}
             icon={<AntDesign name="user" size={20} color="#EB278D" />}
             iconPosition="left"
           />
           <OutlineButton
-            title="Are you a Vendor?"
-            onPress={() => navigation.navigate("VendorLogin")}
+            title="Register as a Vendor"
+            onPress={() => handleUserTypeSelection("vendor")}
             icon={<MaterialIcons name="storefront" size={20} color="#EB278D" />}
             iconPosition="left"
           />

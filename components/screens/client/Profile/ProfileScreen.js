@@ -1,45 +1,26 @@
 import {
   Image,
   SafeAreaView,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import BottomModal from "../../../reusuableComponents/BottomModal";
-import OutlineButton from "../../../reusuableComponents/buttons/OutlineButton";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../../../../context/AuthContext";
-import { useStatusBar } from "../../../../context/StatusBarContext";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
-  const { setBarType } = useStatusBar();
   const { user, logout } = useAuth();
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  useEffect(() => {
-    setBarType("primary");
-  }, []);
 
   const handleLogout = async () => {
     await logout();
   };
-
-  const handleClientSelect = () => {
-    setShowLogoutModal(false);
-    navigation.replace("Login");
-  };
-
-  const handleVendorSelect = () => {
-    setShowLogoutModal(false);
-    navigation.replace("VendorLogin");
-  };
-  console.log({ USER: user });
   return (
     <SafeAreaView className="flex-1 bg-secondary">
       {/* Header with avatar, name, email */}
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View className="bg-primary rounded-b-[40px] items-center pt-[60px] pb-8">
         <Image
           source={
@@ -97,7 +78,7 @@ const ProfileScreen = () => {
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
         </TouchableOpacity>
         {/* Help and Support */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
           onPress={() => navigation.navigate("HelpSupportScreen")}
         >
@@ -111,7 +92,7 @@ const ProfileScreen = () => {
             Help and Support
           </Text>
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         {/* Legal */}
         <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
@@ -144,7 +125,7 @@ const ProfileScreen = () => {
           </Text>
         </TouchableOpacity>
         {/* Delete Account */}
-        <TouchableOpacity className="flex-row items-center bg-white rounded-xl px-4 py-4 shadow-sm">
+        {/* <TouchableOpacity className="flex-row items-center bg-white rounded-xl px-4 py-4 shadow-sm">
           <View className="bg-[#FF0000] p-2 rounded-full mr-4">
             <Ionicons name="trash" size={24} color="#fff" />
           </View>
@@ -154,7 +135,7 @@ const ProfileScreen = () => {
           >
             Delete Account
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </SafeAreaView>
   );

@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   Pressable,
   ScrollView,
+  StatusBar,
 } from "react-native";
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 // Mock data for vendors
 const vendors = [
@@ -44,16 +46,21 @@ const vendors = [
 ];
 
 export default function AcceptedOfferDetailScreen() {
+  const navigation = useNavigation();
   return (
     <View className="flex-1 bg-white">
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <View className="bg-primary pt-[60px] pb-4 px-4">
-        <View className="flex-row items-center">
-          <Pressable onPress={() => navigation.goBack()} className="mr-4">
+        <View className="flex-row items-center justify-center">
+          <Pressable
+            onPress={() => navigation.goBack()}
+            className="absolute left-4"
+          >
             <Ionicons name="chevron-back" size={24} color="white" />
           </Pressable>
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-white text-[16px] flex-1 text-center"
+            className="text-white text-[16px]"
           >
             Choose Vendor
           </Text>

@@ -120,8 +120,6 @@ export default function ProductReviewsScreen() {
   const [error, setError] = useState(null);
   const vendorId = vendor?.id;
   const productId = product?.id;
-  console.log(vendor);
-  console.log(vendorId, productId);
   const hasReviewedThisProduct = reviews.some(
     (review) => review.productId === productId
   );
@@ -136,7 +134,6 @@ export default function ProductReviewsScreen() {
             productId,
           });
           setReviews(res.data?.data || []);
-          console.log(res.data);
         } catch (err) {
           console.error(err.response);
           setError("Failed to load reviews");

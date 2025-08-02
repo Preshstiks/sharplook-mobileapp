@@ -29,17 +29,32 @@ export default function TermsOfUseIntellectualPropertyRightsScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: Jun 10, 2024
+          Last updated: July 24, 2025
         </Text>
         <Text
           className="text-[14px] text-black"
           style={{ fontFamily: "poppinsRegular" }}
         >
-          {/* Replace this with actual terms content */}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-          turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec
-          fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus
-          elit sed risus.
+          In accordance with the Nigeria Data Protection Act (NDPA) 2023 and
+          other applicable data protection laws, you, as a Data Subject, are
+          entitled to exercise the following rights regarding your Personal
+          Data: Right of Access: You have the right to request confirmation as
+          to whether we process your Personal Data and to obtain a copy of such
+          data, along with relevant information regarding the nature, purpose,
+          and categories of processing. Right to Rectification: You may request
+          that any inaccurate or incomplete Personal Data be corrected or
+          updated without undue delay. Right to Erasure: You have the right to
+          request the deletion of your Personal Data where the data is no longer
+          necessary for the purpose it was collected, where you withdraw your
+          consent and no other legal basis exists, or where erasure is required
+          to comply with a legal obligation. Right to Withdraw Consent: Where
+          processing is based on your consent, you may withdraw such consent at
+          any time. This will not affect the lawfulness of processing carried
+          out prior to the withdrawal. Right to Lodge a Complaint: If you
+          believe your data protection rights have been violated, you have the
+          right to lodge a formal complaint with the Nigeria Data Protection
+          Commission (NDPC) or any competent supervisory authority. Requests
+          relating to your Data Rights can be sent to privacy@sharplook.ng
         </Text>
       </ScrollView>
     </View>

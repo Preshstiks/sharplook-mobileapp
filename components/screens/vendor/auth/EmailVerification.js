@@ -26,7 +26,6 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
   const email = route?.params?.email;
   const handleResend = async () => {
     setLoading(true);
-    console.log("Touched");
     try {
       const res = await HttpClient.post("/auth/send-otp", { email });
       showToast.success(res.data.message);
@@ -49,10 +48,8 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
     setVerifying(true);
     // Always include email in the payload
     const payload = { ...values, email };
-    console.log("[DEBUG] handleVerify called with payload:", payload);
     try {
       const res = await HttpClient.post("/auth/verify-otp", payload);
-      console.log("[DEBUG] Registration response:", res);
       showToast.success(res.data.message);
       navigation.navigate("VendorLogin");
     } catch (error) {
