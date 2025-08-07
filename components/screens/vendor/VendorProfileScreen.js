@@ -9,6 +9,7 @@ import {
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../../context/AuthContext";
+import { StatusBar } from "expo-status-bar";
 
 const VendorProfileScreen = () => {
   const navigation = useNavigation();
@@ -21,42 +22,53 @@ const VendorProfileScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-secondary">
       {/* Header with logo, name, badge, address */}
-      <View className="bg-primary rounded-b-[40px] items-center pt-[60px] pb-8">
-        <Image
-          source={
-            user?.avatar
-              ? { uri: user.avatar }
-              : require("../../../assets/icon/avatar.png")
-          }
-          className="w-24 h-24 rounded-full mb-4 bg-white"
-        />
-        <Text
-          className="text-white text-[16px] text-center"
-          style={{ fontFamily: "poppinsMedium" }}
+      <StatusBar barStyle="light-content" backgroundColor={"#EB278D"} />
+      <View className="bg-primary rounded-b-[40px] pt-[40px] pb-8 relative">
+        <TouchableOpacity
+          className="absolute top-[40px] left-4 z-10 p-2"
+          onPress={() => navigation.goBack()}
         >
-          {user?.vendorOnboarding?.businessName}
-        </Text>
-        <View className="flex-row items-center mt-2">
-          <View className="bg-white px-3 py-1 rounded-lg flex-row items-center mr-2">
-            <View className="w-2 h-2 rounded-full bg-[#ED2584] mr-2" />
+          <Ionicons name="chevron-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <View className="items-center pt-10">
+          <View>
+            <Image
+              source={
+                user?.avatar
+                  ? { uri: user.avatar }
+                  : require("../../../assets/icon/avatar.png")
+              }
+              className="w-24 h-24 rounded-full mb-4 bg-white"
+            />
+          </View>
+          <Text
+            className="text-white text-[16px] text-center"
+            style={{ fontFamily: "poppinsMedium" }}
+          >
+            {user?.vendorOnboarding?.businessName}
+          </Text>
+          <View className="flex-row items-center mt-2">
+            <View className="bg-white px-3 py-1 rounded-lg flex-row items-center mr-2">
+              <View className="w-2 h-2 rounded-full bg-[#ED2584] mr-2" />
+              <Text
+                className="text-[12px] text-[#ED2584]"
+                style={{ fontFamily: "poppinsMedium" }}
+              >
+                {user?.vendorOnboarding?.serviceType === "IN_SHOP"
+                  ? "In-shop"
+                  : "Home Service"}
+              </Text>
+            </View>
+          </View>
+          <View className="flex-row justify-center w-[70%] mt-2">
+            <Ionicons name="location-sharp" size={14} color="#fff" />
             <Text
-              className="text-[12px] text-[#ED2584]"
-              style={{ fontFamily: "poppinsMedium" }}
+              className="text-white text-center text-[12px] ml-1"
+              style={{ fontFamily: "poppinsLight" }}
             >
-              {user?.vendorOnboarding?.serviceType === "IN_SHOP"
-                ? "In-shop"
-                : "Home Service"}
+              {user?.vendorOnboarding?.location}
             </Text>
           </View>
-        </View>
-        <View className="flex-row justify-center w-[70%] mt-2">
-          <Ionicons name="location-sharp" size={14} color="#fff" />
-          <Text
-            className="text-white text-center text-[12px] ml-1"
-            style={{ fontFamily: "poppinsLight" }}
-          >
-            {user?.vendorOnboarding?.location}
-          </Text>
         </View>
       </View>
       {/* Options List */}

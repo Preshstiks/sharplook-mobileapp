@@ -20,12 +20,17 @@ export default function HelpSupportScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <View style={styles.header}>
+      <View className="pt-[60px] pb-4 px-4 flex-row items-center shadow-sm mb-5 justify-between bg-white">
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={28} color="#222" />
+          <Ionicons name="chevron-back" size={24} color="#201E1F" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Help and Support</Text>
-        <View style={{ width: 22 }} />
+        <Text
+          style={{ fontFamily: "latoBold" }}
+          className="text-[14px] text-faintDark"
+        >
+          Help and Support
+        </Text>
+        <View style={{ width: 26 }} />
       </View>
       {/* Search Bar */}
       <View className="px-4 mt-4">

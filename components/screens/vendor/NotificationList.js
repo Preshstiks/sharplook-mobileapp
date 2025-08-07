@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -70,18 +71,30 @@ export default function NotificationList() {
       >
         <View
           style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
             backgroundColor: "#EB278D",
             paddingTop: 60,
             paddingBottom: 16,
-            alignItems: "center",
+            paddingHorizontal: 20,
           }}
         >
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={24} color="#fff" />
+          </TouchableOpacity>
           <Text
-            style={{ color: "#fff", fontSize: 16, fontFamily: "poppinsMedium" }}
+            style={{
+              color: "#fff",
+              fontSize: 16,
+              fontFamily: "poppinsMedium",
+            }}
           >
             Notifications
           </Text>
+          <View style={{ width: 26 }} />
         </View>
+
         <View style={{ paddingHorizontal: 0, paddingTop: 16 }}>
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <View key={i} style={styles.notificationItem}>
@@ -128,17 +141,28 @@ export default function NotificationList() {
       <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
         <View
           style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
             backgroundColor: "#EB278D",
             paddingTop: 60,
             paddingBottom: 16,
-            alignItems: "center",
+            paddingHorizontal: 20,
           }}
         >
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={24} color="#fff" />
+          </TouchableOpacity>
           <Text
-            style={{ color: "#fff", fontSize: 16, fontFamily: "poppinsMedium" }}
+            style={{
+              color: "#fff",
+              fontSize: 16,
+              fontFamily: "poppinsMedium",
+            }}
           >
             Notifications
           </Text>
+          <View style={{ width: 26 }} />
         </View>
         <View
           style={{
@@ -168,19 +192,31 @@ export default function NotificationList() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
+      <StatusBar barStyle="light-content" backgroundColor={"#EB278D"} />
       <View
         style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
           backgroundColor: "#EB278D",
           paddingTop: 60,
           paddingBottom: 16,
-          alignItems: "center",
+          paddingHorizontal: 20,
         }}
       >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color="#fff" />
+        </TouchableOpacity>
         <Text
-          style={{ color: "#fff", fontSize: 16, fontFamily: "poppinsMedium" }}
+          style={{
+            color: "#fff",
+            fontSize: 16,
+            fontFamily: "poppinsMedium",
+          }}
         >
           Notifications
         </Text>
+        <View style={{ width: 26 }} />
       </View>
       <SectionList
         sections={notifications}

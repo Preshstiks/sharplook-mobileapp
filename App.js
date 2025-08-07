@@ -9,6 +9,7 @@ import Toast from "react-native-toast-message";
 import { toastConfig } from "./components/ToastComponent/ToastConfig";
 import { CartProvider } from "./context/CartContext";
 import { CallProvider } from "./context/CallContext";
+import { FilterProvider } from "./context/FilterContext";
 if (__DEV__) {
   global.XMLHttpRequest = global.originalXMLHttpRequest
     ? global.originalXMLHttpRequest
@@ -34,9 +35,11 @@ export default function App() {
         <AuthProvider>
           <CartProvider>
             <CallProvider>
-              {/* Pass linking prop to AppNavigator */}
-              <AppNavigator linking={linking} />
-              <Toast config={toastConfig} />
+              <FilterProvider>
+                {/* Pass linking prop to AppNavigator */}
+                <AppNavigator linking={linking} />
+                <Toast config={toastConfig} />
+              </FilterProvider>
             </CallProvider>
           </CartProvider>
         </AuthProvider>

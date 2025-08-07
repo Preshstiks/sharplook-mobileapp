@@ -29,6 +29,7 @@ import {
 } from "../../../reusuableComponents/DateConverter";
 import { formatAmount } from "../../../formatAmount";
 import { showToast } from "../../../ToastComponent/Toast";
+import { useChatNavigation } from "../../../../hooks/useChatNavigation";
 
 export default function BookingDetailScreen() {
   const route = useRoute();
@@ -98,6 +99,8 @@ export default function BookingDetailScreen() {
     }
   };
 
+  const { navigateToChat, isConnecting } = useChatNavigation();
+
   return (
     <View className="flex-1 pb-[40px] bg-secondary">
       {/* Header */}
@@ -122,10 +125,7 @@ export default function BookingDetailScreen() {
           Booking details
         </Text>
         <View className="relative">
-          <MaterialIcons name="shopping-cart" size={24} color="#000" />
-          <View className="absolute -top-1 -right-1 bg-primary rounded-full w-4 h-4 items-center justify-center">
-            <Text className="text-white text-xs font-bold">0</Text>
-          </View>
+          <MaterialIcons name="shopping-cart" size={24} color="#fff" />
         </View>
       </View>
       <ScrollView className="px-4" showsVerticalScrollIndicator={false}>
@@ -198,7 +198,23 @@ export default function BookingDetailScreen() {
                 {booking?.vendor?.vendorOnboarding?.businessName}
               </Text>
             </View>
-            <MaterialIcons name="chat" size={20} color="#EB278D" />
+            <TouchableOpacity
+              onPress={() =>
+                navigateToChat(navigation, {
+                  vendorId: booking?.vendor?.id,
+                  receiverName: booking?.vendor?.vendorOnboarding?.businessName,
+                  vendorPhone: booking?.vendor?.phone,
+                  chat: {
+                    id: booking?.vendor?.id,
+                    name: booking?.vendor?.vendorOnboarding?.businessName,
+                    avatar: booking?.vendor?.vendorOnboarding?.profilePicture,
+                    vendorId: booking?.vendor?.id,
+                  },
+                })
+              }
+            >
+              <MaterialIcons name="chat" size={20} color="#EB278D" />
+            </TouchableOpacity>
           </View>
         </View>
         {/* Booking Description */}
@@ -239,7 +255,7 @@ export default function BookingDetailScreen() {
         {/* Static Map */}
 
         {/* Action Buttons */}
-        {booking?.status !== "COMPLETED" && booking?.dispute === null && (
+        {booking?.status === "ACCEPTED" && booking?.dispute === null && (
           <>
             <AuthButton
               title="Booking Completed"

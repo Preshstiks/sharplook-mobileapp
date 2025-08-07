@@ -271,12 +271,17 @@ export default function TransactionHistoryScreen({ navigation }) {
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Header */}
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
-      <View style={styles.header}>
+      <View className="pt-[40px] pb-4 px-4 flex-row items-center shadow-sm mb-5 justify-between bg-white">
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={28} color="#222" />
+          <Ionicons name="chevron-back" size={24} color="#201E1F" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Transaction History</Text>
-        <View style={{ width: 28 }} />
+        <Text
+          style={{ fontFamily: "latoBold" }}
+          className="text-[14px] text-faintDark"
+        >
+          Transaction History
+        </Text>
+        <View style={{ width: 26 }} />
       </View>
 
       {/* Transaction List */}

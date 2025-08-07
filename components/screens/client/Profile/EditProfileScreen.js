@@ -119,13 +119,19 @@ const EditProfileScreen = ({ navigation }) => {
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         {/* Header */}
-        <View style={styles.header}>
+        <View className="pt-[40px] pb-4 px-4 flex-row items-center shadow-sm mb-5 justify-between bg-white">
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={28} color="#222" />
+            <Ionicons name="chevron-back" size={24} color="#201E1F" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Edit Profile</Text>
-          <View style={{ width: 22 }} />
+          <Text
+            style={{ fontFamily: "latoBold" }}
+            className="text-[14px] text-faintDark"
+          >
+            Edit Profile
+          </Text>
+          <View style={{ width: 26 }} />
         </View>
+
         {/* Profile Image */}
         <View className="items-center mt-2 mb-4">
           <View>
@@ -228,28 +234,3 @@ const EditProfileScreen = ({ navigation }) => {
 };
 
 export default EditProfileScreen;
-const styles = StyleSheet.create({
-  header: {
-    backgroundColor: "#fff",
-    paddingTop: 50,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-    marginBottom: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  headerTitle: {
-    color: "#222",
-    fontSize: 16,
-    fontFamily: "poppinsMedium",
-    flex: 1,
-    textAlign: "center",
-    marginLeft: -28,
-  },
-});

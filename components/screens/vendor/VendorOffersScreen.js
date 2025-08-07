@@ -134,7 +134,7 @@ export default function VendorOffersScreen() {
       getMyOffers(activeTab);
     }, [activeTab])
   );
-
+  console.log({ myOffers });
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />

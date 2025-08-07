@@ -9,6 +9,7 @@ import {
   StatusBar,
   Modal,
   Alert,
+  StyleSheet,
 } from "react-native";
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import {
@@ -21,6 +22,7 @@ import { WebView } from "react-native-webview";
 import { showToast } from "../../../ToastComponent/Toast";
 import { formatAmount } from "../../../formatAmount";
 import SkeletonBox from "../../../reusuableComponents/SkeletonLoader";
+import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 
 // Vendor Card Skeleton Component
 const VendorCardSkeleton = () => {
@@ -136,7 +138,7 @@ export default function AcceptedOfferDetailScreen() {
       const res = await HttpClient.post("/payment/paystack/initiate", {
         paymentFor: "VENDOR SELECTION",
         description: "Payment for Vendor Selection",
-        amount: totalAmount || vendor?.offer?.price || 0,
+        amount: vendorOffers[0].price || 0,
       });
       setPaystackPaymentUrl(res.data.paymentUrl);
       setPaymentReference(res.data.reference);
@@ -169,6 +171,7 @@ export default function AcceptedOfferDetailScreen() {
         offerId,
         selectedVendorId: vendorId,
         paymentMethod,
+        totalAmount: vendorOffers[0].price,
       };
 
       // Only include reference for PAYSTACK payments
@@ -329,35 +332,29 @@ export default function AcceptedOfferDetailScreen() {
                       numberOfLines={3}
                     >
                       {(() => {
-                        const availabilities =
-                          vendor?.vendor?.vendorAvailabilities ||
-                          vendor?.vendorAvailabilities ||
-                          vendor?.availabilities;
+                        // Check for availability in the correct location based on the data structure
+                        const availability = vendor?.vendorAvailability;
 
-                        if (availabilities && availabilities.length > 0) {
-                          const availability = availabilities[0];
+                        if (availability && availability.days) {
+                          const { days, fromTime, toTime } = availability;
 
-                          if (availability && availability.days) {
-                            const { days, fromTime, toTime } = availability;
+                          const formatTime = (time) => {
+                            if (!time) return "";
+                            const [hours, minutes] = time.split(":");
+                            const hour = parseInt(hours);
+                            const ampm = hour >= 12 ? "PM" : "AM";
+                            const displayHour =
+                              hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+                            return `${displayHour}:${minutes} ${ampm}`;
+                          };
 
-                            const formatTime = (time) => {
-                              if (!time) return "";
-                              const [hours, minutes] = time.split(":");
-                              const hour = parseInt(hours);
-                              const ampm = hour >= 12 ? "PM" : "AM";
-                              const displayHour =
-                                hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-                              return `${displayHour}:${minutes} ${ampm}`;
-                            };
+                          const formattedFromTime = formatTime(fromTime);
+                          const formattedToTime = formatTime(toTime);
+                          const formattedDays = days.join(", ");
 
-                            const formattedFromTime = formatTime(fromTime);
-                            const formattedToTime = formatTime(toTime);
-                            const formattedDays = days.join(", ");
+                          const result = `${formattedDays} • ${formattedFromTime} - ${formattedToTime}`;
 
-                            const result = `${formattedDays} • ${formattedFromTime} - ${formattedToTime}`;
-
-                            return result;
-                          }
+                          return result;
                         }
                         return "Not available";
                       })()}
@@ -461,7 +458,7 @@ export default function AcceptedOfferDetailScreen() {
                 style={{ fontFamily: "poppinsSemiBold" }}
                 className="text-primary text-[16px]"
               >
-                {formatAmount(totalAmount)}
+                {formatAmount(vendorOffers[0].price)}
               </Text>
             </View>
           </View>
@@ -476,64 +473,64 @@ export default function AcceptedOfferDetailScreen() {
         transparent={false}
       >
         <View style={{ flex: 1 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: 16,
-              backgroundColor: "#ED2584",
-            }}
-          >
-            <Text
-              className="text-white text-[16px]"
-              style={{ fontFamily: "poppinsMedium" }}
-            >
-              Complete Payment
-            </Text>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Payment</Text>
             <TouchableOpacity
-              className="bg-white rounded-[4px] py-2 px-4"
-              onPress={() => {
-                setPaystackModalVisible(false);
-                handlePaystackVerificationAndSelection(
-                  paymentReference,
-                  selectedVendor
-                );
-              }}
+              onPress={() => setPaystackModalVisible(false)}
+              style={{ padding: 8 }}
             >
-              <Text className="text-[10px] text-primary">Verify Payment</Text>
+              <Ionicons name="close" size={24} color="#222" />
             </TouchableOpacity>
           </View>
           {paystackPaymentUrl ? (
-            <WebView
-              source={{ uri: paystackPaymentUrl }}
-              onNavigationStateChange={(navState) => {
-                // Detect Paystack close or success URL
-                if (
-                  navState.url.includes("paystack.com/close") ||
-                  navState.url.includes("payment/success")
-                ) {
-                  // Try to extract reference from URL if possible
-                  const refMatch = navState.url.match(/[?&]reference=([^&#]+)/);
-                  const reference = refMatch ? refMatch[1] : paymentReference;
-                  setPaystackModalVisible(false);
-                  setPaystackPaymentUrl("");
-                  if (reference) {
+            <>
+              <WebView
+                source={{ uri: paystackPaymentUrl }}
+                onNavigationStateChange={(navState) => {
+                  // Detect Paystack close or success URL
+                  if (
+                    navState.url.includes("paystack.com/close") ||
+                    navState.url.includes("payment/success")
+                  ) {
+                    // Try to extract reference from URL if possible
+                    const refMatch = navState.url.match(
+                      /[?&]reference=([^&#]+)/
+                    );
+                    const reference = refMatch ? refMatch[1] : paymentReference;
+                    setPaystackModalVisible(false);
+                    setPaystackPaymentUrl("");
+                    if (reference) {
+                      handlePaystackVerificationAndSelection(
+                        reference,
+                        selectedVendor
+                      );
+                    } else {
+                      Alert.alert(
+                        "Payment",
+                        "Payment completed, but reference not found."
+                      );
+                    }
+                  }
+                }}
+                startInLoadingState
+                style={{ flex: 1 }}
+              />
+              <View style={styles.verifyButtonContainer}>
+                <Text className="text-center font-medium text-primary pb-2">
+                  Click "Verify payment" after payment to verify
+                </Text>
+                <AuthButton
+                  onPress={() => {
+                    setPaystackModalVisible(false);
                     handlePaystackVerificationAndSelection(
-                      reference,
+                      paymentReference,
                       selectedVendor
                     );
-                  } else {
-                    Alert.alert(
-                      "Payment",
-                      "Payment completed, but reference not found."
-                    );
-                  }
-                }
-              }}
-              startInLoadingState
-              style={{ flex: 1 }}
-            />
+                  }}
+                  title="Verify Payment"
+                />
+              </View>
+            </>
           ) : null}
         </View>
       </Modal>
@@ -542,3 +539,36 @@ export default function AcceptedOfferDetailScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: "#fff",
+    paddingTop: 20,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  headerTitle: {
+    color: "#222",
+    fontSize: 14,
+    fontFamily: "poppinsMedium",
+    flex: 1,
+    textAlign: "center",
+  },
+  verifyButtonContainer: {
+    backgroundColor: "#fff",
+    paddingTop: 16,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E5E5",
+  },
+});

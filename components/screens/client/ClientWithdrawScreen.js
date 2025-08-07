@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import OutlineTextInput from "../../reusuableComponents/inputFields/OutlineTextInput";
-import Dropdown from "../../reusuableComponents/inputFields/Dropdown";
+import SearchableDropdown from "../../reusuableComponents/inputFields/SearchableDropdown";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -120,7 +120,7 @@ export default function ClientWithdrawScreen({ navigation }) {
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text
-          className="flex-1 text-center text-[18px]"
+          className="flex-1 text-center text-[14px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Withdraw
@@ -180,7 +180,7 @@ export default function ClientWithdrawScreen({ navigation }) {
               />
 
               {/* Bank Name */}
-              <Dropdown
+              <SearchableDropdown
                 label="Select Bank"
                 value={values.bankCode}
                 options={bankOptions}

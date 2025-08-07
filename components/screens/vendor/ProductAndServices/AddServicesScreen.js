@@ -174,6 +174,7 @@ export default function AddServicesScreen({ navigation }) {
                   <Dropdown
                     value={values.serviceName}
                     label="Service"
+                    placeholder="Service"
                     onValueChange={(val) => setFieldValue("serviceName", val)}
                     error={errors.serviceName}
                     touched={touched.serviceName}

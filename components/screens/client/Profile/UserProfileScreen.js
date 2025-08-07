@@ -17,14 +17,17 @@ const UserProfileScreen = ({ navigation }) => {
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       {/* Header Section */}
-      <View className="bg-primary rounded-b-[40px] items-center pt-[60px] pb-8 relative">
+      <View className="bg-primary rounded-b-[40px] items-center pt-[75px] pb-8 relative">
         {/* Back Button */}
-        <TouchableOpacity className="absolute left-4 top-8">
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="absolute left-4 top-[40px]"
+        >
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         {/* Edit Icon */}
         <TouchableOpacity
-          className="absolute right-4 top-8"
+          className="absolute right-4 top-[40px]"
           onPress={() => navigation.navigate("EditProfileScreen")}
         >
           <Feather name="edit" size={24} color="#fff" />

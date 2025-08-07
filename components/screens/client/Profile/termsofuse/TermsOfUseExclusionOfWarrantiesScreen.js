@@ -16,10 +16,15 @@ export default function TermsOfUseExclusionOfWarrantiesScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={28} color="#222" />
+          <Ionicons name="chevron-back" size={24} color="#201E1F" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Terms of Use</Text>
-        <View style={{ width: 22 }} />
+        <Text
+          style={{ fontFamily: "latoBold" }}
+          className="text-[14px] text-faintDark"
+        >
+          Terms of Use
+        </Text>
+        <View style={{ width: 26 }} />
       </View>
       <ScrollView className="flex-1 px-4 " showsVerticalScrollIndicator={false}>
         <Text className="text-[15px] mt-2" style={{ fontFamily: "latoBold" }}>

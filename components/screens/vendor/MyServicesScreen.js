@@ -133,7 +133,7 @@ export default function MyServicesScreen({ navigation }) {
         <View>
           <Text
             className="text-center"
-            style={{ fontSize: 18, fontFamily: "latoBold" }}
+            style={{ fontSize: 14, fontFamily: "latoBold" }}
           >
             My Services
           </Text>

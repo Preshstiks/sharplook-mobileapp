@@ -223,7 +223,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text
-          className="flex-1 text-center text-[18px]"
+          className="flex-1 text-center text-[14px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Analytics and Insight

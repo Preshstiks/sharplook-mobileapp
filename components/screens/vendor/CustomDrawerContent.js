@@ -62,7 +62,7 @@ export default function CustomDrawerContent(props) {
         {/* Analytics and Insight */}
         <TouchableOpacity
           className="flex-row items-center px-6 py-4"
-          onPress={() => props.navigation.navigate("AnalyticsAndInsight")}
+          onPress={() => props.navigation.navigate("Analytics & Insights")}
         >
           <Ionicons name="analytics-outline" size={22} color="#ED2584" />
           <Text

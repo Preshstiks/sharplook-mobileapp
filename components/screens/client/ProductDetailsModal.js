@@ -68,6 +68,22 @@ export default function ProductDetailsModal({
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View>
+            {/* Close Button */}
+            <View className="absolute top-5 right-5 z-10">
+              <TouchableOpacity
+                onPress={onClose}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#F5F5F5",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Ionicons name="close" size={20} color="#EB278D" />
+              </TouchableOpacity>
+            </View>
             <Image
               source={
                 product.picture

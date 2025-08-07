@@ -83,12 +83,17 @@ export default function WalletScreen() {
     <View className="flex-1 bg-white">
       {/* Header */}
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate("ClientApp")}>
-          <Ionicons name="chevron-back" size={28} color="#222" />
+      <View className="pt-[60px] pb-4 px-4 flex-row items-center shadow-sm mb-5 justify-between bg-white">
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color="#201E1F" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>SharpPay</Text>
-        <View style={{ width: 28 }} />
+        <Text
+          style={{ fontFamily: "latoBold" }}
+          className="text-[16px] text-faintDark"
+        >
+          SharpPay
+        </Text>
+        <View style={{ width: 26 }} />
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Balance Card */}
@@ -244,29 +249,6 @@ export default function WalletScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    backgroundColor: "#fff",
-    paddingTop: 50,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-    marginBottom: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  headerTitle: {
-    color: "#222",
-    fontSize: 16,
-    fontFamily: "poppinsMedium",
-    flex: 1,
-    textAlign: "center",
-    marginLeft: -28,
-  },
   // Skeleton styles
   skeletonAvatar: {
     width: 40,

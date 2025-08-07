@@ -13,12 +13,17 @@ export default function NotificationDetailScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
       {/* Header */}
-      <View style={styles.header}>
+      <View className="pt-[40px] pb-4 px-4 flex-row items-center shadow-sm mb-5 justify-between bg-white">
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={28} color="#222" />
+          <Ionicons name="chevron-back" size={24} color="#201E1F" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Notification Details</Text>
-        <View style={{ width: 28 }} />
+        <Text
+          style={{ fontFamily: "latoBold" }}
+          className="text-[14px] text-faintDark"
+        >
+          Notification Details
+        </Text>
+        <View style={{ width: 26 }} />
       </View>
       <View style={styles.body}>
         {notification.message.includes("booking") && (

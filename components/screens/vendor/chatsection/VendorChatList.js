@@ -171,13 +171,26 @@ export default function VendorChatListScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8FB]">
-      <View className="bg-primary pb-6 pt-[50px] items-center">
-        <Text
-          className="text-white text-xl font-bold"
-          style={{ fontFamily: "poppinsRegular" }}
+      <View className="bg-primary pb-6 pt-[60px] flex-row items-center justify-between px-4">
+        {/* Back Button */}
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="pr-4"
+          style={{ minWidth: 40, alignItems: "flex-start" }}
         >
-          My Chats
-        </Text>
+          <MaterialIcons name="chevron-left" size={32} color="#fff" />
+        </TouchableOpacity>
+        {/* Title */}
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <Text
+            className="text-white text-[14px]"
+            style={{ fontFamily: "poppinsMedium" }}
+          >
+            My Chats
+          </Text>
+        </View>
+        {/* Right Spacer */}
+        <View style={{ minWidth: 40 }} />
       </View>
       <View className="px-4 mt-4">
         <View className="flex-row items-center bg-white border border-[#F9BCDC] rounded-xl px-4 pt-3 pb-2">

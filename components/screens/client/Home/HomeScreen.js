@@ -39,6 +39,7 @@ import { useStatusBar } from "../../../../context/StatusBarContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useChatNavigation } from "../../../../hooks/useChatNavigation";
 import { useCategories } from "../../../../hooks/useCategories";
+import { useFilter } from "../../../../context/FilterContext";
 // Categories will be populated dynamically from API
 
 const recommendedProducts = [
@@ -123,6 +124,7 @@ export default function HomeScreen() {
   const searchInputRef = React.useRef(null); // <-- add ref
   const { navigateToChatList } = useChatNavigation();
   const { categories, loading: categoriesLoading } = useCategories();
+  const { filterVendors, filters } = useFilter();
   const toggleSearchBar = () => {
     setIsSearchBarActive(!isSearchBarActive);
     setSearchInput(""); // Reset search input when toggling
@@ -260,10 +262,52 @@ export default function HomeScreen() {
             />
           </View>
 
-          {/* <TouchableOpacity onPress={() => navigation.navigate("Filter")}>
-            <FilterBtn width={35} height={35} color="#fff" />
-          </TouchableOpacity> */}
+          <TouchableOpacity onPress={() => navigation.navigate("Filter")}>
+            <View className="relative">
+              <FilterBtn width={35} height={35} color="#fff" />
+              {(filters.rating || filters.serviceType) && (
+                <View className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500" />
+              )}
+            </View>
+          </TouchableOpacity>
         </View>
+        {/* Filter Summary */}
+        {(filters.rating || filters.serviceType) && (
+          <View className="px-4 mt-2">
+            <View className="bg-[#FCE4F0] rounded-lg p-3">
+              <Text
+                style={{ fontFamily: "poppinsMedium" }}
+                className="text-[12px] text-primary mb-1"
+              >
+                Active Filters:
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {filters.rating && (
+                  <View className="bg-primary rounded-full px-3 py-1">
+                    <Text
+                      style={{ fontFamily: "poppinsRegular" }}
+                      className="text-[10px] text-white"
+                    >
+                      {filters.rating}+ Stars
+                    </Text>
+                  </View>
+                )}
+                {filters.serviceType && (
+                  <View className="bg-primary rounded-full px-3 py-1">
+                    <Text
+                      style={{ fontFamily: "poppinsRegular" }}
+                      className="text-[10px] text-white"
+                    >
+                      {filters.serviceType === "HOME_SERVICE"
+                        ? "Home Service"
+                        : "In-shop"}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          </View>
+        )}
         {/* Categories or Search Results */}
         {isSearchBarActive ? (
           <ScrollView className="mt-8 px-4 space-y-4" style={{ zIndex: 20 }}>
@@ -356,36 +400,72 @@ export default function HomeScreen() {
                 ? // Show skeleton loading for categories
                   Array.from({ length: 5 }).map((_, idx) => (
                     <View key={idx} className="items-center flex-1">
-                      <View className="rounded-full h-[54px] w-[54px] items-center justify-center mb-1 border border-gray-200 bg-gray-100" />
+                      <View className="rounded-full h-[54px] w-[54px] items-center justify-center mb-1 border border-lightgray" />
                       <View className="w-8 h-2 bg-gray-200 rounded mt-1" />
                     </View>
                   ))
-                : categories.slice(0, 5).map((cat, idx) => (
-                    <TouchableOpacity
-                      key={cat.id}
-                      className="items-center flex-1"
-                      onPress={() => {
-                        // Filter services by category
-                        const filteredServices = allServices.filter(
-                          (service) => service.serviceName === cat.name
-                        );
-                        navigation.navigate("Categories", {
-                          category: cat.name,
-                          services: filteredServices,
-                        });
-                      }}
-                    >
-                      <View className="rounded-full h-[54px] w-[54px] items-center justify-center mb-1 border border-primary">
-                        <Ionicons name="sparkles" size={24} color="#EB278D" />
-                      </View>
-                      <Text
-                        style={{ fontFamily: "latoRegular" }}
-                        className="text-[10px] text-faintDark text-center mt-0.5"
+                : (() => {
+                    // Show first 4 categories
+                    const firstFourCategories = categories.slice(0, 4);
+
+                    return [
+                      ...firstFourCategories.map((cat, idx) => (
+                        <TouchableOpacity
+                          key={cat.id}
+                          className="items-center flex-1"
+                          onPress={() => {
+                            // Filter services by category
+                            const filteredServices = allServices.filter(
+                              (service) => service.serviceName === cat.name
+                            );
+                            navigation.navigate("Categories", {
+                              category: cat.name,
+                              services: filteredServices,
+                            });
+                          }}
+                        >
+                          <View className="rounded-full h-[54px] w-[54px] items-center justify-center mb-1 border border-primary">
+                            <Ionicons
+                              name="sparkles"
+                              size={24}
+                              color="#EB278D"
+                            />
+                          </View>
+                          <Text
+                            style={{ fontFamily: "latoRegular" }}
+                            className="text-[10px] text-faintDark text-center mt-0.5"
+                          >
+                            {cat.name}
+                          </Text>
+                        </TouchableOpacity>
+                      )),
+                      // Add "Others" as the 5th item
+                      <TouchableOpacity
+                        key="others"
+                        className="items-center flex-1"
+                        onPress={() => {
+                          // Navigate to OtherScreen with all services
+                          navigation.navigate("OtherScreen", {
+                            allServices: allServices,
+                          });
+                        }}
                       >
-                        {cat.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                        <View className="rounded-full h-[54px] w-[54px] items-center justify-center mb-1 border border-primary">
+                          <Ionicons
+                            name="ellipsis-horizontal"
+                            size={24}
+                            color="#EB278D"
+                          />
+                        </View>
+                        <Text
+                          style={{ fontFamily: "latoRegular" }}
+                          className="text-[10px] text-faintDark text-center mt-0.5"
+                        >
+                          Others
+                        </Text>
+                      </TouchableOpacity>,
+                    ];
+                  })()}
             </View>
             {/* Top Vendors */}
             <View className="flex-row items-center justify-between mt-8 mb-4 px-5">
@@ -406,86 +486,99 @@ export default function HomeScreen() {
                   <SkeletonBox key={idx} width={125} height={160} />
                 ))}
               </ScrollView>
-            ) : topVendors.length === 0 ? (
-              <View className="items-center justify-center py-8">
-                <EmptySVG width={120} height={120} />
-                <Text
-                  className="text-[14px] text-gray-400 mt-2"
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  No Top Vendors
-                </Text>
-              </View>
             ) : (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{ paddingLeft: 20 }}
-              >
-                {topVendors.map((vendor, idx) => (
-                  <Pressable
-                    onPress={() =>
-                      navigation.navigate("VendorProfileScreen", {
-                        vendorData: vendor, // Only pass vendorData
-                      })
-                    }
-                    key={vendor.id || idx}
-                    className="w-[125px] bg-white rounded-2xl mr-3 py-4 shadow-sm overflow-hidden"
-                  >
-                    <Image
-                      source={
-                        vendor.avatar ? { uri: vendor.avatar } : DefaultAvatar
-                      }
-                      style={{
-                        width: "100%",
-                        height: 100,
-                        marginBottom: 8,
-                        marginTop: -16,
-                      }}
-                      resizeMode="cover"
-                    />
-                    <View className="px-[10px]">
+              (() => {
+                const filteredVendors = filterVendors(topVendors);
+                if (filteredVendors.length === 0) {
+                  return (
+                    <View className="items-center justify-center py-8">
+                      <EmptySVG width={120} height={120} />
                       <Text
+                        className="text-[14px] text-gray-400 mt-2"
                         style={{ fontFamily: "poppinsRegular" }}
-                        className="text-[12px] text-fadedDark mt-0.5"
                       >
-                        {vendor?.vendorOnboarding?.businessName}
+                        {filters.rating || filters.serviceType
+                          ? "No vendors match your filters"
+                          : "No Top Vendors"}
                       </Text>
-                      <View className="bg-primary rounded-[4px] my-1 px-3 self-start">
-                        <Text
-                          style={{ fontFamily: "poppinsRegular" }}
-                          className="text-[8px] mt-1 text-white"
-                        >
-                          {vendor?.vendorOnboarding?.serviceType ===
-                          "HOME_SERVICE"
-                            ? "Home Service"
-                            : "In-shop"}
-                        </Text>
-                      </View>
-                      <View className="flex-row items-center mt-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Ionicons
-                            key={i}
-                            name={
-                              i < Math.round(vendor?.rating)
-                                ? "star"
-                                : "star-outline"
-                            }
-                            size={16}
-                            color="#FFC107"
-                          />
-                        ))}
-                        <Text
-                          style={{ fontFamily: "poppinsRegular" }}
-                          className="text-[12px] text-fadedDark mt-1 ml-1"
-                        >
-                          {vendor?.rating?.toFixed(1)}
-                        </Text>
-                      </View>
                     </View>
-                  </Pressable>
-                ))}
-              </ScrollView>
+                  );
+                }
+
+                return (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={{ paddingLeft: 20 }}
+                  >
+                    {filteredVendors.map((vendor, idx) => (
+                      <Pressable
+                        onPress={() =>
+                          navigation.navigate("VendorProfileScreen", {
+                            vendorData: vendor, // Only pass vendorData
+                          })
+                        }
+                        key={vendor.id || idx}
+                        className="w-[125px] bg-white rounded-2xl mr-3 py-4 shadow-sm overflow-hidden"
+                      >
+                        <Image
+                          source={
+                            vendor.avatar
+                              ? { uri: vendor.avatar }
+                              : DefaultAvatar
+                          }
+                          style={{
+                            width: "100%",
+                            height: 100,
+                            marginBottom: 8,
+                            marginTop: -16,
+                          }}
+                          resizeMode="cover"
+                        />
+                        <View className="px-[10px]">
+                          <Text
+                            style={{ fontFamily: "poppinsRegular" }}
+                            className="text-[12px] text-fadedDark mt-0.5"
+                          >
+                            {vendor?.vendorOnboarding?.businessName}
+                          </Text>
+                          <View className="bg-primary rounded-[4px] my-1 px-3 self-start">
+                            <Text
+                              style={{ fontFamily: "poppinsRegular" }}
+                              className="text-[8px] mt-1 text-white"
+                            >
+                              {vendor?.vendorOnboarding?.serviceType ===
+                              "HOME_SERVICE"
+                                ? "Home Service"
+                                : "In-shop"}
+                            </Text>
+                          </View>
+                          <View className="flex-row items-center mt-0.5">
+                            {[...Array(5)].map((_, i) => (
+                              <Ionicons
+                                key={i}
+                                name={
+                                  i < Math.round(vendor?.rating)
+                                    ? "star"
+                                    : "star-outline"
+                                }
+                                size={16}
+                                color="#FFC107"
+                              />
+                            ))}
+                            <Text
+                              style={{ fontFamily: "poppinsRegular" }}
+                              className="text-[12px] text-fadedDark mt-1 ml-1"
+                            >
+                              {vendor?.rating?.toFixed(1)}
+                            </Text>
+                          </View>
+                        </View>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                );
+              })()
             )}
 
             {/* Recommended Products */}

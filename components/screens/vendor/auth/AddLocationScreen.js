@@ -279,6 +279,7 @@ export default function AddLocationScreen({ navigation }) {
       <View style={styles.bottomSheet}>
         <ScrollView>
           <TouchableOpacity
+            className="py-5"
             style={[
               styles.locationOption,
               selectedLocation && styles.selectedLocationOption,

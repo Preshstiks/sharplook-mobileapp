@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  Keyboard,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 export default function OTPVerificationScreen({ navigation, route }) {
@@ -36,15 +37,36 @@ export default function OTPVerificationScreen({ navigation, route }) {
         const nextInput = `otpInput${idx + 1}`;
         refs[nextInput]?.focus();
       }
+
+      // Auto-verify when all 4 digits are entered
+      if (value && idx === 3) {
+        const fullOtp = newOtp.join("");
+        if (fullOtp.length === 4) {
+          Keyboard.dismiss();
+          handleVerify(fullOtp);
+        }
+      }
     }
   };
 
   // Refs for OTP inputs
   const refs = {};
 
-  const handleVerify = () => {
-    // On successful OTP verification, navigate to the Vendor dashboard
-    navigation.replace("Vendor", { screen: "Dashboard" });
+  const handleVerify = (otpCode) => {
+    const code = otpCode || otp.join("");
+
+    // TODO: Add your OTP verification logic here
+    // For now, we'll simulate a verification
+    if (code === "1234") {
+      // Replace with actual verification logic
+      // On successful OTP verification, navigate to the Vendor dashboard
+      navigation.replace("Vendor", { screen: "Dashboard" });
+    } else {
+      // Clear OTP input on error
+      setOtp(["", "", "", ""]);
+      refs.otpInput0?.focus();
+      alert("Invalid OTP. Please try again.");
+    }
   };
 
   // Mask phone number
@@ -138,7 +160,7 @@ export default function OTPVerificationScreen({ navigation, route }) {
       <View className="px-6 pb-8">
         <TouchableOpacity
           className="bg-[#eb278d] rounded-xl py-4 items-center"
-          onPress={handleVerify}
+          onPress={() => handleVerify()}
         >
           <Text className="text-white text-[18px] font-semibold">Verify</Text>
         </TouchableOpacity>

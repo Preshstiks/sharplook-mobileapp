@@ -186,12 +186,12 @@ export default function VendorProfileScreen({ navigation, route }) {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-[16px] text-white"
+          className="text-[14px] text-white"
         >
           Vendor's Profile
         </Text>
@@ -517,7 +517,7 @@ export default function VendorProfileScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#EB278D",
-    paddingTop: 50,
+    paddingTop: 60,
     paddingBottom: 16,
     flexDirection: "row",
     alignItems: "center",

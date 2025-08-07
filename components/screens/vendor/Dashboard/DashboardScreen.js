@@ -284,6 +284,7 @@ export default function DashboardScreen({ navigation }) {
       const fetchData = async () => {
         setLoading(true);
         const token = await AsyncStorage.getItem("token");
+        console.log(token);
         try {
           const [productsRes, bookingsRes, walletRes] = await Promise.all([
             HttpClient.get("/products/getVendorProducts"),

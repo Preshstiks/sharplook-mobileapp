@@ -21,27 +21,32 @@ const ProfileScreen = () => {
     <SafeAreaView className="flex-1 bg-secondary">
       {/* Header with avatar, name, email */}
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
-      <View className="bg-primary rounded-b-[40px] items-center pt-[60px] pb-8">
-        <Image
-          source={
-            user?.avatar
-              ? { uri: user.avatar }
-              : require("../../../../assets/icon/avatar.png")
-          }
-          className="w-24 h-24 rounded-full mb-4"
-        />
-        <Text
-          className="text-white text-[16px]"
-          style={{ fontFamily: "poppinsMedium" }}
-        >
-          {`${user?.lastName} ${user?.firstName}`}
-        </Text>
-        <Text
-          className="text-white text-[12px] mt-1"
-          style={{ fontFamily: "poppinsLight" }}
-        >
-          {user?.email}
-        </Text>
+      <View className="bg-primary rounded-b-[40px] pt-[30px] pb-8 px-4">
+        <TouchableOpacity className="pb-6" onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <View className="items-center ">
+          <Image
+            source={
+              user?.avatar
+                ? { uri: user.avatar }
+                : require("../../../../assets/icon/avatar.png")
+            }
+            className="w-24 h-24 rounded-full mb-4"
+          />
+          <Text
+            className="text-white text-[16px]"
+            style={{ fontFamily: "poppinsMedium" }}
+          >
+            {`${user?.lastName} ${user?.firstName}`}
+          </Text>
+          <Text
+            className="text-white text-[12px] mt-1"
+            style={{ fontFamily: "poppinsLight" }}
+          >
+            {user?.email}
+          </Text>
+        </View>
       </View>
       {/* Options List */}
       <View className="mt-8 px-4 space-y-4">

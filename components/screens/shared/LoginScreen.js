@@ -53,6 +53,13 @@ export default function LoginScreen({ navigation }) {
           });
           showToast.info(message);
           navigation.navigate("ClientAddLocation");
+        } else if (
+          message === "Email not verified. An OTP has been sent to your email."
+        ) {
+          showToast.info(message);
+          navigation.navigate("EmailVerificationSignup", {
+            email: values.email,
+          });
         } else {
           showToast.error(
             message || error.message || "An unknown error occurred"

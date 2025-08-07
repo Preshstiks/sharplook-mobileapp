@@ -6,6 +6,7 @@ import {
   Pressable,
   ScrollView,
   StatusBar,
+  TouchableOpacity,
 } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Empty from "../../../../assets/img/empty.svg";
@@ -15,6 +16,7 @@ import { HexConverter } from "../../../reusuableComponents/HexConverter";
 import { DateConverter } from "../../../reusuableComponents/DateConverter";
 import { DayConverter } from "../../../reusuableComponents/DayConverter";
 import { formatAmount } from "../../../formatAmount";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function BookingsScreen() {
   const navigation = useNavigation();
@@ -52,7 +54,9 @@ export default function BookingsScreen() {
       >
         {tab === "PENDING"
           ? "You have no pending bookings"
-          : "You have no completed bookings"}
+          : tab === "ACCEPTED"
+            ? "You have no accepted bookings"
+            : "You have no completed bookings"}
       </Text>
     </View>
   );
@@ -129,13 +133,17 @@ export default function BookingsScreen() {
   return (
     <View className="flex-1 bg-secondary">
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
-      <View className="bg-primary pt-[60px] pb-4 px-4">
+      <View className="bg-primary pt-[60px] pb-4 px-4 flex-row items-center justify-between">
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color="#fff" />
+        </TouchableOpacity>
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-white text-center text-[16px]"
+          className="text-white text-center text-[14px]"
         >
           My Bookings
         </Text>
+        <View style={{ width: 26 }} />
       </View>
       <View className="px-4 mt-3">
         <AuthButton
@@ -153,6 +161,17 @@ export default function BookingsScreen() {
             className={`text-[12px] ${tab === "PENDING" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             Pending
+          </Text>
+        </Pressable>
+        <Pressable
+          className={`px-6 py-3 rounded-[8px] ${tab === "ACCEPTED" ? "bg-primary" : "bg-white border border-[#A5A5A5]"}`}
+          onPress={() => setTab("ACCEPTED")}
+        >
+          <Text
+            style={{ fontFamily: "latoBold" }}
+            className={`text-[12px] ${tab === "ACCEPTED" ? "text-white" : "text-[#A5A5A5]"}`}
+          >
+            Accepted
           </Text>
         </Pressable>
         <Pressable

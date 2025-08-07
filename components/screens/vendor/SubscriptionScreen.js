@@ -39,9 +39,15 @@ export default function SubscriptionScreen({ navigation }) {
   const [subscription, setSubscription] = useState(null);
   const getSub = async () => {
     setSubLoading(true);
-    const res = await HttpClient.get("/vendor/getMySub");
-    setSubscription(res.data);
-    setSubLoading(false);
+    try {
+      const res = await HttpClient.get("/vendor/getMySub");
+      setSubscription(res.data);
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+      setSubscription(null);
+    } finally {
+      setSubLoading(false);
+    }
   };
   useEffect(() => {
     getSub();
@@ -336,43 +342,57 @@ export default function SubscriptionScreen({ navigation }) {
       >
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
+            <Text style={styles.headerTitle}>Payment</Text>
             <TouchableOpacity
-              className="bg-primary rounded-[4px] py-2 px-4"
-              onPress={() => {
-                setPaystackModalVisible(false);
-                handlePaystackVerificationAndSubscription(paymentReference);
-              }}
+              onPress={() => setPaystackModalVisible(false)}
+              style={{ padding: 8 }}
             >
-              <Text className="text-[10px] text-white">Verify Payment</Text>
+              <Ionicons name="close" size={24} color="#222" />
             </TouchableOpacity>
           </View>
           {paystackPaymentUrl ? (
-            <WebView
-              source={{ uri: paystackPaymentUrl }}
-              onNavigationStateChange={(navState) => {
-                // Detect Paystack close or success URL
-                if (
-                  navState.url.includes("paystack.com/close") ||
-                  navState.url.includes("payment/success")
-                ) {
-                  // Try to extract reference from URL if possible
-                  const refMatch = navState.url.match(/[?&]reference=([^&#]+)/);
-                  const reference = refMatch ? refMatch[1] : paymentReference;
-                  setPaystackModalVisible(false);
-                  setPaystackPaymentUrl("");
-                  if (reference) {
-                    handlePaystackVerificationAndSubscription(reference);
-                  } else {
-                    Alert.alert(
-                      "Payment",
-                      "Payment completed, but reference not found."
+            <>
+              <WebView
+                source={{ uri: paystackPaymentUrl }}
+                onNavigationStateChange={(navState) => {
+                  // Detect Paystack close or success URL
+                  if (
+                    navState.url.includes("paystack.com/close") ||
+                    navState.url.includes("payment/success")
+                  ) {
+                    // Try to extract reference from URL if possible
+                    const refMatch = navState.url.match(
+                      /[?&]reference=([^&#]+)/
                     );
+                    const reference = refMatch ? refMatch[1] : paymentReference;
+                    setPaystackModalVisible(false);
+                    setPaystackPaymentUrl("");
+                    if (reference) {
+                      handlePaystackVerificationAndSubscription(reference);
+                    } else {
+                      Alert.alert(
+                        "Payment",
+                        "Payment completed, but reference not found."
+                      );
+                    }
                   }
-                }
-              }}
-              startInLoadingState
-              style={{ flex: 1 }}
-            />
+                }}
+                startInLoadingState
+                style={{ flex: 1 }}
+              />
+              <View style={styles.verifyButtonContainer}>
+                <Text className="text-center font-medium text-primary pb-2">
+                  Click "Verify payment" after payment to verify
+                </Text>
+                <AuthButton
+                  onPress={() => {
+                    setPaystackModalVisible(false);
+                    handlePaystackVerificationAndSubscription(paymentReference);
+                  }}
+                  title="Verify Payment"
+                />
+              </View>
+            </>
           ) : null}
         </View>
       </Modal>
@@ -400,11 +420,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 2,
+  },
+  headerTitle: {
+    color: "#222",
+    fontSize: 14,
+    fontFamily: "poppinsMedium",
+    flex: 1,
+    textAlign: "center",
+  },
+  verifyButtonContainer: {
+    backgroundColor: "#fff",
+    paddingTop: 16,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E5E5",
   },
 });

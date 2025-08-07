@@ -8,6 +8,7 @@ import {
   Pressable,
   TextInput,
   Dimensions,
+  StatusBar,
 } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -15,14 +16,25 @@ import Slider from "@react-native-community/slider";
 import { WebView } from "react-native-webview";
 import * as Location from "expo-location";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
+import { useFilter } from "../../../context/FilterContext";
 
 const { width, height } = Dimensions.get("window");
 
 export default function FilterScreen({ navigation }) {
-  const [price, setPrice] = useState(200000);
-  const [selectedRating, setSelectedRating] = useState(5);
+  const { filters, applyFilters, resetFilters } = useFilter();
+  const [price, setPrice] = useState(filters.price || 200000);
+  const [selectedRating, setSelectedRating] = useState(filters.rating || null);
+  const [selectedServiceType, setSelectedServiceType] = useState(
+    filters.serviceType || null
+  );
   const [selectedLocation, setSelectedLocation] = useState(null);
   const webviewRef = useRef(null);
+
+  const serviceTypes = [
+    { label: "All Services", value: null },
+    { label: "Home Service", value: "HOME_SERVICE" },
+    { label: "In-shop", value: "IN_SHOP" },
+  ];
 
   // Function to get current location and send to WebView
   const handleUseCurrentLocation = async () => {
@@ -41,13 +53,31 @@ export default function FilterScreen({ navigation }) {
     setSelectedLocation(location);
   };
 
+  const handleApplyFilters = () => {
+    const newFilters = {
+      rating: selectedRating,
+      serviceType: selectedServiceType,
+      // price: price, // Commented out price filter
+    };
+    applyFilters(newFilters);
+    navigation.goBack();
+  };
+
+  const handleResetFilters = () => {
+    setPrice(200000);
+    setSelectedRating(null);
+    setSelectedServiceType(null);
+    resetFilters();
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
       {/* Header */}
+      <StatusBar barStyle="light-content" backgroundColor="#EB278D" />
       <View
         style={{
           backgroundColor: "#EB278D",
-          paddingTop: 50,
+          paddingTop: 60,
           paddingBottom: 16,
           flexDirection: "row",
           alignItems: "center",
@@ -65,186 +95,17 @@ export default function FilterScreen({ navigation }) {
             Filter
           </Text>
         </View>
-        {/* Invisible spacer to balance the arrow */}
-        <View style={{ width: 28 }} />
-      </View>
-
-      {/* Search Bar */}
-      <View className="px-4 absolute top-[110px] z-50 left-1 right-1">
-        <View style={styles.searchBarBox}>
-          <Feather
-            name="search"
-            size={22}
-            color="#BDBDBD"
-            style={{ marginLeft: 12, marginRight: 8 }}
-          />
-          <TextInput
-            placeholder="Search..."
-            placeholderTextColor="#BDBDBD"
-            style={styles.searchBarInput}
-          />
-        </View>
-      </View>
-
-      {/* Map */}
-      <View style={styles.mapContainer}>
-        <WebView
-          ref={webviewRef}
-          originWhitelist={["*"]}
-          source={{
-            html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-            <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-            <style>
-              html, body, #map { height: 100%; margin: 0; padding: 0; }
-            </style>
-          </head>
-          <body>
-            <div id="map"></div>
-            <script>
-              var map = L.map('map').setView([6.5244, 3.3792], 13);
-              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-              }).addTo(map);
-              var marker = L.marker([6.5244, 3.3792]).addTo(map)
-                .bindPopup('You are here')
-                .openPopup();
-
-              function updateMap(data) {
-                if (data.latitude && data.longitude) {
-                  map.setView([data.latitude, data.longitude], 16);
-                  marker.setLatLng([data.latitude, data.longitude]);
-                  marker.bindPopup('You are here').openPopup();
-                }
-              }
-
-              // Android
-              document.addEventListener('message', function(event) {
-                try {
-                  var data = JSON.parse(event.data);
-                  updateMap(data);
-                } catch (e) {}
-              });
-
-              // iOS
-              window.addEventListener('message', function(event) {
-                try {
-                  var data = JSON.parse(event.data);
-                  updateMap(data);
-                } catch (e) {}
-              });
-            </script>
-          </body>
-        </html>
-      `,
-          }}
-          style={{ flex: 1 }}
-          javaScriptEnabled
-          domStorageEnabled
-        />
-      </View>
-
-      {/* Location Options */}
-      <View style={styles.locationOptionsContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <TouchableOpacity
-            style={[
-              styles.locationChip,
-              selectedLocation === "Current Location" &&
-                styles.locationChipActive,
-            ]}
-            onPress={handleUseCurrentLocation}
+        <TouchableOpacity onPress={handleResetFilters}>
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 14,
+              fontFamily: "poppinsRegular",
+            }}
           >
-            <MaterialIcons
-              name="my-location"
-              size={16}
-              color={
-                selectedLocation === "Current Location" ? "#fff" : "#EB278D"
-              }
-            />
-            <Text
-              style={[
-                styles.locationChipText,
-                selectedLocation === "Current Location" &&
-                  styles.locationChipTextActive,
-              ]}
-            >
-              Current Location
-            </Text>
-          </TouchableOpacity>
-
-          {/* <TouchableOpacity
-            style={[
-              styles.locationChip,
-              selectedLocation === "Sagamu" && styles.locationChipActive,
-            ]}
-            onPress={() => handleLocationSelect("Sagamu")}
-          >
-            <MaterialIcons
-              name="location-on"
-              size={16}
-              color={selectedLocation === "Sagamu" ? "#fff" : "#BDBDBD"}
-            />
-            <Text
-              style={[
-                styles.locationChipText,
-                selectedLocation === "Sagamu" && styles.locationChipTextActive,
-              ]}
-            >
-              Sagamu (24km)
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.locationChip,
-              selectedLocation === "Abeokuta" && styles.locationChipActive,
-            ]}
-            onPress={() => handleLocationSelect("Abeokuta")}
-          >
-            <MaterialIcons
-              name="location-on"
-              size={16}
-              color={selectedLocation === "Abeokuta" ? "#fff" : "#BDBDBD"}
-            />
-            <Text
-              style={[
-                styles.locationChipText,
-                selectedLocation === "Abeokuta" &&
-                  styles.locationChipTextActive,
-              ]}
-            >
-              Abeokuta (59km)
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.locationChip,
-              selectedLocation === "Lekki-Epe" && styles.locationChipActive,
-            ]}
-            onPress={() => handleLocationSelect("Lekki-Epe")}
-          >
-            <MaterialIcons
-              name="location-on"
-              size={16}
-              color={selectedLocation === "Lekki-Epe" ? "#fff" : "#BDBDBD"}
-            />
-            <Text
-              style={[
-                styles.locationChipText,
-                selectedLocation === "Lekki-Epe" &&
-                  styles.locationChipTextActive,
-              ]}
-            >
-              Lekki-Epe (24km)
-            </Text>
-          </TouchableOpacity> */}
-        </ScrollView>
+            Reset
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -255,8 +116,55 @@ export default function FilterScreen({ navigation }) {
           flexGrow: 1,
         }}
       >
-        {/* Price Range */}
+        {/* Service Type */}
         <Text style={{ fontSize: 16, fontFamily: "latoBold", marginBottom: 8 }}>
+          Service Type
+        </Text>
+        <View style={{ marginBottom: 20 }}>
+          {serviceTypes.map((serviceType) => (
+            <TouchableOpacity
+              key={serviceType.value}
+              onPress={() => setSelectedServiceType(serviceType.value)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingVertical: 12,
+                paddingHorizontal: 16,
+                backgroundColor:
+                  selectedServiceType === serviceType.value
+                    ? "#FCE4F0"
+                    : "transparent",
+                borderRadius: 8,
+                marginBottom: 8,
+                borderWidth: 1,
+                borderColor:
+                  selectedServiceType === serviceType.value
+                    ? "#EB278D"
+                    : "#E0E0E0",
+              }}
+            >
+              <Text
+                style={{
+                  color:
+                    selectedServiceType === serviceType.value
+                      ? "#EB278D"
+                      : "#333",
+                  fontFamily: "poppinsRegular",
+                  fontSize: 14,
+                }}
+              >
+                {serviceType.label}
+              </Text>
+              {selectedServiceType === serviceType.value && (
+                <Ionicons name="checkmark" size={20} color="#EB278D" />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Price Range */}
+        {/* <Text style={{ fontSize: 16, fontFamily: "latoBold", marginBottom: 8 }}>
           Price Range
         </Text>
         <View
@@ -298,7 +206,7 @@ export default function FilterScreen({ navigation }) {
           >
             ₦ 1M
           </Text>
-        </View>
+        </View> */}
 
         {/* Ratings */}
         <Text
@@ -307,7 +215,7 @@ export default function FilterScreen({ navigation }) {
         >
           Ratings
         </Text>
-        {[5, 4, 3, 2].map((rating) => (
+        {[5, 4, 3, 2, 1].map((rating) => (
           <View
             key={rating}
             style={{
@@ -339,7 +247,7 @@ export default function FilterScreen({ navigation }) {
         ))}
         <View style={{ flex: 1 }} className="pt-8" />
         {/* Apply Now Button */}
-        <AuthButton title="Apply Now" />
+        <AuthButton title="Apply Now" onPress={handleApplyFilters} />
       </ScrollView>
     </View>
   );

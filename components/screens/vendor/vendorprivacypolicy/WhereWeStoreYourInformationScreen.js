@@ -14,12 +14,17 @@ export default function WhereWeStoreYourInformationScreen() {
   return (
     <View className="flex-1 bg-white pb-[50px]">
       {/* Header */}
-      <View style={styles.header}>
+      <View className="pt-[60px] pb-3 px-4 bg-white shadow-sm flex-row items-center">
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={28} color="#222" />
+          <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Privacy Policy</Text>
-        <View style={{ width: 22 }} />
+        <Text
+          className="flex-1 text-center text-[14px]"
+          style={{ fontFamily: "poppinsMedium" }}
+        >
+          Privacy Policy
+        </Text>
+        <View style={{ width: 24 }} />
       </View>
       <ScrollView className="flex-1 px-4 " showsVerticalScrollIndicator={false}>
         <Text className="text-[15px] mt-2" style={{ fontFamily: "latoBold" }}>

@@ -52,7 +52,7 @@ export default function AddReviewScreen() {
       <View
         style={{
           backgroundColor: "#EB278D",
-          paddingTop: 50,
+          paddingTop: 60,
           paddingBottom: 16,
           flexDirection: "row",
           alignItems: "center",
@@ -60,12 +60,12 @@ export default function AddReviewScreen() {
           paddingHorizontal: 16,
         }}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-[16px] text-white"
+          className="text-[14px] text-white"
         >
           Add Review
         </Text>

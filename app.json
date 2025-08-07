@@ -2,9 +2,9 @@
   "expo": {
     "name": "sharplook",
     "slug": "sharplook",
-    "version": "1.0.0",
+    "version": "1.0.4",
     "orientation": "portrait",
-    "icon": "./assets/icon/sharplooklogo.png",
+    "icon": "./assets/icon/app-icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -15,16 +15,26 @@
     "scheme": "sharplook",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.techtrove.sharplook"
+      "bundleIdentifier": "com.techtrove.sharplook",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "This app uses the camera to allow users to upload profile and service photos.",
+        "NSFaceIDUsageDescription": "This app uses Face ID to provide secure biometric authentication for login.",
+        "NSMicrophoneUsageDescription": "This app uses the microphone to allow audio input for communication and video recording.",
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to provide nearby services and improve recommendations.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses your location in the background to keep features updated."
+      }
     },
     "android": {
       "edgeToEdgeEnabled": true,
-      "package": "Sharplook"
+      "versionCode": 18,
+      "package": "com.techtrove.sharplook",
+      "permissions": ["USE_BIOMETRIC", "USE_FINGERPRINT"]
     },
     "web": {
       "bundler": "metro"
     },
-    "plugins": ["expo-font"],
+    "plugins": ["expo-font", "expo-local-authentication"],
     "extra": {
       "eas": {
         "projectId": "5fefe00a-d2c0-4a4e-974a-85bafc3c0f16"

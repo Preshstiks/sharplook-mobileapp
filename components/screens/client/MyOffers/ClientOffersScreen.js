@@ -44,13 +44,15 @@ export default function ClientOffersScreen() {
       // Get all my offers and filter for accepted ones
       const response = await HttpClient.get("/offers/myOffers");
       const allOffers = response.data.offers || [];
+      console.log({ allOffers });
       const acceptedOffersData = allOffers.filter((offer) => {
         // Check if offer has vendor offers and any of them has isAccepted: false
         return (
           offer.vendorOffers &&
+          offer.status === "PENDING" &&
           offer.vendorOffers.length > 0 &&
           offer.vendorOffers.some(
-            (vendorOffer) => vendorOffer.isAccepted === false
+            (vendorOffer) => vendorOffer.isAccepted === true
           )
         );
       });
@@ -119,7 +121,7 @@ export default function ClientOffersScreen() {
         return status;
     }
   };
-
+  console.log({ acceptedOffers });
   const renderOfferCard = (offer) => (
     <TouchableOpacity
       key={offer.id}

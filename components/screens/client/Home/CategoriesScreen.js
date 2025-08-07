@@ -217,8 +217,8 @@ export default function CategoriesScreen() {
     <View className="flex-1 bg-white">
       {/* Header */}
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
-      <View className="bg-primary pt-12 pb-4 px-4 flex-row items-center justify-between">
-        <TouchableOpacity>
+      <View className="bg-primary pt-[60px] pb-4 px-4 flex-row items-center justify-between">
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text

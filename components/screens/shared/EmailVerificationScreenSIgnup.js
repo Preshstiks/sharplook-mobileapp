@@ -6,6 +6,7 @@ import {
   Pressable,
   TextInput,
   TouchableOpacity,
+  Keyboard,
 } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
@@ -67,6 +68,15 @@ export default function EmailVerificationScreenSignup({ navigation, route }) {
 
       if (text && idx < 3) inputs.current[idx + 1].focus();
       if (!text && idx > 0) inputs.current[idx - 1].focus();
+
+      // Auto-verify when all 4 digits are entered
+      if (text && idx === 3) {
+        const fullCode = newCode.join("");
+        if (fullCode.length === 4) {
+          Keyboard.dismiss();
+          handleVerify({ otp: fullCode });
+        }
+      }
     }
   };
 
@@ -80,6 +90,10 @@ export default function EmailVerificationScreenSignup({ navigation, route }) {
       showToast.success(res.data.message);
       navigation.replace("Login");
     } catch (error) {
+      // Clear OTP input on error
+      setCode(["", "", "", ""]);
+      inputs.current[0]?.focus();
+
       if (error.response && error.response.data) {
         const errorMessage =
           error.response.data.message || "An unknown error occurred";

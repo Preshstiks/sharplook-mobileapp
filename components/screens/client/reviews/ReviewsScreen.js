@@ -148,12 +148,12 @@ export default function ReviewsScreen() {
     <View className="flex-1 bg-white">
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-[16px] text-white"
+          className="text-[14px] text-white"
         >
           Reviews
         </Text>
@@ -328,7 +328,7 @@ export default function ReviewsScreen() {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#EB278D",
-    paddingTop: 50,
+    paddingTop: 60,
     paddingBottom: 16,
     flexDirection: "row",
     alignItems: "center",

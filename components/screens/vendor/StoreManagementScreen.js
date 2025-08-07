@@ -399,10 +399,10 @@ const StoreManagementScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-secondary">
       {/* Header with logo, name, badge, address */}
-      <View className="bg-primary rounded-b-[40px] items-center pt-[60px] pb-8">
+      <View className="bg-primary rounded-b-[40px] items-center pt-[70px] pb-8">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          className="absolute left-4 top-8"
+          className="absolute left-4 top-10"
         >
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
@@ -442,10 +442,10 @@ const StoreManagementScreen = () => {
             </Text>
           </View>
         </View>
-        <View className="flex-row mt-2">
+        <View className="flex-row mt-2  w-[70%] justify-center">
           <Ionicons name="location-sharp" size={14} color="#fff" />
           <Text
-            className="text-white w-[70%] text-center text-[12px] ml-1"
+            className="text-white text-center text-[12px] ml-1"
             style={{ fontFamily: "poppinsLight" }}
           >
             {user?.vendorOnboarding?.location}

@@ -23,12 +23,17 @@ export default function OtherScreen() {
     <View className="flex-1 bg-white">
       {/* Header */}
       <StatusBar backgroundColor="#EB278D" barStyle="dark-content" />
-      <View style={styles.header}>
+      <View className="pt-[40px] pb-4 px-4 flex-row items-center shadow-sm mb-5 justify-between bg-white">
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={28} color="#222" />
+          <Ionicons name="chevron-back" size={24} color="#201E1F" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Categories</Text>
-        <View style={{ width: 28 }} />
+        <Text
+          style={{ fontFamily: "latoBold" }}
+          className="text-[14px] text-faintDark"
+        >
+          Categories
+        </Text>
+        <View style={{ width: 26 }} />
       </View>
       {/* Categories Grid */}
       <ScrollView
@@ -48,11 +53,11 @@ export default function OtherScreen() {
                   style={{ minHeight: 120 }}
                 >
                   <View
-                    className="bg-gray-100 rounded-[12px] items-center justify-center p-2"
+                    className="bg-secondary rounded-[12px] items-center justify-center p-2"
                     style={{ minHeight: 120 }}
                   >
-                    <View className="rounded-full h-[64px] w-[64px] items-center justify-center mb-2 border border-gray-200 bg-gray-200" />
-                    <View className="w-12 h-3 bg-gray-200 rounded mt-1" />
+                    <View className="rounded-full h-[64px] w-[64px] items-center justify-center mb-2 border border-lightgray bg-lightgray" />
+                    <View className="w-12 h-3 bg-lightgray rounded mt-1" />
                   </View>
                 </View>
               ))

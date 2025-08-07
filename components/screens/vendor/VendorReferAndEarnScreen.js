@@ -15,12 +15,13 @@ import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { showToast } from "../../ToastComponent/Toast";
 import { HttpClient } from "../../../api/HttpClient";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { EmptyData } from "../../reusuableComponents/EmptyData";
 import { formatAmount } from "../../formatAmount";
 import { formatDateTime } from "../../reusuableComponents/DateConverter";
 
-export default function VendorReferAndEarnScreen({ navigation }) {
+export default function VendorReferAndEarnScreen() {
+  const navigation = useNavigation();
   const [inputCode, setInputCode] = useState("");
   const [copied, setCopied] = useState(false);
   const { user } = useAuth();
@@ -57,12 +58,17 @@ export default function VendorReferAndEarnScreen({ navigation }) {
   return (
     <View className="flex-1 bg-white">
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
-      <View style={styles.header}>
+      <View className="pt-[40px] pb-4 px-4 flex-row items-center shadow-sm mb-5 justify-between bg-white">
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={28} color="#222" />
+          <Ionicons name="chevron-back" size={24} color="#201E1F" />
         </TouchableOpacity>
-        <Text style={styles.title}>Refer and Earn</Text>
-        <View style={{ width: 28 }} />
+        <Text
+          style={{ fontFamily: "latoBold" }}
+          className="text-[14px] text-faintDark"
+        >
+          Refer and Earn
+        </Text>
+        <View style={{ width: 26 }} />
       </View>
       <ScrollView
         style={styles.container}

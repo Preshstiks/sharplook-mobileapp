@@ -322,6 +322,7 @@ export default function BookingHomeServiceAppointScreen() {
             <View className="px-4 mt-6">
               <OutlineTextInput
                 label="Offer Amount"
+                keyboardType="numeric"
                 value={values.offerAmount}
                 onChangeText={handleChange("offerAmount")}
                 name="offerAmount"

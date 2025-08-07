@@ -610,7 +610,7 @@ export default function BookingHomeServiceAppointScreen() {
                     className="text-base mb-2"
                     style={{ fontFamily: "poppinsMedium" }}
                   >
-                    Reference Photo (Optional)
+                    Photo of location (Optional)
                   </Text>
                 </View>
                 <View className="border-x border-[#E9E9E9] border-b pb-3 rounded-b-[8px] px-3 border-t-0">
@@ -793,49 +793,63 @@ export default function BookingHomeServiceAppointScreen() {
       >
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
+            <Text style={styles.headerTitle}>Payment</Text>
             <TouchableOpacity
-              className="bg-primary rounded-[4px] py-2 px-4"
-              onPress={() => {
-                setPaystackModalVisible(false);
-                handlePaystackVerificationAndBooking(
-                  paymentReference,
-                  pendingBookingValues
-                );
-              }}
+              onPress={() => setPaystackModalVisible(false)}
+              style={{ padding: 8 }}
             >
-              <Text className="text-[10px] text-white">Verify Payment</Text>
+              <Ionicons name="close" size={24} color="#222" />
             </TouchableOpacity>
           </View>
           {paystackPaymentUrl ? (
-            <WebView
-              source={{ uri: paystackPaymentUrl }}
-              onNavigationStateChange={(navState) => {
-                // Detect Paystack close or success URL
-                if (
-                  navState.url.includes("paystack.com/close") ||
-                  navState.url.includes("payment/success")
-                ) {
-                  // Try to extract reference from URL if possible
-                  const refMatch = navState.url.match(/[?&]reference=([^&#]+)/);
-                  const reference = refMatch ? refMatch[1] : paymentReference;
-                  setPaystackModalVisible(false);
-                  setPaystackPaymentUrl("");
-                  if (reference) {
+            <>
+              <WebView
+                source={{ uri: paystackPaymentUrl }}
+                onNavigationStateChange={(navState) => {
+                  // Detect Paystack close or success URL
+                  if (
+                    navState.url.includes("paystack.com/close") ||
+                    navState.url.includes("payment/success")
+                  ) {
+                    // Try to extract reference from URL if possible
+                    const refMatch = navState.url.match(
+                      /[?&]reference=([^&#]+)/
+                    );
+                    const reference = refMatch ? refMatch[1] : paymentReference;
+                    setPaystackModalVisible(false);
+                    setPaystackPaymentUrl("");
+                    if (reference) {
+                      handlePaystackVerificationAndBooking(
+                        reference,
+                        pendingBookingValues
+                      );
+                    } else {
+                      Alert.alert(
+                        "Payment",
+                        "Payment completed, but reference not found."
+                      );
+                    }
+                  }
+                }}
+                startInLoadingState
+                style={{ flex: 1 }}
+              />
+              <View style={styles.verifyButtonContainer}>
+                <Text className="text-center font-medium text-primary pb-2">
+                  Click "Verify payment" after payment to verify
+                </Text>
+                <AuthButton
+                  onPress={() => {
+                    setPaystackModalVisible(false);
                     handlePaystackVerificationAndBooking(
-                      reference,
+                      paymentReference,
                       pendingBookingValues
                     );
-                  } else {
-                    Alert.alert(
-                      "Payment",
-                      "Payment completed, but reference not found."
-                    );
-                  }
-                }
-              }}
-              startInLoadingState
-              style={{ flex: 1 }}
-            />
+                  }}
+                  title="Verify Payment"
+                />
+              </View>
+            </>
           ) : null}
         </View>
       </Modal>
@@ -851,7 +865,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -860,10 +874,17 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#222",
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "poppinsMedium",
     flex: 1,
     textAlign: "center",
-    marginLeft: -28,
+  },
+  verifyButtonContainer: {
+    backgroundColor: "#fff",
+    paddingTop: 16,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E5E5",
   },
 });

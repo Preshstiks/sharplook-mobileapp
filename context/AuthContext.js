@@ -126,9 +126,6 @@ export const AuthProvider = ({ children }) => {
       setUserID(null);
       setUserType(null);
       setLastAttemptedCredentials(null);
-
-      // Clear subscription data on logout
-      await clearSubscription();
     } catch (error) {
       console.error("Error during logout:", error);
     } finally {
