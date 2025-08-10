@@ -9,6 +9,7 @@ import {
   Dimensions,
   Pressable,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import WhiteChatIcon from "../../../../assets/icon/whitechat.svg";
@@ -21,7 +22,7 @@ import { formatAmount } from "../../../formatAmount";
 import { CTAbtn } from "../../../reusuableComponents/buttons/CTAbtn";
 
 import { useCart } from "../../../../context/CartContext";
-import { HttpClient } from "../../../../api/HttpClient"; // Added missing import
+import { HttpClient } from "../../../../api/HttpClient";
 import { showToast } from "../../../ToastComponent/Toast";
 import VendorProfileProductDetails from "./VendorProfileProductDetails";
 import VendorProfileServiceDetails from "./VendorProfileServiceDetails";
@@ -52,6 +53,7 @@ export default function VendorProfileScreen({ navigation, route }) {
   const [selectedService, setSelectedService] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [addingToCart, setAddingToCart] = useState({});
+  const [bookingLoading, setBookingLoading] = useState({}); // New state for booking loaders
   const { navigateToChat, isConnecting } = useChatNavigation();
 
   const handleDebitCardPayment = () => {
@@ -88,7 +90,7 @@ export default function VendorProfileScreen({ navigation, route }) {
         productId: productId,
       });
       showToast.success(res.data.message);
-      await fetchCart(); // Refresh cart after adding
+      await fetchCart();
     } catch (error) {
       const message =
         error?.response?.data?.message ||
@@ -107,7 +109,59 @@ export default function VendorProfileScreen({ navigation, route }) {
     for (let i = 0; i < quantity; i++) {
       await handleAddToCart(product);
     }
-    setModalVisibleProduct(false); // Fixed: was setModalVisible
+    setModalVisibleProduct(false);
+  };
+
+  // Enhanced booking handler with loading state
+  const handleBookingNavigation = async (service) => {
+    const serviceId = service.id || service._id;
+    setBookingLoading((prev) => ({ ...prev, [serviceId]: true }));
+
+    try {
+      // Add a small delay to ensure all data is ready
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Prepare minimal navigation params to reduce payload
+      const navigationParams = {
+        service: {
+          id: service.id || service._id,
+          serviceName: service.serviceName,
+          servicePrice: service.servicePrice,
+          serviceImage: service.serviceImage,
+          serviceDuration: service.serviceDuration,
+          serviceDescription: service.serviceDescription,
+        },
+        vendorData: {
+          id: vendorData?.id,
+          businessName: vendorData?.vendorOnboarding?.businessName,
+          serviceType: vendorData?.vendorOnboarding?.serviceType,
+          profilePicture: vendorData?.vendorOnboarding?.profilePicture,
+          rating: vendorData?.rating,
+          phone: vendorData?.phone,
+          // Add only essential vendor data needed for booking
+        },
+        id: vendorData?.id,
+      };
+
+      if (vendorServiceType === "HOME_SERVICE") {
+        navigation.navigate(
+          "BookingHomeServiceAppointScreen",
+          navigationParams
+        );
+      } else {
+        navigation.navigate("BookAppointmentScreen", navigationParams);
+      }
+    } catch (error) {
+      showToast.error("Failed to navigate to booking screen");
+    } finally {
+      // Clear loading state after navigation
+      setTimeout(() => {
+        setBookingLoading((prev) => {
+          const { [serviceId]: removed, ...rest } = prev;
+          return rest;
+        });
+      }, 500);
+    }
   };
 
   // Complete renderProduct function
@@ -171,10 +225,29 @@ export default function VendorProfileScreen({ navigation, route }) {
             }}
             className="text-center"
           >
-            {isAdding ? "Adding..." : isInCart ? "In Cart" : "Add to Cart"}
+            {isAdding
+              ? "Adding..."
+              : isInCart
+                ? "Added to Cart"
+                : "Add to Cart"}
           </Text>
         </TouchableOpacity>
       </Pressable>
+    );
+  };
+
+  // Enhanced CTAbtn component with loading state
+  const BookNowButton = ({ service }) => {
+    const serviceId = service.id || service._id;
+    const isLoading = bookingLoading[serviceId];
+
+    return (
+      <CTAbtn
+        onPress={() => handleBookingNavigation(service)}
+        disabled={isLoading}
+        isloading={isLoading}
+        title="Book Now"
+      />
     );
   };
 
@@ -200,7 +273,7 @@ export default function VendorProfileScreen({ navigation, route }) {
             navigateToChat(navigation, {
               vendorId: vendorData?.id,
               receiverName: vendorData?.vendorOnboarding?.businessName,
-              vendorPhone: vendorData?.phone, // Pass the vendor's phone number
+              vendorPhone: vendorData?.phone,
               chat: {
                 id: vendorData?.id,
                 name: vendorData?.vendorOnboarding?.businessName,
@@ -414,23 +487,8 @@ export default function VendorProfileScreen({ navigation, route }) {
                       {formatAmount(service.servicePrice)}
                     </Text>
                   </View>
-                  <CTAbtn
-                    title="Book Now"
-                    onPress={() => {
-                      if (vendorServiceType === "HOME_SERVICE") {
-                        navigation.navigate("BookingHomeServiceAppointScreen", {
-                          service,
-                          vendorData,
-                          id: vendorData?.id,
-                        });
-                      } else {
-                        navigation.navigate("BookAppointmentScreen", {
-                          service,
-                          vendorData,
-                        });
-                      }
-                    }}
-                  />
+                  {/* Replace CTAbtn with BookNowButton */}
+                  <BookNowButton service={service} />
                 </Pressable>
               ))}
             </View>
@@ -499,7 +557,7 @@ export default function VendorProfileScreen({ navigation, route }) {
         visible={modalVisibleProduct}
         onClose={() => setModalVisibleProduct(false)}
         product={selectedProduct}
-        vendorData={vendorData} // Pass the entire vendor object
+        vendorData={vendorData}
         onAddToCart={handleAddToCartFromModal}
         cartProductIds={cartProductIds}
         addingToCart={addingToCart}
@@ -508,7 +566,7 @@ export default function VendorProfileScreen({ navigation, route }) {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         service={selectedService}
-        vendorData={vendorData} // Add this prop
+        vendorData={vendorData}
       />
     </View>
   );

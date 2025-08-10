@@ -85,6 +85,18 @@ export default function CustomDrawerContent(props) {
             Offers
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-row items-center px-6 py-4"
+          onPress={() => props.navigation.navigate("OrdersStack")}
+        >
+          <Ionicons name="receipt-outline" size={22} color="#ED2584" />
+          <Text
+            className="ml-4 text-[15px] text-faintDark"
+            style={{ fontFamily: "poppinsRegular" }}
+          >
+            Orders
+          </Text>
+        </TouchableOpacity>
         {/* Refer and Earn */}
         <TouchableOpacity
           className="flex-row items-center px-6 py-4"

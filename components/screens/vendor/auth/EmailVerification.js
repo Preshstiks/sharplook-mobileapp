@@ -17,61 +17,37 @@ import { showToast } from "../../../ToastComponent/Toast";
 import { HttpClient } from "../../../../api/HttpClient";
 import { UIActivityIndicator } from "react-native-indicators";
 import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
+import { Feather } from "@expo/vector-icons";
 
 export default function VendorEmailVerificationScreen({ navigation, route }) {
   const [code, setCode] = useState(["", "", "", ""]);
   const [timer, setTimer] = useState(60);
+
   const [loading, setLoading] = useState(false);
-  const [verifying, setVerifying] = useState(false);
+  const inputs = useRef([]);
+  const email = route?.params?.email || "raj****@gmail.com";
+
   // Handler for resending OTP
-  const email = route?.params?.email;
   const handleResend = async () => {
     setLoading(true);
     try {
-      const res = await HttpClient.post("/auth/send-otp", { email });
+      const res = await HttpClient.post("/auth/send-otp", {
+        email: route?.params?.email,
+      });
       showToast.success(res.data.message);
-      setTimer(60);
+      setTimer(60); // Reset timer
     } catch (error) {
-      if (isAxiosError(error)) {
-        if (error.response && error.response.data) {
-          const errorMessage =
-            error.response.data.message || "An unknown error occurred";
-          showToast.error(errorMessage);
-        } else {
-          showToast.error("An unexpected error occurred. Please try again.");
-        }
+      if (error.response && error.response.data) {
+        const errorMessage =
+          error.response.data.message || "An unknown error occurred";
+        showToast.error(errorMessage);
+      } else {
+        showToast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
     }
   };
-  const handleVerify = async (values) => {
-    setVerifying(true);
-    // Always include email in the payload
-    const payload = { ...values, email };
-    try {
-      const res = await HttpClient.post("/auth/verify-otp", payload);
-      showToast.success(res.data.message);
-      navigation.navigate("VendorLogin");
-    } catch (error) {
-      // Clear OTP input on error
-      setCode(["", "", "", ""]);
-      inputs.current[0]?.focus();
-
-      if (isAxiosError(error)) {
-        if (error.response && error.response.data) {
-          const errorMessage =
-            error.response.data.message || "An unknown error occurred";
-          showToast.error(errorMessage);
-        } else {
-          showToast.error("An unexpected error occurred. Please try again.");
-        }
-      }
-    } finally {
-      setVerifying(false);
-    }
-  };
-  const inputs = useRef([]);
 
   useEffect(() => {
     if (timer > 0) {
@@ -87,8 +63,8 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
       setCode(newCode);
 
       // Update Formik field value
-      const otp = newCode.join("");
-      setFieldValue("otp", otp);
+      const verificationCode = newCode.join("");
+      setFieldValue("otp", verificationCode);
 
       if (text && idx < 3) inputs.current[idx + 1].focus();
       if (!text && idx > 0) inputs.current[idx - 1].focus();
@@ -103,7 +79,31 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
       }
     }
   };
-
+  const handleVerify = async (values) => {
+    setVerifying(true);
+    // Always include email in the payload
+    const payload = { ...values, email };
+    try {
+      const res = await HttpClient.post("/auth/verify-otp", payload);
+      showToast.success(res.data.message);
+      navigation.navigate("VendorLogin");
+    } catch (error) {
+      // Clear OTP input on error
+      setCode(["", "", "", ""]);
+      inputs.current[0]?.focus();
+      if (isAxiosError(error)) {
+        if (error.response && error.response.data) {
+          const errorMessage =
+            error.response.data.message || "An unknown error occurred";
+          showToast.error(errorMessage);
+        } else {
+          showToast.error("An unexpected error occurred. Please try again.");
+        }
+      }
+    } finally {
+      setVerifying(false);
+    }
+  };
   return (
     <View className="flex-1 bg-secondary px-5 py-[60px]">
       <View className="flex-row items-center mb-8 gap-8">
@@ -194,19 +194,65 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
                 </Text>
               </TouchableOpacity>
             )}
+            <TouchableOpacity
+              className="flex-row gap-3 justify-center items-center mt-[50px] mb-8"
+              onPress={async () => {
+                const phone = route?.params?.phone;
+
+                if (!phone) {
+                  // No phone? Go to phone number entry screen
+                  navigation.navigate("PhoneNumberVerificationScreen", {
+                    email: route?.params?.email,
+                  });
+                  return;
+                }
+                setLoading(true);
+                try {
+                  await HttpClient.post("/auth/send-otp", {
+                    phone: phone,
+                  });
+                  navigation.navigate("OTPVerification", {
+                    phone: phone,
+                    email: route?.params?.email,
+                  });
+                } catch (error) {
+                  console.log(error);
+                  if (error.response && error.response.data) {
+                    const errorMessage =
+                      error.response.data.message ||
+                      "An unknown error occurred";
+                    showToast.error(errorMessage);
+                  } else {
+                    showToast.error(
+                      "An unexpected error occurred. Please try again."
+                    );
+                  }
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              <Feather name="phone" size={20} color="#EB278D" />
+              <Text
+                style={{ fontFamily: "poppinsRegular" }}
+                className="text-primary text-[12px]"
+              >
+                Verify with Phone Number instead
+              </Text>
+            </TouchableOpacity>
             <View className="flex-1" />
             <View className="mb-8">
               <AuthButton
                 title="Verify"
                 loadingMsg="Verifying"
                 onPress={handleSubmit}
-                isloading={verifying}
+                isloading={loading}
               />
             </View>
           </>
         )}
       </Formik>
-      <LoaderOverlay visible={verifying} />
+      <LoaderOverlay visible={loading} />
     </View>
   );
 }

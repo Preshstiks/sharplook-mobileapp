@@ -28,28 +28,28 @@ import VendorHelpSupportScreen from "./VendorHelpSupportScreen";
 import VendorLegalScreen from "./VendorLegalScreen";
 import VendorPrivacyPolicyScreen from "./VendorPrivacyPolicyScreen";
 import VendorTermsOfUseScreen from "./VendorTermsOfUseScreen";
-import TermsOfUseYourRelationshipWithUsScreen from "./vendortermsofuse/TermsOfUseYourRelationshipWithUsScreen";
-import TermsOfUseAcceptingTheTermsScreen from "./vendortermsofuse/TermsOfUseAcceptingTheTermsScreen";
-import TermsOfUseChangesToTheTermsScreen from "./vendortermsofuse/TermsOfUseChangesToTheTermsScreen";
-import TermsOfUseYourAccountWithUsScreen from "./vendortermsofuse/TermsOfUseYourAccountWithUsScreen";
-import TermsOfUseYourAccessToAndUseOfOurServicesScreen from "./vendortermsofuse/TermsOfUseYourAccessToAndUseOfOurServicesScreen";
-import TermsOfUseIntellectualPropertyRightsScreen from "./vendortermsofuse/TermsOfUseIntellectualPropertyRightsScreen";
-import TermsOfUseContentScreen from "./vendortermsofuse/TermsOfUseContentScreen";
-import TermsOfUseIndemnityScreen from "./vendortermsofuse/TermsOfUseIndemnityScreen";
-import TermsOfUseExclusionOfWarrantiesScreen from "./vendortermsofuse/TermsOfUseExclusionOfWarrantiesScreen";
-import TermsOfUseLimitationOfLiabilityScreen from "./vendortermsofuse/TermsOfUseLimitationOfLiabilityScreen";
-import TermsOfUseOtherTermsScreen from "./vendortermsofuse/TermsOfUseOtherTermsScreen";
-import WhatInformationWeCollectScreen from "./vendorprivacypolicy/WhatInformationWeCollectScreen";
-import HowWeUseYourInformationScreen from "./vendorprivacypolicy/HowWeUseYourInformationScreen";
-import HowWeShareYourInformationScreen from "./vendorprivacypolicy/HowWeShareYourInformationScreen";
-import WhereWeStoreYourInformationScreen from "./vendorprivacypolicy/WhereWeStoreYourInformationScreen";
-import YourRightsAndChoicesScreen from "./vendorprivacypolicy/YourRightsAndChoicesScreen";
-import TheSecurityOfYourInformationScreen from "./vendorprivacypolicy/TheSecurityOfYourInformationScreen";
-import HowLongWeKeepYourInformationScreen from "./vendorprivacypolicy/HowLongWeKeepYourInformationScreen";
-import InformationRelatingToChildrenAndTeensScreen from "./vendorprivacypolicy/InformationRelatingToChildrenAndTeensScreen";
-import PrivacyPolicyUpdateScreen from "./vendorprivacypolicy/PrivacyPolicyUpdateScreen";
-import ContactScreen from "./vendorprivacypolicy/ContactScreen";
-import JurisdictionSpecificScreen from "./vendorprivacypolicy/JurisdictionSpecificScreen";
+
+// Vendor Terms of Use Screen Components
+import TermsOfUseAcceptanceOfTermsScreen from "./vendortermsofuse/TermsOfUseAcceptanceOfTermsScreen";
+import TermsOfUseChangesToTermsScreen from "./vendortermsofuse/TermsOfUseChangesToTermsScreen";
+import TermsOfUseEligibilityScreen from "./vendortermsofuse/TermsOfUseEligibilityScreen";
+import TermsOfUseServicesOfferedScreen from "./vendortermsofuse/TermsOfUseServicesOfferedScreen";
+import TermsOfUseUserAccountsScreen from "./vendortermsofuse/TermsOfUseUserAccountsScreen";
+import TermsOfUseLocationTrackingScreen from "./vendortermsofuse/TermsOfUseLocationTrackingScreen";
+import TermsOfUseBookingPoliciesScreen from "./vendortermsofuse/TermsOfUseBookingPoliciesScreen";
+import TermsOfUsePaymentTermsScreen from "./vendortermsofuse/TermsOfUsePaymentTermsScreen";
+import TermsOfUseIntellectualPropertyScreen from "./vendortermsofuse/TermsOfUseIntellectualPropertyScreen";
+import TermsOfUseProhibitedActivitiesScreen from "./vendortermsofuse/TermsOfUseProhibitedActivitiesScreen";
+import TermsOfUseThirdPartyLinksScreen from "./vendortermsofuse/TermsOfUseThirdPartyLinksScreen";
+import TermsOfUseDisclaimersScreen from "./vendortermsofuse/TermsOfUseDisclaimersScreen";
+import TermsOfUseIndemnificationScreen from "./vendortermsofuse/TermsOfUseIndemnificationScreen";
+import TermsOfUseTerminationScreen from "./vendortermsofuse/TermsOfUseTerminationScreen";
+import TermsOfUseGoverningLawScreen from "./vendortermsofuse/TermsOfUseGoverningLawScreen";
+import TermsOfUseDisputeResolutionScreen from "./vendortermsofuse/TermsOfUseDisputeResolutionScreen";
+import TermsOfUseSeverabilityScreen from "./vendortermsofuse/TermsOfUseSeverabilityScreen";
+import TermsOfUseEntireAgreementScreen from "./vendortermsofuse/TermsOfUseEntireAgreementScreen";
+import TermsOfUseContactUsScreen from "./vendortermsofuse/TermsOfUseContactUsScreen";
+
 import AddProductScreen from "./ProductAndServices/AddProductScreen";
 import AddServicesScreen from "./ProductAndServices/AddServicesScreen";
 import EditProductScreen from "./ProductAndServices/EditProduct";
@@ -62,6 +62,29 @@ import VendorOfferDetailsScreen from "./VendorOfferDetailsScreen";
 import SubscriptionScreen from "./SubscriptionScreen";
 import VendorReferAndEarnScreen from "./VendorReferAndEarnScreen";
 import { Ionicons } from "@expo/vector-icons";
+import OrdersStack from "./MyOrder/MyOrderStack";
+import DataControllerScreen from "./vendorprivacypolicy/DataController";
+import VendorPrivacyPolicyIntroScreen from "./vendorprivacypolicy/VendorPrivacyPolicyIntroScreen";
+import VendorAutomaticCollectionScreen from "./vendorprivacypolicy/VendorAutomaticCollectionScreen";
+import VendorCollectionOfPersonalInfoScreen from "./vendorprivacypolicy/VendorCollectionOfPersonalInfoScreen";
+import VendorCookiesAndUsageDataScreen from "./vendorprivacypolicy/VendorCookiesAndUsageDataScreen";
+import VendorHowWeShareInfoScreen from "./vendorprivacypolicy/VendorHowWeShareInfoScreen";
+import VendorManagingPersonalInfoScreen from "./vendorprivacypolicy/VendorManagingPersonalInfoScreen";
+import VendorUseAndProcessingScreen from "./vendorprivacypolicy/VendorUseAndProcessingScreen";
+import VendorUsageDataScreen from "./vendorprivacypolicy/VendorUsageDataScreen";
+import VendorInformationTransferScreen from "./vendorprivacypolicy/VendorInformationTransferScreen";
+import VendorServiceProvidersScreen from "./vendorprivacypolicy/VendorServiceProvidersScreen";
+import VendorPrivacyOfChildrenScreen from "./vendorprivacypolicy/VendorPrivacyOfChildrenScreen";
+import VendorNewslettersScreen from "./vendorprivacypolicy/VendorNewslettersScreen";
+import VendorLinksToOtherAppsScreen from "./vendorprivacypolicy/VendorLinksToOtherAppsScreen";
+import VendorInformationSecurityScreen from "./vendorprivacypolicy/VendorInformationSecurityScreen";
+import VendorDataBreachScreen from "./vendorprivacypolicy/VendorDataBreachScreen";
+import VendorLegalDisclosuresScreen from "./vendorprivacypolicy/VendorLegalDisclosuresScreen";
+import VendorChangesAndAmendmentsScreen from "./vendorprivacypolicy/VendorChangesAndAmendmentsScreen";
+import VendorIndemnityScreen from "./vendorprivacypolicy/VendorIndemnityScreen";
+import VendorAcceptanceOfPolicyScreen from "./vendorprivacypolicy/VendorAcceptanceOfPolicyScreen";
+import VendorContactingUsScreen from "./vendorprivacypolicy/VendorContactingUsScreen";
+import ServiceLevelAgreementScreen from "./ServiceLevelAgreement";
 // import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
 
 const Stack = createNativeStackNavigator();
@@ -101,6 +124,15 @@ function VendorMainDrawer() {
       <Drawer.Screen
         name="Store Management"
         component={StoreManagementScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="storefront-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="OrdersStack"
+        component={OrdersStack}
         options={{
           drawerIcon: ({ color, size }) => (
             <Ionicons name="storefront-outline" size={size} color={color} />
@@ -358,137 +390,119 @@ export default function VendorNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseYourRelationshipWithUsScreen"
+        name="ServiceLevelAgreementScreen"
         children={(props) => (
           // <ProtectedRoute
           //   {...props}
-          //   Component={TermsOfUseYourRelationshipWithUsScreen}
+          //   Component={VendorTermsOfUseScreen}
           //   requiredRole="VENDOR"
           // />
-          <TermsOfUseYourRelationshipWithUsScreen {...props} />
+          <ServiceLevelAgreementScreen {...props} />
+        )}
+        options={{ headerShown: false }}
+      />
+
+      {/* Vendor Terms of Use Screen Routes */}
+      <Stack.Screen
+        name="TermsOfUseAcceptanceOfTermsScreen"
+        children={(props) => <TermsOfUseAcceptanceOfTermsScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TermsOfUseChangesToTermsScreen"
+        children={(props) => <TermsOfUseChangesToTermsScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TermsOfUseEligibilityScreen"
+        children={(props) => <TermsOfUseEligibilityScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TermsOfUseServicesOfferedScreen"
+        children={(props) => <TermsOfUseServicesOfferedScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TermsOfUseUserAccountsScreen"
+        children={(props) => <TermsOfUseUserAccountsScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TermsOfUseLocationTrackingScreen"
+        children={(props) => <TermsOfUseLocationTrackingScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TermsOfUseBookingPoliciesScreen"
+        children={(props) => <TermsOfUseBookingPoliciesScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TermsOfUsePaymentTermsScreen"
+        children={(props) => <TermsOfUsePaymentTermsScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TermsOfUseIntellectualPropertyScreen"
+        children={(props) => (
+          <TermsOfUseIntellectualPropertyScreen {...props} />
         )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseAcceptingTheTermsScreen"
+        name="TermsOfUseProhibitedActivitiesScreen"
         children={(props) => (
-          // <ProtectedRoute
-          //   {...props}
-          //   Component={TermsOfUseAcceptingTheTermsScreen}
-          //   requiredRole="VENDOR"
-          // />
-          <TermsOfUseAcceptingTheTermsScreen {...props} />
+          <TermsOfUseProhibitedActivitiesScreen {...props} />
         )}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseChangesToTheTermsScreen"
-        children={(props) => (
-          // <ProtectedRoute
-          //   {...props}
-          //   Component={TermsOfUseChangesToTheTermsScreen}
-          //   requiredRole="VENDOR"
-          // />
-          <TermsOfUseChangesToTheTermsScreen {...props} />
-        )}
+        name="TermsOfUseThirdPartyLinksScreen"
+        children={(props) => <TermsOfUseThirdPartyLinksScreen {...props} />}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseYourAccountWithUsScreen"
-        children={(props) => (
-          // <ProtectedRoute
-          //   {...props}
-          //   Component={TermsOfUseYourAccountWithUsScreen}
-          //   requiredRole="VENDOR"
-          // />
-          <TermsOfUseYourAccountWithUsScreen {...props} />
-        )}
+        name="TermsOfUseDisclaimersScreen"
+        children={(props) => <TermsOfUseDisclaimersScreen {...props} />}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseYourAccessToAndUseOfOurServicesScreen"
-        children={(props) => (
-          // <ProtectedRoute
-          //   {...props}
-          //   Component={TermsOfUseYourAccessToAndUseOfOurServicesScreen}
-          //   requiredRole="VENDOR"
-          // />
-          <TermsOfUseYourAccessToAndUseOfOurServicesScreen {...props} />
-        )}
+        name="TermsOfUseIndemnificationScreen"
+        children={(props) => <TermsOfUseIndemnificationScreen {...props} />}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseIntellectualPropertyRightsScreen"
-        children={(props) => (
-          // <ProtectedRoute
-          //   {...props}
-          //   Component={TermsOfUseIntellectualPropertyRightsScreen}
-          //   requiredRole="VENDOR"
-          // />
-          <TermsOfUseIntellectualPropertyRightsScreen {...props} />
-        )}
+        name="TermsOfUseTerminationScreen"
+        children={(props) => <TermsOfUseTerminationScreen {...props} />}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseContentScreen"
-        children={(props) => (
-          // <ProtectedRoute
-          //   {...props}
-          //   Component={TermsOfUseContentScreen}
-          //   requiredRole="VENDOR"
-          // />
-          <TermsOfUseContentScreen {...props} />
-        )}
+        name="TermsOfUseGoverningLawScreen"
+        children={(props) => <TermsOfUseGoverningLawScreen {...props} />}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseIndemnityScreen"
-        children={(props) => (
-          // <ProtectedRoute
-          //   {...props}
-          //   Component={TermsOfUseIndemnityScreen}
-          //   requiredRole="VENDOR"
-          // />
-          <TermsOfUseIndemnityScreen {...props} />
-        )}
+        name="TermsOfUseDisputeResolutionScreen"
+        children={(props) => <TermsOfUseDisputeResolutionScreen {...props} />}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseExclusionOfWarrantiesScreen"
-        children={(props) => (
-          // <ProtectedRoute
-          //   {...props}
-          //   Component={TermsOfUseExclusionOfWarrantiesScreen}
-          //   requiredRole="VENDOR"
-          // />
-          <TermsOfUseExclusionOfWarrantiesScreen {...props} />
-        )}
+        name="TermsOfUseSeverabilityScreen"
+        children={(props) => <TermsOfUseSeverabilityScreen {...props} />}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseLimitationOfLiabilityScreen"
-        children={(props) => (
-          // <ProtectedRoute
-          //   {...props}
-          //   Component={TermsOfUseLimitationOfLiabilityScreen}
-          //   requiredRole="VENDOR"
-          // />
-          <TermsOfUseLimitationOfLiabilityScreen {...props} />
-        )}
+        name="TermsOfUseEntireAgreementScreen"
+        children={(props) => <TermsOfUseEntireAgreementScreen {...props} />}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="TermsOfUseOtherTermsScreen"
-        children={(props) => (
-          // <ProtectedRoute
-          //   {...props}
-          //   Component={TermsOfUseOtherTermsScreen}
-          //   requiredRole="VENDOR"
-          // />
-          <TermsOfUseOtherTermsScreen {...props} />
-        )}
+        name="TermsOfUseContactUsScreen"
+        children={(props) => <TermsOfUseContactUsScreen {...props} />}
         options={{ headerShown: false }}
       />
+
       <Stack.Screen
         name="WhatInformationWeCollectScreen"
         children={(props) => (
@@ -598,6 +612,11 @@ export default function VendorNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="VendorDataControllerScreen"
+        children={(props) => <DataControllerScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="ContactScreen"
         children={(props) => (
           // <ProtectedRoute
@@ -655,6 +674,110 @@ export default function VendorNavigator() {
       <Stack.Screen
         name="VendorReferAndEarn"
         component={VendorReferAndEarnScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* New Privacy Policy Screens */}
+      <Stack.Screen
+        name="VendorPrivacyPolicyIntroScreen"
+        children={(props) => <VendorPrivacyPolicyIntroScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorAutomaticCollectionScreen"
+        children={(props) => <VendorAutomaticCollectionScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorCollectionOfPersonalInfoScreen"
+        children={(props) => (
+          <VendorCollectionOfPersonalInfoScreen {...props} />
+        )}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorCookiesAndUsageDataScreen"
+        children={(props) => <VendorCookiesAndUsageDataScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorHowWeShareInfoScreen"
+        children={(props) => <VendorHowWeShareInfoScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorManagingPersonalInfoScreen"
+        children={(props) => <VendorManagingPersonalInfoScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorUseAndProcessingScreen"
+        children={(props) => <VendorUseAndProcessingScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorUsageDataScreen"
+        children={(props) => <VendorUsageDataScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorInformationTransferScreen"
+        children={(props) => <VendorInformationTransferScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorServiceProvidersScreen"
+        children={(props) => <VendorServiceProvidersScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorPrivacyOfChildrenScreen"
+        children={(props) => <VendorPrivacyOfChildrenScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorNewslettersScreen"
+        children={(props) => <VendorNewslettersScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorLinksToOtherAppsScreen"
+        children={(props) => <VendorLinksToOtherAppsScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorInformationSecurityScreen"
+        children={(props) => <VendorInformationSecurityScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorDataBreachScreen"
+        children={(props) => <VendorDataBreachScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorLegalDisclosuresScreen"
+        children={(props) => <VendorLegalDisclosuresScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorChangesAndAmendmentsScreen"
+        children={(props) => <VendorChangesAndAmendmentsScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorIndemnityScreen"
+        children={(props) => <VendorIndemnityScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorAcceptanceOfPolicyScreen"
+        children={(props) => <VendorAcceptanceOfPolicyScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorContactingUsScreen"
+        children={(props) => <VendorContactingUsScreen {...props} />}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

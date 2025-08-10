@@ -94,7 +94,10 @@ const BottomModal = ({
     >
       <View style={{ flex: 1 }}>
         <BlurView intensity={5} style={styles.overlay}>
-          <TouchableWithoutFeedback onPress={showCloseBtn ? null : onClose}>
+          <TouchableWithoutFeedback
+            testID="backdrop"
+            onPress={showCloseBtn ? null : onClose}
+          >
             <View style={{ flex: 1, justifyContent: "flex-end" }}>
               {/* Modal content */}
               {ModalContent}
@@ -104,7 +107,12 @@ const BottomModal = ({
           {/* Floating Close Button */}
           {showCloseBtn && (
             <Animated.View style={[styles.floatingCloseBtn, closeBtnStyle]}>
-              <TouchableOpacity onPress={handleClose} activeOpacity={0.7}>
+              <TouchableOpacity
+                t
+                accessibilityRole="button"
+                onPress={handleClose}
+                activeOpacity={0.7}
+              >
                 <View className="bg-primary w-12 h-12 rounded-full items-center justify-center">
                   <Ionicons name="close" size={32} color="#fff" />
                 </View>

@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import {
   Ionicons,
@@ -14,9 +16,12 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import TawkToChat from "../../TawkToChat";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function HelpSupportScreen() {
   const navigation = useNavigation();
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -32,6 +37,7 @@ export default function HelpSupportScreen() {
         </Text>
         <View style={{ width: 26 }} />
       </View>
+
       {/* Search Bar */}
       <View className="px-4 mt-4">
         <View className="flex-row items-center bg-[#F6F6F6] rounded-lg px-3 py-2 mb-4">
@@ -97,6 +103,7 @@ export default function HelpSupportScreen() {
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
         </TouchableOpacity>
       </View>
+
       {/* Contact Us Section */}
       <View className="items-center mt-10">
         <Text className="text-[16px] mb-4" style={{ fontFamily: "latoBold" }}>
@@ -136,6 +143,7 @@ export default function HelpSupportScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#fff",

@@ -5,17 +5,49 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../../../context/AuthContext";
+import React, { useState } from "react";
+import TawkToChatForClient from "../../../TawkToChatForClient";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const { user, logout } = useAuth();
 
+  const [chatVisible, setChatVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const clientName = `${user?.lastName || ""} ${user?.firstName || ""}`;
+  const clientEmail = user?.email || "";
+  const clientPhone = user?.phone || "";
+  const clientAvatar = user?.avatar || "";
+  const clientRole = "client";
+
   const handleLogout = async () => {
     await logout();
+  };
+
+  const handleChatOpen = () => {
+    setChatVisible(true);
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 10000);
+  };
+
+  const handleChatClose = () => {
+    setChatVisible(false);
+    setIsLoading(true);
+  };
+
+  const handleChatLoad = () => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
   };
   return (
     <SafeAreaView className="flex-1 bg-secondary">
@@ -83,9 +115,9 @@ const ProfileScreen = () => {
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
         </TouchableOpacity>
         {/* Help and Support */}
-        {/* <TouchableOpacity
+        <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
-          onPress={() => navigation.navigate("HelpSupportScreen")}
+          onPress={handleChatOpen}
         >
           <View className="bg-primary p-2 rounded-full mr-4">
             <Ionicons name="help-circle" size={24} color="#fff" />
@@ -97,7 +129,7 @@ const ProfileScreen = () => {
             Help and Support
           </Text>
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
-        </TouchableOpacity> */}
+        </TouchableOpacity>
         {/* Legal */}
         <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
@@ -142,6 +174,77 @@ const ProfileScreen = () => {
           </Text>
         </TouchableOpacity> */}
       </View>
+      {/* TawkToChatForClient Modal */}
+      <Modal
+        visible={chatVisible}
+        animationType="slide"
+        onRequestClose={handleChatClose}
+      >
+        <View style={{ flex: 1, backgroundColor: "#f5f5f5" }}>
+          {/* Loading Overlay */}
+          {isLoading && (
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "#f5f5f5",
+                justifyContent: "center",
+                alignItems: "center",
+                zIndex: 20,
+              }}
+            >
+              <ActivityIndicator size="large" color="#EB278D" />
+              <Text
+                style={{
+                  marginTop: 20,
+                  fontSize: 16,
+                  fontFamily: "poppinsRegular",
+                  color: "#666",
+                }}
+              >
+                Loading chat...
+              </Text>
+            </View>
+          )}
+          {/* WebView */}
+          <TawkToChatForClient
+            name={clientName}
+            email={clientEmail}
+            phone={clientPhone}
+            avatar={clientAvatar}
+            role={clientRole}
+            onLoadEnd={handleChatLoad}
+          />
+          {/* Close Button */}
+          <TouchableOpacity
+            style={{
+              position: "absolute",
+              top: 40,
+              right: 20,
+              zIndex: 30,
+              backgroundColor: "#fff",
+              borderRadius: 20,
+              paddingHorizontal: 20,
+              paddingVertical: 8,
+              elevation: 2,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.2,
+              shadowRadius: 4,
+            }}
+            onPress={handleChatClose}
+          >
+            <Text
+              style={{ fontSize: 16, color: "#EB278D", fontWeight: "bold" }}
+            >
+              Close
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

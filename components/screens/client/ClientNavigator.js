@@ -26,13 +26,12 @@ import AddProductReviewScreen from "./reviews/AddProductReview";
 import AddServiceReviewScreen from "./reviews/AddServiceReview";
 import ServiceReviewsScreen from "./reviews/ServiceReview";
 import ProductReviewsScreen from "./reviews/ProductReview";
-import AcceptedOfferDetailScreen from "./Booking/AcceptedOfferDetailScreen";
 import BookingStack from "./Booking/BookingStack";
 import NotificationStack from "./Notification/NotificationStack";
 import ProfileStack from "./Profile/ProfileStack";
 import WalletStack from "./WalletStack";
 import ClientOfferStack from "./MyOffers/ClientOfferStack";
-import IncomingCallNotification from "../../reusuableComponents/IncomingCallNotification";
+import MyOrderStack from "./MyOrder/MyOrderStack";
 
 const Drawer = createDrawerNavigator();
 
@@ -45,7 +44,7 @@ export default function ClientNavigator() {
         screenOptions={{
           headerShown: false,
           drawerStyle: { backgroundColor: "#d6c0ad", width: 300 },
-          drawerActiveTintColor: "#BF6A37",
+          drawerActiveTintColor: "#ED2584",
           drawerInactiveTintColor: "#3c2a1e",
           drawerLabelStyle: { fontFamily: "poppinsRegular", fontSize: 16 },
           swipeEnabled: false,
@@ -83,6 +82,15 @@ export default function ClientNavigator() {
           options={{
             drawerIcon: ({ color, size }) => (
               <Ionicons name="pricetag-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="My Orders"
+          component={MyOrderStack}
+          options={{
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="receipt-outline" size={size} color={color} />
             ),
           }}
         />
@@ -236,14 +244,7 @@ export default function ClientNavigator() {
           component={BookingHomeServiceAppointScreen}
           options={{ drawerItemStyle: { display: "none" } }}
         />
-
-        <Drawer.Screen
-          name="AcceptedOfferDetailScreen"
-          component={AcceptedOfferDetailScreen}
-          options={{ drawerItemStyle: { display: "none" } }}
-        />
       </Drawer.Navigator>
-      <IncomingCallNotification />
     </>
   );
 }

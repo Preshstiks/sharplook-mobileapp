@@ -189,16 +189,52 @@ export default function EmailVerificationScreenSignup({ navigation, route }) {
             )}
             <TouchableOpacity
               className="flex-row gap-3 justify-center items-center mt-[50px] mb-8"
-              onPress={() => alert("Switch to phone number verification")}
+              onPress={async () => {
+                const phone = route?.params?.phone;
+
+                if (!phone) {
+                  // No phone? Go to phone number entry screen
+                  navigation.navigate("ClientVerifyPhoneNumber", {
+                    email: route?.params?.email,
+                  });
+                  return;
+                }
+                // If phone exists, send OTP and navigate to VerifyWithPhoneOTP
+                setLoading(true);
+                try {
+                  await HttpClient.post("/auth/send-otp", {
+                    phone: phone,
+                  });
+                  navigation.navigate("VerifyWithPhoneOTP", {
+                    phone: phone,
+                    email: route?.params?.email,
+                  });
+                } catch (error) {
+                  console.log(error);
+                  if (error.response && error.response.data) {
+                    const errorMessage =
+                      error.response.data.message ||
+                      "An unknown error occurred";
+                    showToast.error(errorMessage);
+                  } else {
+                    showToast.error(
+                      "An unexpected error occurred. Please try again."
+                    );
+                  }
+                } finally {
+                  setLoading(false);
+                }
+              }}
             >
-              {/* <Feather name="phone" size={20} color="#EB278D" /> */}
-              {/* <Text
+              <Feather name="phone" size={20} color="#EB278D" />
+              <Text
                 style={{ fontFamily: "poppinsRegular" }}
                 className="text-primary text-[12px]"
               >
                 Verify with Phone Number instead
-              </Text> */}
+              </Text>
             </TouchableOpacity>
+
             <View className="flex-1" />
             <View className="mb-8">
               <AuthButton

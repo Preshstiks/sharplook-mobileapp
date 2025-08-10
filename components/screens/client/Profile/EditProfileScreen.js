@@ -109,8 +109,8 @@ const EditProfileScreen = ({ navigation }) => {
     if (selectedImage) {
       return { uri: selectedImage };
     }
-    if (user?.picture) {
-      return { uri: user.picture };
+    if (user?.avatar) {
+      return { uri: user.avatar };
     }
     return require("../../../../assets/icon/avatar.png");
   };

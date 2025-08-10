@@ -1,6 +1,7 @@
-import { Text, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { BarIndicator } from "react-native-indicators";
 
-export const CTAbtn = ({ onPress, title }) => {
+export const CTAbtn = ({ onPress, title, isloading }) => {
   return (
     <TouchableOpacity
       style={{
@@ -12,15 +13,26 @@ export const CTAbtn = ({ onPress, title }) => {
       }}
       onPress={onPress}
     >
-      <Text
-        style={{
-          color: "#fff",
-          fontFamily: "poppinsRegular",
-          fontSize: 12,
-        }}
-      >
-        {title}
-      </Text>
+      {isloading ? (
+        <View className="flex-row items-center gap-2">
+          <Text
+            style={{ fontFamily: "poppinsMedium" }}
+            className="text-center text-[13px] text-white"
+          >
+            <BarIndicator color="#fff" size={20} />
+          </Text>
+        </View>
+      ) : (
+        <Text
+          style={{
+            color: "#fff",
+            fontFamily: "poppinsRegular",
+            fontSize: 12,
+          }}
+        >
+          {title}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };

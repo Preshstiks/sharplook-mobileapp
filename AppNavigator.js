@@ -25,8 +25,9 @@ import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/reusuableComponents/ProtectedRoute";
 import AddLocationScreen from "./components/screens/vendor/auth/AddLocationScreen";
 import CallScreen from "./components/screens/client/GlobalScreens/CallScreen";
-import IncomingCallNotification from "./components/reusuableComponents/IncomingCallNotification";
 import InitialSubscriptionScreen from "./components/screens/vendor/auth/InitialSubscriptionScreen";
+import PhoneNumberVerificationScreen from "./components/screens/vendor/auth/PhoneNumberVerificationScreen";
+import OTPVerificationScreen from "./components/screens/vendor/auth/OTPVerificationScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -115,6 +116,16 @@ export default function AppNavigator({ linking }) {
               name="ClientVerifyPhoneNumber"
               component={ClientVerifyPhoneNumber}
               options={{ title: "ClientVerifyPhoneNumber", headerShown: false }}
+            />
+            <Stack.Screen
+              name="PhoneNumberVerificationScreen"
+              component={PhoneNumberVerificationScreen}
+              options={{ title: "ClientVerifyPhoneNumber", headerShown: false }}
+            />
+            <Stack.Screen
+              name="OTPVerification"
+              component={OTPVerificationScreen}
+              options={{ title: "OTPVerificationScreen", headerShown: false }}
             />
             <Stack.Screen
               name="VerifyWithPhoneOTP"

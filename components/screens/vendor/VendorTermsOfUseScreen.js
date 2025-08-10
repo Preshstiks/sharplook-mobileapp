@@ -10,17 +10,25 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 const termsSections = [
-  "Your Relationship With Us",
-  "Accepting the Terms",
-  "Changes to the Terms",
-  "Your Account with Us",
-  "Your Access to and Use of Our Services",
-  "Intellectual Property Rights",
-  "Content",
-  "Indemnity",
-  "EXCLUSION OF WARRANTIES",
-  "LIMITATION OF LIABILITY",
-  "Other Terms",
+  "Acceptance of Terms",
+  "Changes to Terms",
+  "Eligibility",
+  "Services Offered",
+  "User Accounts",
+  "Location Tracking and Update Requirements",
+  "Booking and Appointment Policies",
+  "Payment Terms",
+  "Intellectual Property",
+  "Prohibited Activities",
+  "Third Party Links",
+  "Disclaimers",
+  "Indemnification",
+  "Termination",
+  "Governing Law",
+  "Dispute Resolution Process",
+  "Severability",
+  "Entire Agreement",
+  "Contact Us",
 ];
 
 export default function TermsOfUseScreen() {
@@ -48,7 +56,7 @@ export default function TermsOfUseScreen() {
           className="text-[14px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
-          Last updated: July 24, 2025
+          Last updated: August 5, 2025
         </Text>
         {termsSections.map((section, idx) => (
           <TouchableOpacity
@@ -56,17 +64,25 @@ export default function TermsOfUseScreen() {
             className="flex-row items-center bg-white rounded-xl px-4 py-4 mb-3 shadow-sm border border-[#F6F6F6]"
             onPress={() => {
               const routes = [
-                "TermsOfUseYourRelationshipWithUsScreen",
-                "TermsOfUseAcceptingTheTermsScreen",
-                "TermsOfUseChangesToTheTermsScreen",
-                "TermsOfUseYourAccountWithUsScreen",
-                "TermsOfUseYourAccessToAndUseOfOurServicesScreen",
-                "TermsOfUseIntellectualPropertyRightsScreen",
-                "TermsOfUseContentScreen",
-                "TermsOfUseIndemnityScreen",
-                "TermsOfUseExclusionOfWarrantiesScreen",
-                "TermsOfUseLimitationOfLiabilityScreen",
-                "TermsOfUseOtherTermsScreen",
+                "TermsOfUseAcceptanceOfTermsScreen",
+                "TermsOfUseChangesToTermsScreen",
+                "TermsOfUseEligibilityScreen",
+                "TermsOfUseServicesOfferedScreen",
+                "TermsOfUseUserAccountsScreen",
+                "TermsOfUseLocationTrackingScreen",
+                "TermsOfUseBookingPoliciesScreen",
+                "TermsOfUsePaymentTermsScreen",
+                "TermsOfUseIntellectualPropertyScreen",
+                "TermsOfUseProhibitedActivitiesScreen",
+                "TermsOfUseThirdPartyLinksScreen",
+                "TermsOfUseDisclaimersScreen",
+                "TermsOfUseIndemnificationScreen",
+                "TermsOfUseTerminationScreen",
+                "TermsOfUseGoverningLawScreen",
+                "TermsOfUseDisputeResolutionScreen",
+                "TermsOfUseSeverabilityScreen",
+                "TermsOfUseEntireAgreementScreen",
+                "TermsOfUseContactUsScreen",
               ];
               navigation.navigate(routes[idx]);
             }}

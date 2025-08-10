@@ -46,7 +46,7 @@ export default function ServiceDetailsModal({
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View>
-          <View className="absolute top-5 right-5">
+          <View className="absolute top-10 right-10">
             <TouchableOpacity
               onPress={onClose}
               style={{
@@ -240,7 +240,13 @@ export default function ServiceDetailsModal({
           borderTopColor: "#F0F0F0",
         }}
       >
-        <AuthButton onPress={() => onBookNow(service)} title="Book Now" />
+        <AuthButton
+          onPress={() => {
+            onBookNow(service);
+            onClose();
+          }}
+          title="Book Now"
+        />
       </View>
     </PageModal>
   );

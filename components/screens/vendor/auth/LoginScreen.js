@@ -63,7 +63,8 @@ export default function VendorLoginScreen({ navigation }) {
           navigation.replace("AddLocation");
         } else if (
           status === 403 &&
-          message === "Email not verified. An OTP has been sent to your email."
+          message ===
+            "Email or Phone Number not verified. An OTP has been sent to your email."
         ) {
           showToast.info(message);
           navigation.navigate("VendorEmailVerification", {

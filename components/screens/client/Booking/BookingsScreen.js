@@ -44,7 +44,7 @@ export default function BookingsScreen() {
   );
 
   const filteredBookings = bookings.filter((b) => b.status === tab);
-
+  console.log({ filteredBookings });
   const EmptyState = () => (
     <View className="flex-1 justify-center items-center px-8">
       <Empty width={150} height={150} />
@@ -147,7 +147,7 @@ export default function BookingsScreen() {
       </View>
       <View className="px-4 mt-3">
         <AuthButton
-          title="Offer your price"
+          title="Make an Offer"
           onPress={() => navigation.navigate("OfferPriceScreen")}
         />
       </View>

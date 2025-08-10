@@ -90,6 +90,8 @@ export const AuthInput = ({
           <TouchableOpacity
             onPress={togglePasswordVisibility}
             style={styles.eyeIcon}
+            accessibilityRole="button"
+            testID="toggle-password-visibility"
           >
             <Ionicons
               name={isPasswordVisible ? "eye-off" : "eye"}

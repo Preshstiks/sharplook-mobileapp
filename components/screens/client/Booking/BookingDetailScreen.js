@@ -72,16 +72,37 @@ export default function BookingDetailScreen() {
   const handleDisputeSubmit = async (values, { resetForm }) => {
     setIsSubmittingDispute(true);
     try {
-      const res = await HttpClient.post("/disputes/raiseDispute", {
-        bookingId: booking?.id,
-        reason: values.reason,
-        referencePhoto: values.referencePhoto,
+      const formData = new FormData();
+      formData.append("bookingId", booking?.id);
+
+      // Add reason
+      formData.append("reason", values.reason);
+
+      // Add image if provided
+      if (values.referencePhoto) {
+        // Extract filename from URI
+        const filename = values.referencePhoto.split("/").pop();
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : "image/jpeg";
+
+        formData.append("referencePhoto", {
+          uri: values.referencePhoto,
+          name: filename || "dispute_image.jpg",
+          type: type,
+        });
+      }
+      const res = await HttpClient.post("/disputes/raiseDispute", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
       showToast.success(res.data.message);
       // Optionally show a toast or feedback here
       setShowDisputeModal(false);
+      navigation.goBack();
       resetForm();
     } catch (error) {
+      console.log(error.response);
       showToast.error(error.response.data.message);
     } finally {
       setIsSubmittingDispute(false);
@@ -135,8 +156,15 @@ export default function BookingDetailScreen() {
             style={{ fontFamily: "poppinsSemiBold" }}
             className="text-[20px]"
           >
-            {booking?.status === "PENDING" ? "Pending" : "Completed"}
+            {booking?.status === "ACCEPTED" && booking?.dispute !== null
+              ? "Disputed"
+              : booking?.status === "PENDING"
+                ? "Pending"
+                : booking?.status === "COMPLETED"
+                  ? "Completed"
+                  : "Accepted"}
           </Text>
+
           <Text
             style={{ fontFamily: "latoBold" }}
             className="text-[16px] text-[#00000080] mt-1"

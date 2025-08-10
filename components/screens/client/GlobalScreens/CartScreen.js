@@ -37,6 +37,7 @@ export default function CartScreen() {
   const [paymentReference, setPaymentReference] = useState(null);
   const [paystackModalVisible, setPaystackModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [updatingQuantities, setUpdatingQuantities] = useState(false);
 
   // Modal states
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -88,7 +89,6 @@ export default function CartScreen() {
 
   const removeItem = async (itemId) => {
     setDeletingItemId(itemId);
-    const token = await AsyncStorage.getItem("token");
 
     try {
       const res = await HttpClient.delete(`/client/removeProduct/${itemId}`);
@@ -96,9 +96,40 @@ export default function CartScreen() {
         prevItems.filter((item) => item.id !== itemId)
       );
       showToast.success(res.data.message);
+      fetchCart();
     } catch (error) {
     } finally {
       setDeletingItemId(null);
+    }
+  };
+
+  // New function to update cart quantities
+  const updateCartQuantities = async () => {
+    setUpdatingQuantities(true);
+    try {
+      // Prepare the payload with all cart items and their current quantities
+      const items = cartItems.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+      }));
+
+      const payload = { items };
+
+      const res = await HttpClient.put("/client/updateCartQty", payload);
+      console.log(res.data);
+
+      await fetchCart();
+
+      return true;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to update cart quantities";
+      showToast.error(message);
+      return false;
+    } finally {
+      setUpdatingQuantities(false);
     }
   };
 
@@ -112,6 +143,14 @@ export default function CartScreen() {
     setSelectedPaymentMethod(paymentMethod);
     setShowPaymentModal(false);
 
+    // Update cart quantities before proceeding with checkout
+    const quantitiesUpdated = await updateCartQuantities();
+
+    if (!quantitiesUpdated) {
+      showToast.error("Failed to update quantities. Please try again.");
+      return;
+    }
+
     if (paymentMethod === "PAYSTACK") {
       await initiateCheckout();
     } else if (paymentMethod === "SHARP-PAY") {
@@ -120,13 +159,17 @@ export default function CartScreen() {
   };
 
   const handleCheckoutFrmCart = async () => {
+    const bookingPayload = {
+      totalAmount: total,
+      paymentMethod: "SHARP-PAY",
+    };
     try {
-      const res = await HttpClient.post("/orders/checkout", {
-        reference: sharpPayReference,
-      });
-      showToast.success("Order placed successfully using SharpPay");
+      const res = await HttpClient.post("/orders/checkout", bookingPayload);
+      showToast.success(res.data.message);
+
       navigation.navigate("HomeScreen");
     } catch (error) {
+      console.log(error.response);
       if (error.response?.data?.message === "Insufficient wallet balance") {
         showToast.error(error.response.data.message);
       } else {
@@ -194,6 +237,16 @@ export default function CartScreen() {
     }
   };
 
+  // Updated proceed button to handle quantity updates
+  const handleProceedToCheckout = async () => {
+    // First update the quantities
+    const quantitiesUpdated = await updateCartQuantities();
+
+    if (quantitiesUpdated) {
+      setShowLocationModal(true);
+    }
+  };
+
   return (
     <View className="flex-1 bg-secondary">
       {/* Header */}
@@ -212,18 +265,13 @@ export default function CartScreen() {
       </View>
 
       {/* Cart Items or Empty State */}
-      {isLoading ? (
+      {isLoading || updatingQuantities ? (
         <ScrollView
           className="flex-1 px-4"
           showsVerticalScrollIndicator={false}
         >
           <View className="flex-1 items-center justify-center mt-20">
-            <Text
-              style={{ fontFamily: "poppinsRegular" }}
-              className="text-[16px] text-faintDark"
-            >
-              Loading cart...
-            </Text>
+            <ActivityIndicator size="large" color="#EB278D" />
           </View>
         </ScrollView>
       ) : cartItems.length === 0 ? (
@@ -295,6 +343,7 @@ export default function CartScreen() {
                           updateQuantity(item.id, item.quantity - 1)
                         }
                         className="w-8 h-8 bg-gray-100 rounded-full items-center justify-center"
+                        disabled={updatingQuantities}
                       >
                         <Ionicons name="remove" size={16} color="#EB278D" />
                       </TouchableOpacity>
@@ -309,6 +358,7 @@ export default function CartScreen() {
                           updateQuantity(item.id, item.quantity + 1)
                         }
                         className="w-8 h-8 bg-gray-100 rounded-full items-center justify-center"
+                        disabled={updatingQuantities}
                       >
                         <Ionicons name="add" size={16} color="#EB278D" />
                       </TouchableOpacity>
@@ -317,7 +367,9 @@ export default function CartScreen() {
                   <TouchableOpacity
                     className="ml-2"
                     onPress={() => removeItem(item.product.id)}
-                    disabled={deletingItemId === item.product.id}
+                    disabled={
+                      deletingItemId === item.product.id || updatingQuantities
+                    }
                   >
                     {deletingItemId === item.product.id ? (
                       <View
@@ -359,7 +411,7 @@ export default function CartScreen() {
               style={{ fontFamily: "poppinsRegular" }}
               className="text-[14px] text-[#868889]"
             >
-              {formatAmount(subtotal)}
+              {formatAmount(total)}
             </Text>
           </View>
           <View className="flex-row justify-between mb-2">
@@ -393,8 +445,9 @@ export default function CartScreen() {
           </View>
 
           <AuthButton
-            title="Proceed"
-            onPress={() => setShowLocationModal(true)}
+            title={updatingQuantities ? "Updating..." : "Proceed"}
+            onPress={handleProceedToCheckout}
+            disabled={updatingQuantities}
           />
         </View>
       )}
@@ -492,7 +545,7 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#fff",
-    paddingTop: 20,
+    paddingTop: 30,
     paddingBottom: 16,
     paddingHorizontal: 16,
     marginBottom: 20,

@@ -22,6 +22,7 @@ import { showToast } from "../../ToastComponent/Toast";
 import { HttpClient } from "../../../api/HttpClient";
 import { isAxiosError } from "axios";
 import LoaderOverlay from "../../reusuableComponents/LoaderOverlay";
+import { PhoneInput } from "../../reusuableComponents/inputFields/PhoneInput";
 export default function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +35,10 @@ export default function RegisterScreen({ navigation }) {
       showToast.success(res.data.message);
       if (res.data.statusCode === 201) {
       }
-      navigation.navigate("EmailVerificationSignup", { email: values.email });
+      navigation.navigate("EmailVerificationSignup", {
+        email: values.email,
+        phone: values.phone,
+      });
     } catch (error) {
       if (error.response && error.response.data) {
         const errorMessage = error.response.data.message;
@@ -135,14 +139,17 @@ export default function RegisterScreen({ navigation }) {
                   touched={touched.email}
                   keyboardType="email-address"
                 />
-                <AuthInput
-                  label="Phone"
+
+                <PhoneInput
+                  label="Enter Phone Number"
+                  placeholder="8123456789"
                   value={values.phone}
                   onChangeText={handleChange("phone")}
                   onBlur={handleBlur("phone")}
                   error={errors.phone}
                   touched={touched.phone}
                   keyboardType="phone-pad"
+                  isPhoneInput={true}
                 />
 
                 <AuthInput

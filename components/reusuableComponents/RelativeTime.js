@@ -2,8 +2,8 @@ import React from "react";
 
 /**
  * Converts an ISO date string to a relative time string (e.g., '5 mins ago', '1 hr ago', 'just now', '2 days ago', etc.).
- * @param {string|Date} isoDate - The ISO date string or Date object to convert.
- * @returns {string} The relative time string.
+ * @param {string|Date} isoDate
+ * @returns {string}
  */
 export const getRelativeTime = (isoDate) => {
   if (!isoDate) return "";

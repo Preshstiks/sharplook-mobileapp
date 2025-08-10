@@ -14,7 +14,11 @@ const ProtectedRoute = ({
   if (isLoading && showLoader) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#EB278D" />
+        <ActivityIndicator
+          testID="loading-indicator"
+          size="large"
+          color="#EB278D"
+        />
       </View>
     );
   }

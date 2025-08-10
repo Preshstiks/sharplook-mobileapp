@@ -35,8 +35,8 @@ const UserProfileScreen = ({ navigation }) => {
         {/* Avatar */}
         <Image
           source={
-            user?.picture
-              ? { uri: user?.picture }
+            user?.avatar
+              ? { uri: user?.avatar }
               : require("../../../../assets/icon/avatar.png")
           }
           className="w-24 h-24 rounded-full mb-4"

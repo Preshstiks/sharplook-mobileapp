@@ -128,7 +128,10 @@ const PageModal = ({
           ]}
         >
           <BlurView intensity={10} style={StyleSheet.absoluteFillObject}>
-            <TouchableWithoutFeedback onPress={handleBackdropPress}>
+            <TouchableWithoutFeedback
+              testID="backdrop-touchable"
+              onPress={handleBackdropPress}
+            >
               <View style={StyleSheet.absoluteFillObject} />
             </TouchableWithoutFeedback>
           </BlurView>

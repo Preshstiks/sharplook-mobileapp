@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import OfferPriceScreen from "./OfferPriceScreen";
 import BookingDetailScreen from "./BookingDetailScreen";
 import BookingsScreen from "./BookingsScreen";
-import AcceptedOfferDetailScreen from "./AcceptedOfferDetailScreen";
 import VendorProfileScreen from "../GlobalScreens/VendorProfileScreen";
 
 const Stack = createNativeStackNavigator();
@@ -23,10 +22,6 @@ export default function BookingStack() {
       <Stack.Screen
         name="VendorProfileScreen"
         component={VendorProfileScreen}
-      />
-      <Stack.Screen
-        name="AcceptedOfferDetailScreen"
-        component={AcceptedOfferDetailScreen}
       />
       {/* Add other screens here */}
     </Stack.Navigator>

@@ -55,6 +55,7 @@ export default function Dropdown({
         <TouchableWithoutFeedback onPress={() => setIsFocused(true)}>
           <View style={styles.pickerWrapper} pointerEvents="box-none">
             <Picker
+              testID="picker-element"
               selectedValue={value}
               onValueChange={(val) => {
                 setIsFocused(false);
@@ -65,13 +66,13 @@ export default function Dropdown({
               onBlur={() => setIsFocused(false)}
               dropdownIconColor="#EB278D"
             >
-              {/* Placeholder option if provided */}
               {placeholder && (
                 <Picker.Item label={placeholder} value="" color="#BEBEBE" />
               )}
               {options &&
-                options.map((option) => (
+                options.map((option, index) => (
                   <Picker.Item
+                    testID={`picker-item-${index}`}
                     key={option.value}
                     label={option.label}
                     value={option.value}

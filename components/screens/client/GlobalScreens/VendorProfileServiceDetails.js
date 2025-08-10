@@ -54,7 +54,7 @@ export default function VendorProfileServiceDetails({
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View>
-          <View className="absolute top-5 right-5">
+          <View className="absolute top-10 right-10">
             <TouchableOpacity
               onPress={onClose}
               style={{
@@ -250,6 +250,7 @@ export default function VendorProfileServiceDetails({
       >
         <AuthButton
           onPress={() => {
+            onClose();
             if (vendorServiceType === "HOME_SERVICE") {
               navigation.navigate("BookingHomeServiceAppointScreen", {
                 service,

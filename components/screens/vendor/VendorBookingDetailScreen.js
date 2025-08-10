@@ -71,10 +71,29 @@ export default function VendorBookingDetailScreen() {
   const handleDisputeSubmit = async (values, { resetForm }) => {
     setIsSubmittingDispute(true);
     try {
-      const res = await HttpClient.post("/disputes/raiseDispute", {
-        bookingId: booking?.id,
-        reason: values.reason,
-        referencePhoto: values.referencePhoto,
+      const formData = new FormData();
+      formData.append("bookingId", booking?.id);
+
+      // Add reason
+      formData.append("reason", values.reason);
+
+      // Add image if provided
+      if (values.referencePhoto) {
+        // Extract filename from URI
+        const filename = values.referencePhoto.split("/").pop();
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : "image/jpeg";
+
+        formData.append("referencePhoto", {
+          uri: values.referencePhoto,
+          name: filename || "dispute_image.jpg",
+          type: type,
+        });
+      }
+      const res = await HttpClient.post("/disputes/raiseDispute", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
       showToast.success(res.data.message);
       // Optionally show a toast or feedback here

@@ -671,7 +671,7 @@ export default function BookingHomeServiceAppointScreen() {
                   className="ml-2 text-[11px] text-[#000]"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
-                  ₦5,000 for first 5km,{" "}
+                  ₦1,000 for first 5km,{" "}
                   <Text
                     className="text-[#ee9002]"
                     style={{ fontFamily: "poppinsRegular" }}

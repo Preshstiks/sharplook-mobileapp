@@ -19,6 +19,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { HttpClient } from "../../../../api/HttpClient";
 import { showToast } from "../../../ToastComponent/Toast";
 import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
+import { PhoneInput } from "../../../reusuableComponents/inputFields/PhoneInput";
 
 const SERVICE_OPTIONS = [
   { label: "In-shop", value: "IN_SHOP" },
@@ -55,7 +56,10 @@ export default function VendorRegisterScreen({ navigation }) {
         },
       });
       showToast.success(res.data.message);
-      navigation.navigate("VendorEmailVerification", { email: values.email });
+      navigation.navigate("VendorEmailVerification", {
+        email: values.email,
+        phone: values.phone,
+      });
     } catch (error) {
       if (error.response && error.response.data) {
         const errorMessage = error.response.data.error;
@@ -159,15 +163,16 @@ export default function VendorRegisterScreen({ navigation }) {
                   touched={touched.email}
                   keyboardType="email-address"
                 />
-
-                <AuthInput
-                  label="Phone"
+                <PhoneInput
+                  label="Enter Phone Number"
+                  placeholder="8123456789"
                   value={values.phone}
                   onChangeText={handleChange("phone")}
                   onBlur={handleBlur("phone")}
                   error={errors.phone}
                   touched={touched.phone}
                   keyboardType="phone-pad"
+                  isPhoneInput={true}
                 />
                 <AuthInput
                   label="Password"

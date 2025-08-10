@@ -30,6 +30,7 @@ const SkeletonBox = ({ width, height, borderRadius = 4, style = {} }) => {
 
   return (
     <Animated.View
+      testID="skeleton-box"
       style={[
         {
           width,

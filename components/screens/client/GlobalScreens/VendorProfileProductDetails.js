@@ -71,7 +71,7 @@ export default function VendorProfileProductDetails({
         <ScrollView showsVerticalScrollIndicator={false}>
           <View>
             {/* Close Button */}
-            <View className="absolute top-5 right-5 z-10">
+            <View className="absolute top-10 right-10 z-10">
               <TouchableOpacity
                 onPress={onClose}
                 style={{

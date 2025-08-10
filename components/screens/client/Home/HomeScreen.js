@@ -150,6 +150,7 @@ export default function HomeScreen() {
       };
       const fetchTopVendors = async () => {
         const token = await AsyncStorage.getItem("token");
+        console.log(token);
         setLoadingVendors(true);
         try {
           const res = await HttpClient.get("/user/topVendors");
