@@ -94,7 +94,7 @@ export default function FundVendorWalletScreen({ navigation }) {
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text
-          className="flex-1 text-center text-[16px]"
+          className="flex-1 text-center text-[18px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           FundWallet
@@ -120,7 +120,7 @@ export default function FundVendorWalletScreen({ navigation }) {
             showsVerticalScrollIndicator={false}
           >
             <Text
-              className="text-[14px] mt-6 mb-4"
+              className="text-[16px] mt-6 mb-4"
               style={{ fontFamily: "latoBold" }}
             >
               Enter the amount you want to fund your wallet
@@ -157,6 +157,7 @@ export default function FundVendorWalletScreen({ navigation }) {
       >
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
+            <View style={{ width: 24 }} />
             <Text style={styles.headerTitle}>Payment</Text>
             <TouchableOpacity
               onPress={() => setPaystackModalVisible(false)}
@@ -223,8 +224,8 @@ export default function FundVendorWalletScreen({ navigation }) {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#fff",
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingTop: 50,
+    paddingBottom: 14,
     paddingHorizontal: 16,
     marginBottom: 20,
     flexDirection: "row",
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#222",
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: "poppinsMedium",
     flex: 1,
     textAlign: "center",

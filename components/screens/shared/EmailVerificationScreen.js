@@ -89,19 +89,19 @@ export default function EmailVerificationScreen({ navigation, route }) {
         <Text style={{ fontFamily: "poppinsSemiBold" }}>Verification</Text>
       </View>
       <Text
-        className="text-center mb-1 text-sm"
+        className="text-center mb-1 text-[16px]"
         style={{ fontFamily: "poppinsRegular" }}
       >
         We have sent verification code to your email
       </Text>
       <Text
-        className="text-center mb-10 text-sm text-primary"
+        className="text-center mb-10 text-[16px] text-primary"
         style={{ fontFamily: "poppinsRegular" }}
       >
         {email}
       </Text>
       <Text
-        className="text-center mb-4 text-sm"
+        className="text-center mb-4 text-[16px]"
         style={{ fontFamily: "poppinsRegular" }}
       >
         Please enter your verification code
@@ -144,7 +144,7 @@ export default function EmailVerificationScreen({ navigation, route }) {
             {/* Timer or Resend Code */}
             {timer > 0 ? (
               <Text
-                className="text-center text-sm mb-2"
+                className="text-center text-[16px] mb-2"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 Resend code in{" "}
@@ -156,7 +156,7 @@ export default function EmailVerificationScreen({ navigation, route }) {
               <Pressable onPress={handleResend}>
                 <Text
                   style={{ fontFamily: "latoBold" }}
-                  className="text-primary text-[14px] underline text-center mb-2"
+                  className="text-primary text-[16px] underline text-center mb-2"
                 >
                   Resend Code
                 </Text>

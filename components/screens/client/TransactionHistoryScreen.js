@@ -277,7 +277,7 @@ export default function TransactionHistoryScreen({ navigation }) {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Transaction History
         </Text>
@@ -523,23 +523,23 @@ const styles = StyleSheet.create({
   },
   txName: {
     fontFamily: "poppinsMedium",
-    fontSize: 13,
+    fontSize: 15,
     color: "#222",
   },
   txDate: {
     fontFamily: "latoBold",
-    fontSize: 10,
+    fontSize: 12,
     color: "#888",
     marginTop: 2,
   },
   txAmount: {
     fontFamily: "latoBold",
-    fontSize: 14,
+    fontSize: 16,
     color: "#222",
   },
   txStatus: {
     fontFamily: "latoBold",
-    fontSize: 10,
+    fontSize: 12,
     marginTop: 2,
   },
   paginationContainer: {
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   paginationInfoText: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#666",
     fontFamily: "poppinsRegular",
   },
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   paginationText: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#333",
     fontFamily: "poppinsMedium",
   },
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   paginationDotsText: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#666",
     fontFamily: "poppinsRegular",
   },
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginLeft: 10,
-    fontSize: 14,
+    fontSize: 16,
     color: "#333",
     fontFamily: "poppinsMedium",
   },

@@ -36,7 +36,7 @@ export default function PaymentMethodModal({
           <View className="flex-row items-center justify-between mb-6">
             <Text
               style={{ fontFamily: "poppinsSemiBold" }}
-              className="text-[18px] text-faintDark"
+              className="text-[20px] text-faintDark"
             >
               Select Payment Method
             </Text>
@@ -51,7 +51,7 @@ export default function PaymentMethodModal({
           <View className="mb-6">
             <Text
               style={{ fontFamily: "poppinsMedium" }}
-              className="text-[14px] text-faintDark mb-3"
+              className="text-[16px] text-faintDark mb-3"
             >
               Payment Method
             </Text>
@@ -79,13 +79,13 @@ export default function PaymentMethodModal({
                 <View className="flex-1">
                   <Text
                     style={{ fontFamily: "poppinsMedium" }}
-                    className="text-[14px] text-faintDark"
+                    className="text-[16px] text-faintDark"
                   >
                     SharpPay Wallet
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[12px] text-gray-500 mt-1"
+                    className="text-[14px] text-gray-500 mt-1"
                   >
                     Pay with your wallet balance
                   </Text>
@@ -114,13 +114,13 @@ export default function PaymentMethodModal({
                 <View className="flex-1">
                   <Text
                     style={{ fontFamily: "poppinsMedium" }}
-                    className="text-[14px] text-faintDark"
+                    className="text-[16px] text-faintDark"
                   >
                     Paystack
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[12px] text-gray-500 mt-1"
+                    className="text-[14px] text-gray-500 mt-1"
                   >
                     Pay with card or bank transfer
                   </Text>
@@ -135,13 +135,13 @@ export default function PaymentMethodModal({
           <View className="flex-row justify-between mb-2">
             <Text
               style={{ fontFamily: "poppinsRegular" }}
-              className="text-[14px] text-[#868889]"
+              className="text-[16px] text-[#868889]"
             >
               Subtotal
             </Text>
             <Text
               style={{ fontFamily: "poppinsRegular" }}
-              className="text-[14px] text-[#868889]"
+              className="text-[16px] text-[#868889]"
             >
               {formatAmount(subtotal)}
             </Text>
@@ -149,13 +149,13 @@ export default function PaymentMethodModal({
           <View className="flex-row justify-between mb-2">
             <Text
               style={{ fontFamily: "poppinsRegular" }}
-              className="text-[14px] text-[#868889]"
+              className="text-[16px] text-[#868889]"
             >
               Shipping
             </Text>
             <Text
               style={{ fontFamily: "poppinsRegular" }}
-              className="text-[14px] text-[#868889]"
+              className="text-[16px] text-[#868889]"
             >
               {formatAmount(delivery)}
             </Text>
@@ -164,13 +164,13 @@ export default function PaymentMethodModal({
           <View className="flex-row justify-between mb-4">
             <Text
               style={{ fontFamily: "poppinsSemiBold" }}
-              className="text-[16px] text-faintDark"
+              className="text-[18px] text-faintDark"
             >
               Total
             </Text>
             <Text
               style={{ fontFamily: "poppinsSemiBold" }}
-              className="text-[16px] text-fadedDark"
+              className="text-[18px] text-fadedDark"
             >
               ₦ {total.toLocaleString()}
             </Text>

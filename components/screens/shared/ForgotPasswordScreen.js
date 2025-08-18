@@ -36,13 +36,13 @@ export default function ForgotPasswordScreen({ navigation }) {
         <Text style={{ fontFamily: "poppinsSemiBold" }}>Forgot password</Text>
       </View>
       <Text
-        className="text-center text-sm mb-3"
+        className="text-center text-[16px] mb-3"
         style={{ fontFamily: "poppinsRegular" }}
       >
         Please fill your email address below
       </Text>
       <Text
-        className="text-center text-sm mb-8 text-faintDark2"
+        className="text-center text-[16px] mb-8 text-faintDark2"
         style={{ fontFamily: "poppinsRegular" }}
       >
         We will send you a code to reset your password

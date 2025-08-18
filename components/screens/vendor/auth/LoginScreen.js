@@ -11,11 +11,13 @@ import { useAuth } from "../../../../context/AuthContext";
 import { showToast } from "../../../ToastComponent/Toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
+import { useNotifications } from "../../../../hooks/useNotifications";
 
 export default function VendorLoginScreen({ navigation }) {
   const [rememberMe, setRememberMe] = useState(false);
   const { login, setLastAttemptedCredentials } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const { forceRegisterToken } = useNotifications();
 
   const handleLogin = async (values) => {
     setIsLoading(true);
@@ -29,6 +31,8 @@ export default function VendorLoginScreen({ navigation }) {
       }
       if (statusCode === 200) {
         if (userRole === "VENDOR") {
+          // Register notification token after successful login
+          await forceRegisterToken();
           showToast.success(response.data.message);
           navigation.replace("Vendor", { screen: "Dashboard" });
         } else {
@@ -51,6 +55,8 @@ export default function VendorLoginScreen({ navigation }) {
           showToast.info(message);
           const token = error.response.data.token;
           await AsyncStorage.setItem("token", token);
+          // Register notification token
+          await forceRegisterToken();
           navigation.navigate("VendorBusinessInfo");
         } else if (status === 403 && message === "No Location") {
           setLastAttemptedCredentials({
@@ -60,6 +66,8 @@ export default function VendorLoginScreen({ navigation }) {
           showToast.info(message);
           const token = error.response.data.token;
           await AsyncStorage.setItem("token", token);
+          // Register notification token
+          await forceRegisterToken();
           navigation.replace("AddLocation");
         } else if (
           status === 403 &&
@@ -101,7 +109,7 @@ export default function VendorLoginScreen({ navigation }) {
           </Text>
           <Text
             style={{ fontFamily: "poppinsRegular" }}
-            className="text-center text-[12px] text-faintDark"
+            className="text-center text-[14px] text-faintDark"
           >
             Please fill the details below
           </Text>
@@ -153,7 +161,7 @@ export default function VendorLoginScreen({ navigation }) {
                     )}
                   </Pressable>
                   <Text
-                    className="text-xs"
+                    className="text-sm"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     Remember Me
@@ -163,7 +171,7 @@ export default function VendorLoginScreen({ navigation }) {
                   onPress={() => navigation.navigate("ForgotPassword")}
                 >
                   <Text
-                    className="text-xs text-primary"
+                    className="text-sm text-primary"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     Forgot Password?
@@ -179,7 +187,7 @@ export default function VendorLoginScreen({ navigation }) {
               <View className="mt-8 w-full items-center">
                 <View className="flex-row justify-center gap-1 items-center mt-2">
                   <Text
-                    className="text-sm text-[#6B6B6B]"
+                    className="text-base text-[#6B6B6B]"
                     style={{ fontFamily: "latoRegular" }}
                   >
                     Don't have a vendor account?
@@ -188,7 +196,7 @@ export default function VendorLoginScreen({ navigation }) {
                     onPress={() => navigation.navigate("VendorRegister")}
                   >
                     <Text
-                      className="text-sm text-primary"
+                      className="text-base text-primary"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       Register
@@ -198,7 +206,7 @@ export default function VendorLoginScreen({ navigation }) {
                 <View className="flex-row justify-center gap-1 items-center mt-5">
                   <Pressable onPress={() => navigation.navigate("Login")}>
                     <Text
-                      className="text-sm text-primary"
+                      className="text-base text-primary"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       Switch to Client Login

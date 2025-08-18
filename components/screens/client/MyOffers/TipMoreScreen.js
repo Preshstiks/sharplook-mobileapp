@@ -128,7 +128,7 @@ export default function TipMoreScreen() {
 
         <Text
           style={{
-            fontSize: 16,
+            fontSize: 18,
             fontFamily: "poppinsMedium",
             color: "#1F2937",
           }}
@@ -160,7 +160,7 @@ export default function TipMoreScreen() {
         <View style={{ marginBottom: 12 }}>
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-[12px] pb-1"
+            className="text-[14px] pb-1"
           >
             Service
           </Text>
@@ -176,7 +176,7 @@ export default function TipMoreScreen() {
           >
             <Text
               style={{
-                fontSize: 12,
+                fontSize: 14,
                 fontFamily: "poppinsRegular",
                 color: "#1F2937",
               }}
@@ -190,7 +190,7 @@ export default function TipMoreScreen() {
         <View style={{ marginBottom: 12 }}>
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-[12px] pb-1"
+            className="text-[14px] pb-1"
           >
             Service Type
           </Text>
@@ -206,7 +206,7 @@ export default function TipMoreScreen() {
           >
             <Text
               style={{
-                fontSize: 12,
+                fontSize: 14,
                 fontFamily: "poppinsRegular",
                 color: "#1F2937",
               }}
@@ -276,7 +276,7 @@ export default function TipMoreScreen() {
               <Ionicons name="calendar-outline" size={16} color="#8C8D8B" />
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: "#8C8D8B",
                   marginLeft: 4,
@@ -289,7 +289,7 @@ export default function TipMoreScreen() {
               <Ionicons name="time-outline" size={16} color="#8C8D8B" />
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: "#8C8D8B",
                   marginLeft: 4,
@@ -323,7 +323,7 @@ export default function TipMoreScreen() {
           >
             <Text
               style={{
-                fontSize: 14,
+                fontSize: 16,
                 fontFamily: "poppinsMedium",
                 color: "#1F2937",
                 marginBottom: 8,
@@ -333,7 +333,7 @@ export default function TipMoreScreen() {
             </Text>
             <Text
               style={{
-                fontSize: 14,
+                fontSize: 16,
                 fontFamily: "poppinsRegular",
                 color: "#6B7280",
               }}

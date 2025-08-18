@@ -74,7 +74,7 @@ export const ChatTimestamp = ({
     <View className="items-end">
       {showDate && dateText && (
         <Text
-          className="text-xs text-[#A9A9A9] mb-1"
+          className="text-sm text-[#A9A9A9] mb-1"
           style={{ fontFamily: "poppinsRegular" }}
         >
           {dateText}
@@ -82,7 +82,7 @@ export const ChatTimestamp = ({
       )}
       {showTime && (
         <Text
-          className="text-xs text-[#A9A9A9]"
+          className="text-sm text-[#A9A9A9]"
           style={{ fontFamily: "poppinsRegular" }}
         >
           {timeText}

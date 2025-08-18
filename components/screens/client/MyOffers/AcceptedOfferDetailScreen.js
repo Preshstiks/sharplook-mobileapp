@@ -248,7 +248,7 @@ export default function AcceptedOfferDetailScreen() {
           </Pressable>
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-white text-[16px]"
+            className="text-white text-[18px]"
           >
             Choose Vendor
           </Text>
@@ -257,7 +257,7 @@ export default function AcceptedOfferDetailScreen() {
       <ScrollView className="px-4 pt-8 pb-[80px]">
         <Text
           style={{ fontFamily: "poppinsSemiBold" }}
-          className="text-[18px] mb-4"
+          className="text-[20px] mb-4"
         >
           Accepted Offers
         </Text>
@@ -303,14 +303,14 @@ export default function AcceptedOfferDetailScreen() {
 
                   <Text
                     style={{ fontFamily: "poppinsMedium" }}
-                    className="text-[14px] mt-6 text-center"
+                    className="text-[16px] mt-6 text-center"
                   >
                     {vendor?.vendorOnboarding?.businessName}
                   </Text>
                   <View className="bg-primary my-3 px-[10px] py-1 rounded-[8px] mt-1">
                     <Text
                       style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[10px] pt-1 text-white "
+                      className="text-[12px] pt-1 text-white "
                     >
                       {vendor?.vendorOnboarding?.serviceType === "IN_SHOP"
                         ? "In-shop"
@@ -328,7 +328,7 @@ export default function AcceptedOfferDetailScreen() {
                     />
                     <Text
                       style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[12px] text-faintDark flex-1"
+                      className="text-[14px] text-faintDark flex-1"
                       numberOfLines={3}
                     >
                       {(() => {
@@ -373,7 +373,7 @@ export default function AcceptedOfferDetailScreen() {
                   >
                     <Text
                       style={{ fontFamily: "latoBold" }}
-                      className="text-white text-center text-[14px]"
+                      className="text-white text-center text-[16px]"
                     >
                       {loading ? "Processing..." : "Select Vendor"}
                     </Text>
@@ -388,7 +388,7 @@ export default function AcceptedOfferDetailScreen() {
                   >
                     <Text
                       style={{ fontFamily: "latoBold" }}
-                      className="text-primary text-[14px] text-center"
+                      className="text-primary text-[16px] text-center"
                     >
                       View Profile
                     </Text>
@@ -412,7 +412,7 @@ export default function AcceptedOfferDetailScreen() {
             <View className="flex-row justify-between items-center mb-6">
               <Text
                 style={{ fontFamily: "poppinsSemiBold" }}
-                className="text-[16px] text-fadedDark"
+                className="text-[18px] text-fadedDark"
               >
                 Select Payment Method
               </Text>
@@ -438,7 +438,7 @@ export default function AcceptedOfferDetailScreen() {
                   }`}
                 />
                 <Text
-                  className="text-[12px]"
+                  className="text-[14px]"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
                   {method.label}
@@ -450,13 +450,13 @@ export default function AcceptedOfferDetailScreen() {
             <View className="flex-row justify-between items-center border-t border-lightgray pt-4 mt-4">
               <Text
                 style={{ fontFamily: "poppinsMedium" }}
-                className="text-[14px] text-fadedDark"
+                className="text-[18px] text-fadedDark"
               >
                 Total Amount
               </Text>
               <Text
                 style={{ fontFamily: "poppinsSemiBold" }}
-                className="text-primary text-[16px]"
+                className="text-primary text-[18px]"
               >
                 {formatAmount(vendorOffers[0].price)}
               </Text>
@@ -474,6 +474,7 @@ export default function AcceptedOfferDetailScreen() {
       >
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
+            <View style={{ width: 24 }} />
             <Text style={styles.headerTitle}>Payment</Text>
             <TouchableOpacity
               onPress={() => setPaystackModalVisible(false)}
@@ -543,8 +544,8 @@ export default function AcceptedOfferDetailScreen() {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#fff",
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingTop: 50,
+    paddingBottom: 14,
     paddingHorizontal: 16,
     marginBottom: 20,
     flexDirection: "row",
@@ -558,7 +559,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#222",
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: "poppinsMedium",
     flex: 1,
     textAlign: "center",

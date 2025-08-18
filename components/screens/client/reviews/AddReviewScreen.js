@@ -65,7 +65,7 @@ export default function AddReviewScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-[14px] text-white"
+          className="text-[16px] text-white"
         >
           Add Review
         </Text>
@@ -89,7 +89,7 @@ export default function AddReviewScreen() {
           touched,
         }) => (
           <>
-            <View className="flex-1 px-4 mt-6">
+            <View className="px-4 mt-6">
               <OutlineTextAreaInput
                 label="How was your experience?"
                 placeholder="Describe your experience?"
@@ -101,13 +101,13 @@ export default function AddReviewScreen() {
 
               <View className="flex-row justify-between mt-2 items-center">
                 <Text
-                  className="text-[12px]"
+                  className="text-[14px]"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
                   Star
                 </Text>
                 <Text
-                  className="text-[15px] text-primary ml-auto"
+                  className="text-[17px] text-primary ml-auto"
                   style={{ fontFamily: "poppinsBold" }}
                 >
                   {values.rating.toFixed(1)}
@@ -115,7 +115,7 @@ export default function AddReviewScreen() {
               </View>
 
               <View className="flex-row items-center mb-8">
-                <Text className="text-[12px] mr-2">1.0</Text>
+                <Text className="text-[14px] mr-2">1.0</Text>
                 <Slider
                   style={{ flex: 1, height: 40 }}
                   minimumValue={1}
@@ -127,12 +127,12 @@ export default function AddReviewScreen() {
                   value={values.rating}
                   onValueChange={(value) => setFieldValue("rating", value)}
                 />
-                <Text className="text-[12px] ml-2">5.0</Text>
+                <Text className="text-[14px] ml-2">5.0</Text>
               </View>
 
               {/* Display star rating error if any */}
               {touched.rating && errors.rating && (
-                <Text className="text-red-500 text-[12px] mb-2">
+                <Text className="text-red-500 text-[14px] mb-2">
                   {errors.rating}
                 </Text>
               )}

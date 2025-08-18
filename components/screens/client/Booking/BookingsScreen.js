@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -12,45 +12,109 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Empty from "../../../../assets/img/empty.svg";
 import { HttpClient } from "../../../../api/HttpClient";
 import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
-import { HexConverter } from "../../../reusuableComponents/HexConverter";
 import { DateConverter } from "../../../reusuableComponents/DateConverter";
 import { DayConverter } from "../../../reusuableComponents/DayConverter";
 import { formatAmount } from "../../../formatAmount";
 import { Ionicons } from "@expo/vector-icons";
+import { io } from "socket.io-client";
+import { useAuth } from "../../../../context/AuthContext";
 
 export default function BookingsScreen() {
   const navigation = useNavigation();
+  const { user } = useAuth();
+  const socketRef = useRef(null);
   const [tab, setTab] = useState("PENDING");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const userId = user?.id;
+
+  const fetchBookings = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await HttpClient.get("/bookings/getBookings");
+      setBookings(response.data.data || []);
+    } catch (err) {
+      setError("Failed to load bookings.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (userId) {
+      fetchBookings();
+      socketRef.current = io("https://sharplook-backend-zd8j.onrender.com", {
+        query: { userId },
+        transports: ["websocket"],
+      });
+
+      socketRef.current.on("bookingUpdated", (data) => {
+        console.log("bookingUpdated:", JSON.stringify(data));
+        const { bookingId, status } = data;
+
+        if (bookingId && status) {
+          setBookings((prevBookings) =>
+            prevBookings.map((booking) =>
+              booking.id === bookingId
+                ? { ...booking, status: status }
+                : booking
+            )
+          );
+
+          console.log(`Updated booking ${bookingId} status to ${status}`);
+        }
+      });
+    }
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("bookingUpdated");
+        socketRef.current.disconnect();
+      }
+    };
+  }, [userId]);
+
+  // Join booking rooms when bookings change
+  useEffect(() => {
+    if (socketRef.current && bookings.length > 0) {
+      bookings.forEach((booking) => {
+        if (booking.id) {
+          socketRef.current.emit("joinBookingRoom", { bookingId: booking.id });
+          console.log(`Joined booking room: ${booking.id}`);
+        }
+      });
+    }
+  }, [bookings]); // Re-run when bookings array changes
+
+  // Socket cleanup effect
+  useEffect(() => {
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("connect");
+        socketRef.current.off("disconnect");
+        socketRef.current.off("bookingUpdated");
+        socketRef.current.disconnect();
+      }
+    };
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      const fetchBookings = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const response = await HttpClient.get("/bookings/getBookings");
-
-          setBookings(response.data.data || []);
-        } catch (err) {
-          setError("Failed to load bookings.");
-        } finally {
-          setLoading(false);
-        }
-      };
       fetchBookings();
     }, [])
   );
 
   const filteredBookings = bookings.filter((b) => b.status === tab);
-  console.log({ filteredBookings });
+
   const EmptyState = () => (
     <View className="flex-1 justify-center items-center px-8">
       <Empty width={150} height={150} />
       <Text
         style={{ fontFamily: "poppinsRegular" }}
-        className="text-[12px] text-center"
+        className="text-[14px] text-center"
       >
         {tab === "PENDING"
           ? "You have no pending bookings"
@@ -139,7 +203,7 @@ export default function BookingsScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-white text-center text-[14px]"
+          className="text-white text-center text-[16px]"
         >
           My Bookings
         </Text>
@@ -158,7 +222,7 @@ export default function BookingsScreen() {
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "PENDING" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[14px] ${tab === "PENDING" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             Pending
           </Text>
@@ -169,7 +233,7 @@ export default function BookingsScreen() {
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "ACCEPTED" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[14px] ${tab === "ACCEPTED" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             Accepted
           </Text>
@@ -180,7 +244,7 @@ export default function BookingsScreen() {
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "COMPLETED" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[14px] ${tab === "COMPLETED" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             Completed
           </Text>
@@ -216,38 +280,38 @@ export default function BookingsScreen() {
                 <View>
                   <Text
                     style={{ fontFamily: "poppinsMedium" }}
-                    className="text-[16px] mb-1 text-fadedDark"
+                    className="text-[18px] mb-1 text-fadedDark"
                   >
-                    {booking?.serviceName}
+                    {booking?.serviceName || booking?.service?.serviceName}
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[10px] text-fadedDark"
+                    className="text-[12px] text-fadedDark"
                   >
                     {booking?.vendor.vendorOnboarding.businessName}
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[10px] text-fadedDark"
+                    className="text-[12px] text-fadedDark"
                   >
                     {DateConverter(booking?.date)}
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[10px] text-fadedDark"
+                    className="text-[12px] text-fadedDark"
                   >
                     {booking?.time}
                   </Text>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[10px] text-fadedDark"
+                    className="text-[12px] text-fadedDark"
                   >
                     {DayConverter(booking?.date)}
                   </Text>
                 </View>
                 <Text
                   style={{ fontFamily: "latoBold" }}
-                  className="text-primary text-[14px] pr-2 self-end"
+                  className="text-primary text-[16px] pr-2 self-end"
                 >
                   {formatAmount(booking?.price)}
                 </Text>

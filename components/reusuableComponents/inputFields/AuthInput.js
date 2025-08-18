@@ -43,7 +43,7 @@ export const AuthInput = ({
     paddingHorizontal: 4,
     top: -10,
     fontFamily: "poppinsRegular",
-    fontSize: 12,
+    fontSize: 14,
     backgroundColor: "#FFFAFD",
     color: isFocused ? "#EB278D" : "#333333",
     zIndex: 2,
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 16,
     color: "#333",
     paddingVertical: Platform.OS === "ios" ? 12 : 8,
     marginTop: 8,
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#FF0000",
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "poppinsRegular",
     marginTop: 4,
     marginLeft: 12,

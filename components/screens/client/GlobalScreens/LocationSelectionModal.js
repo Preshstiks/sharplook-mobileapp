@@ -165,7 +165,7 @@ export default function LocationSelectionModal({
           <View className="flex-row items-center justify-between mb-6">
             <Text
               style={{ fontFamily: "poppinsSemiBold" }}
-              className="text-[18px] text-faintDark"
+              className="text-[20px] text-faintDark"
             >
               Select Delivery Location
             </Text>
@@ -183,7 +183,7 @@ export default function LocationSelectionModal({
           <View className="mb-6">
             <Text
               style={{ fontFamily: "poppinsMedium" }}
-              className="text-[14px] text-faintDark mb-3"
+              className="text-[16px] text-faintDark mb-3"
             >
               Delivery Location
             </Text>
@@ -213,7 +213,7 @@ export default function LocationSelectionModal({
                   <View className="flex-1">
                     <Text
                       style={{ fontFamily: "poppinsMedium" }}
-                      className="text-[14px] text-faintDark"
+                      className="text-[16px] text-faintDark"
                     >
                       {option.label}
                     </Text>
@@ -221,7 +221,7 @@ export default function LocationSelectionModal({
                       locationOption === "current" && (
                         <Text
                           style={{ fontFamily: "poppinsRegular" }}
-                          className="text-[12px] text-gray-500 mt-1"
+                          className="text-[14px] text-gray-500 mt-1"
                         >
                           Using your current GPS location
                         </Text>
@@ -230,7 +230,7 @@ export default function LocationSelectionModal({
                       locationOption === "registered" && (
                         <Text
                           style={{ fontFamily: "poppinsRegular" }}
-                          className="text-[12px] text-gray-500 mt-1"
+                          className="text-[14px] text-gray-500 mt-1"
                         >
                           Using your registered location
                         </Text>
@@ -254,7 +254,7 @@ export default function LocationSelectionModal({
                   <MaterialIcons name="my-location" size={20} color="#EB278D" />
                   <Text
                     style={{ fontFamily: "poppinsMedium" }}
-                    className="text-[14px] text-primary ml-2 flex-1"
+                    className="text-[16px] text-primary ml-2 flex-1"
                   >
                     {isLocationLoading
                       ? "Updating location..."
@@ -298,18 +298,42 @@ export default function LocationSelectionModal({
                           <div id="map"></div>
                           <script>
                             var map = L.map('map').setView([6.5244, 3.3792], 13);
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                              attribution: '&copy; OpenStreetMap contributors'
+                            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                              subdomains: 'abcd',
+                              maxZoom: 19
                             }).addTo(map);
                             var marker = L.marker([6.5244, 3.3792]).addTo(map)
                               .bindPopup('You are here')
                               .openPopup();
 
+                            // Function to get location name from coordinates
+                            function getLocationName(lat, lng) {
+                              fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1')
+                                .then(function(response) { 
+                                  if (response.ok) {
+                                    return response.json(); 
+                                  }
+                                  throw new Error('Network response was not ok');
+                                })
+                                .then(function(data) {
+                                  if (data.display_name) {
+                                    marker.bindPopup(data.display_name).openPopup();
+                                  } else {
+                                    marker.bindPopup('You are here').openPopup();
+                                  }
+                                })
+                                .catch(function(error) { 
+                                  console.log('Geocoding error:', error);
+                                  marker.bindPopup('You are here').openPopup();
+                                });
+                            }
+
                             function updateMap(data) {
                               if (data.latitude && data.longitude) {
                                 map.setView([data.latitude, data.longitude], 16);
                                 marker.setLatLng([data.latitude, data.longitude]);
-                                marker.bindPopup('You are here').openPopup();
+                                getLocationName(data.latitude, data.longitude);
                               }
                             }
 
@@ -347,7 +371,7 @@ export default function LocationSelectionModal({
           <View className="flex-row justify-between mb-2">
             <Text
               style={{ fontFamily: "poppinsRegular" }}
-              className="text-[14px] text-[#868889]"
+              className="text-[16px] text-[#868889]"
             >
               Subtotal
             </Text>

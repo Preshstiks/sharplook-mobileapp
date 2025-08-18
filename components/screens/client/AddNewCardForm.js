@@ -30,7 +30,7 @@ export default function AddNewCardForm({ onAddCard }) {
         </TouchableOpacity>
         <View style={{ flex: 1, alignItems: "center" }}>
           <Text
-            style={{ color: "#fff", fontSize: 16, fontFamily: "poppinsMedium" }}
+            style={{ color: "#fff", fontSize: 18, fontFamily: "poppinsMedium" }}
           >
             Add New Card
           </Text>
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: "poppinsRegular",
-    fontSize: 13,
+    fontSize: 15,
     color: "#201E1F",
     marginBottom: 2,
     marginTop: 6,

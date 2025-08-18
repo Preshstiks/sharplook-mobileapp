@@ -15,11 +15,13 @@ import { showToast } from "../../ToastComponent/Toast";
 import { useAuth } from "../../../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoaderOverlay from "../../reusuableComponents/LoaderOverlay";
+import { useNotifications } from "../../../hooks/useNotifications";
 
 export default function LoginScreen({ navigation }) {
   const [rememberMe, setRememberMe] = useState(false);
   const { setLastAttemptedCredentials, login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const { forceRegisterToken } = useNotifications();
 
   const handleLogin = async (values) => {
     setIsLoading(true);
@@ -34,6 +36,8 @@ export default function LoginScreen({ navigation }) {
         if (userRole === "CLIENT") {
           if (token) {
             await login(token, userRole);
+            // Register notification token after successful login
+            await forceRegisterToken();
           }
           showToast.success(response.data.message);
           navigation.replace("ClientApp");
@@ -51,6 +55,8 @@ export default function LoginScreen({ navigation }) {
             email: values.email,
             password: values.password,
           });
+          // Register notification token
+          await forceRegisterToken();
           showToast.info(message);
           navigation.navigate("ClientAddLocation");
         } else if (
@@ -90,7 +96,7 @@ export default function LoginScreen({ navigation }) {
           </Text>
           <Text
             style={{ fontFamily: "poppinsRegular" }}
-            className="text-center text-[12px] text-faintDark"
+            className="text-center text-[14px] text-faintDark"
           >
             Please fill the details below
           </Text>
@@ -142,7 +148,7 @@ export default function LoginScreen({ navigation }) {
                     )}
                   </Pressable>
                   <Text
-                    className="text-xs"
+                    className="text-[14px]"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     Remember Me
@@ -152,7 +158,7 @@ export default function LoginScreen({ navigation }) {
                   onPress={() => navigation.navigate("ForgotPassword")}
                 >
                   <Text
-                    className="text-xs text-primary"
+                    className="text-[14px] text-primary"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     Forgot Password?
@@ -169,14 +175,14 @@ export default function LoginScreen({ navigation }) {
               <View className="mt-8 w-full items-center">
                 <View className="flex-row justify-center gap-1 items-center mt-2">
                   <Text
-                    className="text-sm text-[#6B6B6B]"
+                    className="text-[16px] text-[#6B6B6B]"
                     style={{ fontFamily: "latoRegular" }}
                   >
                     Don't have an account?
                   </Text>
                   <Pressable onPress={() => navigation.navigate("Register")}>
                     <Text
-                      className="text-sm text-primary"
+                      className="text-[16px] text-primary"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       Register
@@ -186,7 +192,7 @@ export default function LoginScreen({ navigation }) {
                 <View className="flex-row justify-center gap-1 items-center mt-5">
                   <Pressable onPress={() => navigation.navigate("VendorLogin")}>
                     <Text
-                      className="text-sm text-primary"
+                      className="text-[16px] text-primary"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       Switch to Vendor Login

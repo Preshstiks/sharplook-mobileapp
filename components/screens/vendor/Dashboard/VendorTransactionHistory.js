@@ -220,12 +220,7 @@ export default function VendorTransactionHistory({ navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#201E1F" />
         </TouchableOpacity>
-        <Text
-          style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
-        >
-          Transaction History
-        </Text>
+        <Text className="text-[16px] text-faintDark">Transaction History</Text>
         <View style={{ width: 26 }} />
       </View>
 
@@ -377,7 +372,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#222",
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "poppinsMedium",
     flex: 1,
     textAlign: "center",
@@ -421,7 +416,7 @@ const styles = StyleSheet.create({
   },
   dropdownTitle: {
     fontFamily: "poppinsMedium",
-    fontSize: 16,
+    fontSize: 18,
     color: "#222",
   },
   dropdownList: {
@@ -441,7 +436,7 @@ const styles = StyleSheet.create({
   },
   dropdownItemText: {
     fontFamily: "poppinsRegular",
-    fontSize: 14,
+    fontSize: 16,
     color: "#222",
   },
   selectedDropdownItemText: {
@@ -468,23 +463,23 @@ const styles = StyleSheet.create({
   },
   txName: {
     fontFamily: "poppinsMedium",
-    fontSize: 13,
+    fontSize: 15,
     color: "#222",
   },
   txDate: {
     fontFamily: "latoBold",
-    fontSize: 10,
+    fontSize: 12,
     color: "#888",
     marginTop: 2,
   },
   txAmount: {
     fontFamily: "latoBold",
-    fontSize: 14,
+    fontSize: 16,
     color: "#222",
   },
   txStatus: {
     fontFamily: "latoBold",
-    fontSize: 10,
+    fontSize: 12,
     marginTop: 2,
   },
   paginationContainer: {
@@ -499,7 +494,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   paginationInfoText: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#666",
     fontFamily: "poppinsRegular",
   },
@@ -534,7 +529,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   paginationText: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#333",
     fontFamily: "poppinsMedium",
   },
@@ -549,7 +544,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   paginationDotsText: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#666",
     fontFamily: "poppinsRegular",
   },
@@ -578,7 +573,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginLeft: 10,
-    fontSize: 14,
+    fontSize: 16,
     color: "#333",
     fontFamily: "poppinsMedium",
   },

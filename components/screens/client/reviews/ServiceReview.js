@@ -155,7 +155,7 @@ export default function ServiceReviewsScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-[16px] text-white"
+          className="text-[18px] text-white"
         >
           Reviews
         </Text>
@@ -170,14 +170,14 @@ export default function ServiceReviewsScreen() {
         <View className="flex-row items-center justify-between my-6">
           <View>
             <Text
-              className="text-[12px] text-faintDark"
+              className="text-[14px] text-faintDark"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {reviews.length} Reviews
             </Text>
             <View className="flex-row items-center mt-1">
               <Text
-                className="text-[12px] mt-1 mr-2"
+                className="text-[14px] mt-1 mr-2"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 {/* Show average rating if available */}
@@ -227,7 +227,7 @@ export default function ServiceReviewsScreen() {
                 className="mr-1"
               />
               <Text
-                className="text-white mt-1 text-[12px] ml-2"
+                className="text-white mt-1 text-[14px] ml-2"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 Add Review
@@ -266,20 +266,20 @@ export default function ServiceReviewsScreen() {
             <View className="flex-1">
               <View className="flex-row items-center justify-between">
                 <Text
-                  className="text-[12px] font-semibold text-faintDark"
+                  className="text-[14px] font-semibold text-faintDark"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
                   {review.name || review.userName || "Anonymous"}
                 </Text>
                 <View className="flex-row items-center">
                   <Text
-                    className="text-[12px] mr-1"
+                    className="text-[14px] mr-1"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     {review.rating}
                   </Text>
                   <Text
-                    className="text-[10px] mr-1"
+                    className="text-[12px] mr-1"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     rating
@@ -295,7 +295,7 @@ export default function ServiceReviewsScreen() {
                     className="mr-1"
                   />
                   <Text
-                    className="text-[10px] mt-1"
+                    className="text-[12px] mt-1"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     {review.date || review.createdAt?.slice(0, 10) || "-"}
@@ -317,7 +317,7 @@ export default function ServiceReviewsScreen() {
                 </View>
               </View>
               <Text
-                className="text-[10px] text-faintDark"
+                className="text-[12px] text-faintDark"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 {review.text || review.comment || ""}

@@ -21,7 +21,7 @@ export default function LegalScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Legal
         </Text>
@@ -37,7 +37,7 @@ export default function LegalScreen() {
             <Octicons name="shield" size={22} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-black"
+            className="flex-1 text-[16px] text-black"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Privacy Policy
@@ -52,7 +52,7 @@ export default function LegalScreen() {
             <MaterialIcons name="description" size={22} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-black"
+            className="flex-1 text-[16px] text-black"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Terms of Use

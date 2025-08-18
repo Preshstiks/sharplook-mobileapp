@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./global.css";
 import AppNavigator from "./AppNavigator";
 import { AuthProvider } from "./context/AuthContext";
@@ -10,6 +10,7 @@ import { toastConfig } from "./components/ToastComponent/ToastConfig";
 import { CartProvider } from "./context/CartContext";
 import { CallProvider } from "./context/CallContext";
 import { FilterProvider } from "./context/FilterContext";
+import notificationService from "./utils/notificationService";
 if (__DEV__) {
   global.XMLHttpRequest = global.originalXMLHttpRequest
     ? global.originalXMLHttpRequest
@@ -28,6 +29,25 @@ const linking = {
   },
 };
 export default function App() {
+  useEffect(() => {
+    // Initialize notification service when app starts
+    const initializeNotifications = async () => {
+      try {
+        await notificationService.initialize();
+        console.log("Notification service initialized successfully");
+      } catch (error) {
+        console.error("Failed to initialize notification service:", error);
+      }
+    };
+
+    initializeNotifications();
+
+    // Cleanup on unmount
+    return () => {
+      notificationService.cleanup();
+    };
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBarProvider>

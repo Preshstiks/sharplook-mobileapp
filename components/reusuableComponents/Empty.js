@@ -6,7 +6,7 @@ export const EmptyState = ({ item }) => (
 
     <Text
       style={{ fontFamily: "poppinsRegular" }}
-      className="text-[12px] text-center"
+      className="text-[14px] text-center"
     >
       Oops! You have no {item}
     </Text>

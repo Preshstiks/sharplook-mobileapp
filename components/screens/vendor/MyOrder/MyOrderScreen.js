@@ -11,7 +11,6 @@ import {
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Empty from "../../../../assets/img/empty.svg";
 import { HttpClient } from "../../../../api/HttpClient";
-import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 import { HexConverter } from "../../../reusuableComponents/HexConverter";
 import {
   DateConverter,
@@ -54,10 +53,6 @@ export default function MyOrderScreen() {
           // Check if any item in the items array has the selected status
           return orderItem.status === tab;
         });
-
-  console.log("Filtered orders:", filteredOrders);
-  console.log("Current tab:", tab);
-  console.log("All orders:", order);
 
   const EmptyState = () => (
     <View className="flex-1 justify-center items-center px-8">
@@ -166,9 +161,7 @@ export default function MyOrderScreen() {
         <Text style={{ fontFamily: "poppinsMedium" }} className="text-[16px]">
           Orders
         </Text>
-        <View className="relative">
-          <MaterialIcons name="shopping-cart" size={24} color="#fff" />
-        </View>
+        <View style={{ width: 26 }} />
       </View>
 
       <View className="flex-row justify-center mt-8 mb-2 gap-3">

@@ -2,32 +2,18 @@ import React from "react";
 import {
   View,
   Text,
-  Image,
   ScrollView,
   TouchableOpacity,
   StatusBar,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
-import OutlineButton from "../../../reusuableComponents/buttons/OutlineButton";
-import { HttpClient } from "../../../../api/HttpClient";
-import * as ImagePicker from "expo-image-picker";
-import { Feather, AntDesign } from "@expo/vector-icons";
-import { Formik } from "formik";
-import * as Yup from "yup";
-import BottomModal from "../../../reusuableComponents/BottomModal";
-import { useState } from "react";
-import { OutlineTextAreaInput } from "../../../reusuableComponents/inputFields/OutlineTextInput";
 import { HexConverter } from "../../../reusuableComponents/HexConverter";
 import {
   DateConverter,
   formatDateTime,
-  formatDateToDDMMYYYY,
 } from "../../../reusuableComponents/DateConverter";
 import { formatAmount } from "../../../formatAmount";
-import { showToast } from "../../../ToastComponent/Toast";
-import { useChatNavigation } from "../../../../hooks/useChatNavigation";
 
 export default function OrderDetailsScreen() {
   const route = useRoute();
@@ -109,6 +95,12 @@ export default function OrderDetailsScreen() {
             className="text-[12px] mb-2"
             style={{ fontFamily: "poppinsRegular" }}
           >
+            Delivery Type: {order?.order?.deliveryType}
+          </Text>
+          <Text
+            className="text-[12px] mb-2"
+            style={{ fontFamily: "poppinsRegular" }}
+          >
             To: {order?.order?.user?.location}
           </Text>
 
@@ -123,7 +115,7 @@ export default function OrderDetailsScreen() {
               className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "latoBold" }}
             >
-              {formatAmount(order?.items[0]?.price)}
+              {` ${formatAmount(order?.items[0]?.price)} x ${order?.items[0]?.quantity}`}
             </Text>
           </View>
         </View>
@@ -159,7 +151,7 @@ export default function OrderDetailsScreen() {
               Total Payment{" "}
             </Text>
             <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
-              {formatAmount(order?.items[0]?.price)}
+              {formatAmount(order?.total)}
             </Text>
           </View>
         </View>

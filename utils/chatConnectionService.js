@@ -32,7 +32,7 @@ class ChatConnectionService {
         }
 
         // Initialize socket connection
-        this.socket = io("https://sharplook-backend-2l7j.onrender.com", {
+        this.socket = io("https://sharplook-backend-zd8j.onrender.com", {
           query: { userId },
           transports: ["websocket", "polling"],
           reconnection: true,

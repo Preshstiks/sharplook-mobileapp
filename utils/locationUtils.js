@@ -45,3 +45,25 @@ export const getCurrentLocation = async () => {
     throw error;
   }
 };
+
+// Utility function to check if user location is set for home service booking
+export const checkUserLocationForBooking = (user, showToast) => {
+  if (!user || !user.location) {
+    showToast.warning(
+      "Please set your location in your profile to book home services"
+    );
+    return false;
+  }
+  return true;
+};
+
+// Utility function to check if user location is set for cart checkout
+export const checkUserLocationForCheckout = (user, showToast) => {
+  if (!user || !user.location) {
+    showToast.warning(
+      "Please set your location in your profile to checkout products"
+    );
+    return false;
+  }
+  return true;
+};

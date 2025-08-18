@@ -7,13 +7,13 @@ export const useChatNavigation = () => {
   const [isConnecting, setIsConnecting] = useState(false);
 
   const navigateToChat = useCallback(
-    async (navigation, chatParams, options = {}) => {
+    (navigation, chatParams, options = {}) => {
       const {
         roomId,
         receiverId,
         receiverName,
         vendorId,
-        showLoading = true,
+        showLoading = false, // Changed default to false
         onConnectionStart,
         onConnectionSuccess,
         onConnectionError,
@@ -50,59 +50,121 @@ export const useChatNavigation = () => {
         return;
       }
 
-      try {
-        // Set connecting state
-        setIsConnecting(true);
+      // ✅ NAVIGATE IMMEDIATELY - Don't wait for connection
+      navigation.navigate("ChatDetailScreen", {
+        roomId: actualRoomId,
+        receiverId: actualReceiverId,
+        receiverName: receiverName || chatParams.chat?.name || "Chat",
+        connectionEstablished: false, // Initially false
+        socket: null, // Let ChatDetail handle connection
+        vendorPhone: chatParams.vendorPhone,
+        vendorAvatar: chatParams.vendorAvatar,
+        ...options,
+      });
 
-        // Call connection start callback
-        if (onConnectionStart) {
-          onConnectionStart();
+      // ✅ ESTABLISH CONNECTION IN BACKGROUND (non-blocking)
+      (async () => {
+        try {
+          setIsConnecting(true);
+
+          if (onConnectionStart) {
+            onConnectionStart();
+          }
+
+          // Get existing connection or create new one
+          const existingSocket = chatConnectionService.getSocket();
+
+          if (existingSocket && chatConnectionService.isSocketConnected()) {
+            // Use existing connection
+            if (onConnectionSuccess) {
+              onConnectionSuccess({ socket: existingSocket });
+            }
+          } else {
+            // Establish new connection in background
+            const connectionResult =
+              await chatConnectionService.establishConnection(
+                user.id,
+                actualRoomId
+              );
+
+            if (onConnectionSuccess) {
+              onConnectionSuccess(connectionResult);
+            }
+          }
+        } catch (error) {
+          console.error("❌ Background connection failed:", error);
+
+          if (onConnectionError) {
+            onConnectionError(error);
+          }
+        } finally {
+          setIsConnecting(false);
         }
+      })();
+    },
+    [user]
+  );
 
-        // Show loading if requested
-        if (showLoading) {
+  // ✅ OPTIMIZED VERSION WITH IMMEDIATE NAVIGATION
+  const navigateToChatOptimized = useCallback(
+    (navigation, chatParams, options = {}) => {
+      const {
+        roomId,
+        receiverId,
+        receiverName,
+        vendorId,
+        vendorPhone,
+        vendorAvatar,
+      } = chatParams;
+
+      // Calculate room and receiver IDs
+      let actualRoomId = roomId;
+      let actualReceiverId = receiverId;
+
+      if (vendorId && !roomId) {
+        const userId = user?.id;
+        if (userId) {
+          actualRoomId = [userId, vendorId].sort().join("_");
+          actualReceiverId = vendorId;
         }
+      }
 
-        // Establish connection before navigation
-        const connectionResult =
-          await chatConnectionService.establishConnection(
-            user.id,
-            actualRoomId
-          );
-
-        // Call connection success callback
-        if (onConnectionSuccess) {
-          onConnectionSuccess(connectionResult);
+      if (chatParams.chat?.vendorId) {
+        const userId = user?.id;
+        if (userId) {
+          actualRoomId = [userId, chatParams.chat.vendorId].sort().join("_");
+          actualReceiverId = chatParams.chat.vendorId;
         }
+      }
 
-        // Navigate to chat screen with connection info
-        navigation.navigate("ChatDetailScreen", {
-          roomId: actualRoomId,
-          receiverId: actualReceiverId,
-          receiverName: receiverName || chatParams.chat?.name || "Chat",
-          connectionEstablished: true,
-          socket: connectionResult.socket,
-          vendorPhone: chatParams.vendorPhone, // Pass vendor phone number
-          ...options,
-        });
-      } catch (error) {
-        console.error("❌ Failed to establish chat connection:", error);
+      if (!actualRoomId || !user?.id) {
+        console.error("❌ Missing required parameters");
+        return;
+      }
 
-        // Call connection error callback
-        if (onConnectionError) {
-          onConnectionError(error);
-        }
+      // ✅ IMMEDIATE NAVIGATION WITH OPTIMISTIC CONNECTION
+      const existingSocket = chatConnectionService.getSocket();
+      const isConnected =
+        existingSocket && chatConnectionService.isSocketConnected();
 
-        navigation.navigate("ChatDetailScreen", {
-          roomId: actualRoomId,
-          receiverId: actualReceiverId,
-          receiverName: receiverName || chatParams.chat?.name || "Chat",
-          connectionEstablished: false,
-          vendorPhone: chatParams.vendorPhone, // Pass vendor phone number
-          ...options,
-        });
-      } finally {
-        setIsConnecting(false);
+      navigation.navigate("ChatDetailScreen", {
+        roomId: actualRoomId,
+        receiverId: actualReceiverId,
+        receiverName: receiverName || chatParams.chat?.name || "Chat",
+        connectionEstablished: isConnected,
+        socket: isConnected ? existingSocket : null,
+        vendorPhone: vendorPhone || chatParams.chat?.phoneNumber,
+        vendorAvatar: vendorAvatar || chatParams.chat?.avatar,
+        ...options,
+      });
+
+      // Background connection establishment (if needed)
+      if (!isConnected) {
+        chatConnectionService
+          .establishConnection(user.id, actualRoomId)
+          .catch((error) => {
+            console.warn("Background connection failed:", error);
+          });
       }
     },
     [user]
@@ -113,7 +175,8 @@ export const useChatNavigation = () => {
   }, []);
 
   return {
-    navigateToChat,
+    navigateToChat: navigateToChatOptimized, // Use optimized version
+    navigateToChatOriginal: navigateToChat, // Keep original as fallback
     navigateToChatList,
     isConnecting,
     isConnectedToRoom: chatConnectionService.isConnectedToRoom.bind(
@@ -124,4 +187,52 @@ export const useChatNavigation = () => {
       chatConnectionService
     ),
   };
+};
+
+// ✅ ALTERNATIVE SUPER FAST VERSION
+export const useFastChatNavigation = () => {
+  const { user } = useAuth();
+
+  const navigateToChat = useCallback(
+    (navigation, chatParams, options = {}) => {
+      // Quick parameter extraction
+      const userId = user?.id;
+      if (!userId) return;
+
+      const {
+        roomId,
+        receiverId,
+        vendorId,
+        receiverName,
+        vendorPhone,
+        vendorAvatar,
+      } = chatParams;
+
+      // Quick room ID calculation
+      let actualRoomId = roomId;
+      let actualReceiverId = receiverId;
+
+      if (vendorId && !roomId) {
+        actualRoomId = [userId, vendorId].sort().join("_");
+        actualReceiverId = vendorId;
+      }
+
+      if (!actualRoomId) return;
+
+      // ✅ INSTANT NAVIGATION - No async operations
+      navigation.navigate("ChatDetailScreen", {
+        roomId: actualRoomId,
+        receiverId: actualReceiverId,
+        receiverName: receiverName || "Chat",
+        connectionEstablished: false,
+        socket: null,
+        vendorPhone,
+        vendorAvatar,
+        ...options,
+      });
+    },
+    [user?.id]
+  );
+
+  return { navigateToChat };
 };

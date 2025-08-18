@@ -17,7 +17,7 @@ import { formatAmount } from "../../../formatAmount";
 import { HttpClient } from "../../../../api/HttpClient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCart } from "../../../../context/CartContext";
-import ProductDetailsModal from "../ProductDetailsModal";
+// import ProductDetailsModal from "../ProductDetailsModal";
 import { useChatNavigation } from "../../../../hooks/useChatNavigation";
 import { ChatConnectionLoader } from "../../../reusuableComponents/ChatConnectionLoader";
 import { StatusBar } from "react-native";
@@ -177,7 +177,6 @@ export default function Market() {
       fetchCart();
     }, [fetchCart])
   );
-
   const handleAddToCart = async (product) => {
     const productId = product.id || product._id;
     setAddingToCart((prev) => ({ ...prev, [productId]: true }));
@@ -202,14 +201,17 @@ export default function Market() {
     }
   };
   const handleProductPress = (product) => {
-    setSelectedProduct(product);
-    setModalVisible(true);
+    navigation.navigate("ProductDetailsScreen", {
+      product,
+      onAddToCart: handleAddToCartFromModal,
+      cartProductIds,
+      addingToCart,
+    });
   };
   const handleAddToCartFromModal = async (product, quantity) => {
     for (let i = 0; i < quantity; i++) {
       await handleAddToCart(product);
     }
-    setModalVisible(false);
   };
   const handleChatVendor = (product) => {
     const vendorId = product?.vendor?.id;
@@ -227,6 +229,16 @@ export default function Market() {
       });
     }
   };
+  const filteredProducts = products.filter((item) => {
+    const query = search.toLowerCase();
+    return (
+      item.productName?.toLowerCase().includes(query) ||
+      item.title?.toLowerCase().includes(query) ||
+      item?.vendor?.vendorOnboarding?.businessName
+        ?.toLowerCase()
+        .includes(query)
+    );
+  });
 
   const renderProduct = ({ item }) => {
     const productId = item.id || item._id;
@@ -254,14 +266,14 @@ export default function Market() {
             <View className="p-3">
               <Text
                 style={{ fontFamily: "latoBold" }}
-                className="text-[16px] text-faintDark mb-1"
+                className="text-[18px] text-faintDark mb-1"
               >
                 {item.productName || item.title}
               </Text>
               <View className="flex-row items-center justify-between">
                 <Text
                   style={{ fontFamily: "latoBold" }}
-                  className="text-[10px] w-[80%] my-2"
+                  className="text-[12px] w-[80%] my-2"
                 >
                   Vendor: {item?.vendor?.vendorOnboarding?.businessName}
                 </Text>
@@ -274,7 +286,7 @@ export default function Market() {
               </View>
               <Text
                 style={{ fontFamily: "latoBold" }}
-                className="text-[13px] text-faintDark mb-1"
+                className="text-[15px] text-faintDark mb-1"
               >
                 {formatAmount(item.price)}
               </Text>
@@ -294,7 +306,7 @@ export default function Market() {
                   ))}
                   <Text
                     style={{ fontFamily: "latoRegular" }}
-                    className="text-[10px] ml-1 text-[#A9A9A9]"
+                    className="text-[12px] ml-1 text-[#A9A9A9]"
                   >
                     {(item.reviews || 0).toLocaleString()}
                   </Text>
@@ -307,7 +319,7 @@ export default function Market() {
               >
                 <Text
                   style={{ fontFamily: "poppinsRegular" }}
-                  className={`text-[11px] text-center  ${isInCart ? "text-primary" : "text-white"}`}
+                  className={`text-[13px] text-center  ${isInCart ? "text-primary" : "text-white"}`}
                 >
                   {isInCart
                     ? "Added to Cart"
@@ -333,7 +345,7 @@ export default function Market() {
         <View style={{ width: 26 }} />
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[16px] text-faintDark"
+          className="text-[18px] text-faintDark"
         >
           Market
         </Text>
@@ -357,7 +369,7 @@ export default function Market() {
                 paddingHorizontal: 3,
               }}
             >
-              <Text style={{ color: "#fff", fontSize: 10, fontWeight: "bold" }}>
+              <Text style={{ color: "#fff", fontSize: 12, fontWeight: "bold" }}>
                 {cartItems.length}
               </Text>
             </View>
@@ -369,7 +381,7 @@ export default function Market() {
         <View className="flex-row items-center flex-1 bg-secondary border border-[#F9BCDC] rounded-xl px-4 mr-3">
           <MaterialIcons name="search" size={22} color="#8c817a" />
           <TextInput
-            className="ml-2 text-xs pt-5 pb-4 placeholder:text-faintDark2"
+            className="ml-2 text-sm pt-5 pb-4 placeholder:text-faintDark2"
             placeholder="Search Market"
             cursorColor="#EB278D"
             style={{ fontFamily: "poppinsRegular" }}
@@ -379,25 +391,13 @@ export default function Market() {
         </View>
       </View>
       {/* Item Count & Filter */}
-      <View className="flex-row items-center justify-between px-4 mb-2">
+      <View className="flex-row items-center justify-between px-4 my-5">
         <Text
-          className="text-[16px] text-faintDark"
+          className="text-[18px] text-faintDark"
           style={{ fontFamily: "latoBold" }}
         >
-          {products.length.toLocaleString()} Items
+          {filteredProducts.length.toLocaleString()} Items
         </Text>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Filter")}
-          className="flex-row items-center bg-white rounded-[6px] px-3 py-4 pb-3 shadow-sm"
-        >
-          <Text
-            className="text-[13px] mr-1"
-            style={{ fontFamily: "poppinsRegular" }}
-          >
-            Filter
-          </Text>
-          <Feather name="filter" size={16} color="black" />
-        </TouchableOpacity>
       </View>
       {/* Product Grid */}
       {loading ? (
@@ -414,7 +414,7 @@ export default function Market() {
         <EmptyData msg="No products found" />
       ) : (
         <FlatList
-          data={products}
+          data={filteredProducts}
           renderItem={renderProduct}
           keyExtractor={(item) => item.id?.toString() || item._id?.toString()}
           numColumns={2}
@@ -423,14 +423,7 @@ export default function Market() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
         />
       )}
-      <ProductDetailsModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        product={selectedProduct}
-        onAddToCart={handleAddToCartFromModal}
-        cartProductIds={cartProductIds}
-        addingToCart={addingToCart}
-      />
+      {/* ProductDetailsModal removed - now using ProductDetailsScreen */}
     </View>
   );
 }

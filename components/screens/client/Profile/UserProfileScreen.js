@@ -13,6 +13,7 @@ import { useAuth } from "../../../../context/AuthContext";
 
 const UserProfileScreen = ({ navigation }) => {
   const { user } = useAuth();
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
@@ -42,13 +43,13 @@ const UserProfileScreen = ({ navigation }) => {
           className="w-24 h-24 rounded-full mb-4"
         />
         <Text
-          className="text-white text-[16px]"
+          className="text-white text-[18px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           {`${user.lastName} ${user.firstName}`}
         </Text>
         <Text
-          className="text-white text-[12px] mt-1"
+          className="text-white text-[14px] mt-1"
           style={{ fontFamily: "poppinsLight" }}
         >
           {user.email}

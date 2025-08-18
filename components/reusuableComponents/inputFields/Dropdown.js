@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
+  TouchableOpacity,
+  Modal,
+  FlatList,
+  Dimensions,
   Platform,
-  TouchableWithoutFeedback,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import { Ionicons } from "@expo/vector-icons";
+
+const { height: screenHeight } = Dimensions.get("window");
 
 export default function Dropdown({
   label,
@@ -14,75 +19,126 @@ export default function Dropdown({
   onValueChange,
   error,
   touched,
-  options,
-  placeholder, // new prop
+  options = [],
+  placeholder = "Select an option...",
 }) {
-  const [isFocused, setIsFocused] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [dropdownTop, setDropdownTop] = useState(0);
+  const dropdownButton = useRef();
 
-  // Floating label style
-  const labelStyle = {
-    position: "absolute",
-    left: 12,
-    paddingHorizontal: 4,
-    top: -10,
-    fontFamily: "poppinsRegular",
-    fontSize: 12,
-    backgroundColor: "#FFFAFD",
-    color: isFocused ? "#EB278D" : "#333333",
-    zIndex: 2,
-    alignSelf: "flex-start",
-    opacity: label ? 1 : 0,
+  const toggleDropdown = () => {
+    if (isOpen) {
+      setIsOpen(false);
+    } else {
+      openDropdown();
+    }
   };
 
-  // Outlined border color
-  const borderColor =
-    error && touched ? "#FF0000" : isFocused ? "#EB278D" : "#F9BCDC";
+  const openDropdown = () => {
+    dropdownButton.current.measure((_fx, _fy, _w, h, _px, py) => {
+      const dropdownHeight = Math.min(options.length * 50 + 20, 200);
+      const spaceBelow = screenHeight - py - h;
+      const spaceAbove = py;
 
-  // Show label if focused or value is selected
-  const showLabel = !!label;
+      // Position dropdown below if there's enough space, otherwise above
+      if (spaceBelow >= dropdownHeight) {
+        setDropdownTop(py + h);
+      } else if (spaceAbove >= dropdownHeight) {
+        setDropdownTop(py - dropdownHeight);
+      } else {
+        // If neither space is enough, position in the middle
+        setDropdownTop(py + h);
+      }
+    });
+    setIsOpen(true);
+  };
+
+  const onItemPress = (item) => {
+    setIsOpen(false);
+    onValueChange(item.value);
+  };
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      style={[styles.item, value === item.value && styles.selectedItem]}
+      onPress={() => onItemPress(item)}
+    >
+      <Text
+        style={[
+          styles.itemText,
+          value === item.value && styles.selectedItemText,
+        ]}
+      >
+        {item.label}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const getSelectedLabel = () => {
+    const selectedOption = options.find((option) => option.value === value);
+    return selectedOption ? selectedOption.label : placeholder;
+  };
+
+  const isPlaceholder = !value;
+  const borderColor =
+    error && touched ? "#FF0000" : isOpen ? "#EB278D" : "#F9BCDC";
 
   return (
     <View style={{ marginBottom: 16 }}>
-      <View
-        style={[styles.outlinedContainer, { borderColor }]}
-        onLayout={() => {}}
-      >
-        {showLabel && (
-          <Text style={labelStyle} numberOfLines={1}>
+      <View style={[styles.outlinedContainer, { borderColor }]}>
+        {label && (
+          <Text
+            style={[styles.label, { color: isOpen ? "#EB278D" : "#333333" }]}
+          >
             {label}
           </Text>
         )}
-        <TouchableWithoutFeedback onPress={() => setIsFocused(true)}>
-          <View style={styles.pickerWrapper} pointerEvents="box-none">
-            <Picker
-              testID="picker-element"
-              selectedValue={value}
-              onValueChange={(val) => {
-                setIsFocused(false);
-                onValueChange(val);
-              }}
-              style={styles.picker}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              dropdownIconColor="#EB278D"
-            >
-              {placeholder && (
-                <Picker.Item label={placeholder} value="" color="#BEBEBE" />
-              )}
-              {options &&
-                options.map((option, index) => (
-                  <Picker.Item
-                    testID={`picker-item-${index}`}
-                    key={option.value}
-                    label={option.label}
-                    value={option.value}
-                  />
-                ))}
-            </Picker>
-          </View>
-        </TouchableWithoutFeedback>
+
+        <TouchableOpacity
+          ref={dropdownButton}
+          style={styles.button}
+          onPress={toggleDropdown}
+          activeOpacity={0.8}
+        >
+          <Text
+            style={[styles.buttonText, isPlaceholder && styles.placeholderText]}
+            numberOfLines={1}
+          >
+            {getSelectedLabel()}
+          </Text>
+          <Ionicons
+            name={isOpen ? "chevron-up" : "chevron-down"}
+            size={16}
+            color="#EB278D"
+            style={styles.icon}
+          />
+        </TouchableOpacity>
       </View>
+
       {error && touched && <Text style={styles.error}>{error}</Text>}
+
+      <Modal
+        visible={isOpen}
+        transparent
+        animationType="none"
+        onRequestClose={() => setIsOpen(false)}
+      >
+        <TouchableOpacity
+          style={styles.overlay}
+          onPress={() => setIsOpen(false)}
+        >
+          <View style={[styles.dropdown, { top: dropdownTop }]}>
+            <FlatList
+              data={options}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.value.toString()}
+              style={styles.list}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={true}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -94,19 +150,91 @@ const styles = StyleSheet.create({
     overflow: "visible",
     position: "relative",
     marginTop: 12,
-    backgroundColor: "transparent",
+    backgroundColor: "#FFFAFD",
   },
-  pickerWrapper: {
-    width: "100%",
-    justifyContent: "center",
-    backgroundColor: "transparent",
-  },
-  picker: {
-    width: "100%",
-    backgroundColor: "transparent",
+  label: {
+    position: "absolute",
+    left: 12,
+    top: -10,
+    paddingHorizontal: 4,
+    fontSize: 14,
+    backgroundColor: "#FFFAFD",
     fontFamily: "poppinsRegular",
-    color: "#333",
-    marginTop: Platform.OS === "ios" ? 8 : 0,
+    zIndex: 2,
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingRight: 40,
+    minHeight: 48,
+  },
+  buttonText: {
+    flex: 1,
+    fontSize: 17,
+    color: "#333333",
+    fontFamily: "poppinsRegular",
+  },
+  placeholderText: {
+    color: "#BEBEBE",
+  },
+  icon: {
+    position: "absolute",
+    right: 12,
+    color: "#EB278D",
+    fontSize: 12,
+    fontFamily: "poppinsRegular",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  dropdown: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    maxHeight: 200,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
+  },
+  list: {
+    maxHeight: 200,
+  },
+  item: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#F0F0F0",
+  },
+  selectedItem: {
+    backgroundColor: "#F9BCDC",
+  },
+  itemText: {
+    fontSize: 17,
+    color: "#333333",
+    fontFamily: "poppinsRegular",
+  },
+  selectedItemText: {
+    color: "#EB278D",
+    fontWeight: "500",
   },
   error: {
     color: "#EB278D",

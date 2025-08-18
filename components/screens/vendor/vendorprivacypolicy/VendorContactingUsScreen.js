@@ -5,12 +5,16 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 export default function VendorContactingUsScreen() {
   const navigation = useNavigation();
+  const handleEmailPress = () => {
+    Linking.openURL("mailto:hello@sharplook.beauty");
+  };
   return (
     <View className="flex-1 bg-white pb-[50px]">
       {/* Header */}
@@ -43,7 +47,13 @@ export default function VendorContactingUsScreen() {
           If you would like to contact us to understand more about this Policy
           or wish to contact us concerning any matter relating to individual
           rights and your Personal Information, you may do so via the Contact
-          Form or send an email to privacy@sharplook.ng
+          Form or send an email to{" "}
+          <TouchableOpacity onPress={handleEmailPress}>
+            <Text className="text-primary underline -mb-1">
+              hello@sharplook.beauty
+            </Text>
+          </TouchableOpacity>
+          .
         </Text>
       </ScrollView>
     </View>

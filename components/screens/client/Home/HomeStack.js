@@ -9,6 +9,10 @@ import VendorProfileScreen from "../GlobalScreens/VendorProfileScreen";
 import BookAppointmentScreen from "../GlobalScreens/BookAppointmentScreen";
 import ProductReviewsScreen from "../reviews/ProductReview";
 import OtherScreen from "./OtherScreen";
+import ProductDetailsScreen from "../ProductDetailsScreen";
+import ServiceDetailsScreen from "../ServiceDetailsScreen";
+import VendorProfileProductDetailsScreen from "../VendorProfileProductDetailsScreen";
+import VendorProfileServiceDetailsScreen from "../VendorProfileServiceDetailsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -35,6 +39,22 @@ export default function HomeStack() {
       <Stack.Screen
         name="BookAppointmentScreen"
         component={BookAppointmentScreen}
+      />
+      <Stack.Screen
+        name="ProductDetailsScreen"
+        component={ProductDetailsScreen}
+      />
+      <Stack.Screen
+        name="ServiceDetailsScreen"
+        component={ServiceDetailsScreen}
+      />
+      <Stack.Screen
+        name="VendorProfileProductDetailsScreen"
+        component={VendorProfileProductDetailsScreen}
+      />
+      <Stack.Screen
+        name="VendorProfileServiceDetailsScreen"
+        component={VendorProfileServiceDetailsScreen}
       />
     </Stack.Navigator>
   );

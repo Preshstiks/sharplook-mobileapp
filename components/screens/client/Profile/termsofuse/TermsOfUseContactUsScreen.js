@@ -4,13 +4,16 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
+  Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 export default function TermsOfUseContactUsScreen() {
   const navigation = useNavigation();
+  const handleEmailPress = () => {
+    Linking.openURL("mailto:hello@sharplook.beauty");
+  };
   return (
     <View className="flex-1 bg-white pb-[50px]">
       {/* Header */}
@@ -20,36 +23,40 @@ export default function TermsOfUseContactUsScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Terms of Use
         </Text>
         <View style={{ width: 26 }} />
       </View>
       <ScrollView className="flex-1 px-4 " showsVerticalScrollIndicator={false}>
-        <Text className="text-[15px] mt-2" style={{ fontFamily: "latoBold" }}>
+        <Text className="text-[17px] mt-2" style={{ fontFamily: "latoBold" }}>
           Contact Us
         </Text>
         <Text
-          className="text-[14px] mt-2 text-black mb-4"
+          className="text-[16px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
           Last updated: August 5, 2025
         </Text>
         <Text
-          className="text-[14px] text-black leading-6 mb-4"
+          className="text-[16px] text-black leading-6"
           style={{ fontFamily: "poppinsRegular" }}
         >
           If you have any questions about these Terms, please contact us at:
           {"\n\n"}
           <Text style={{ fontFamily: "poppinsBold" }}>Email:</Text>{" "}
-          Privacy@sharplook.ng
-          {"\n\n"}
-          <Text style={{ fontFamily: "poppinsBold" }}>Phone:</Text> [To be
-          provided]
-          {"\n\n"}
-          <Text style={{ fontFamily: "poppinsBold" }}>Address:</Text> [To be
-          provided]
+          <TouchableOpacity>
+            <Text className="text-primary underline -mb-1">
+              hello@sharplook.beauty
+            </Text>
+          </TouchableOpacity>
+          {/* {"\n\n"} */}
+          {/* <Text style={{ fontFamily: "poppinsBold" }}>Phone:</Text> [To be
+          provided] */}
+          {/* {"\n\n"} */}
+          {/* <Text style={{ fontFamily: "poppinsBold" }}>Address:</Text> [To be
+          provided] */}
         </Text>
       </ScrollView>
     </View>

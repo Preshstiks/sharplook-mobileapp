@@ -108,7 +108,7 @@ export default function InitialSubscriptionScreen({ navigation }) {
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text
-          className="flex-1 text-center text-[14px]"
+          className="flex-1 text-center text-[16px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Subscription
@@ -117,7 +117,7 @@ export default function InitialSubscriptionScreen({ navigation }) {
           onPress={() => navigation.replace("Vendor", { screen: "Dashboard" })}
         >
           <Text
-            className="text-[12px] text-primary"
+            className="text-[14px] text-primary"
             style={{ fontFamily: "poppinsMedium" }}
           >
             Skip
@@ -129,7 +129,7 @@ export default function InitialSubscriptionScreen({ navigation }) {
         {/* Main Heading */}
         <View className="mt-6 mb-8">
           <Text
-            className="text-[14px] text-center text-gray-800"
+            className="text-[16px] text-center text-gray-800"
             style={{ fontFamily: "poppinsMedium" }}
           >
             Activate Your In-shop Vendor Subscription
@@ -140,14 +140,14 @@ export default function InitialSubscriptionScreen({ navigation }) {
         <View style={styles.planCard}>
           <View className="border-b border-[#EBEBEA] py-4">
             <Text
-              className="text-[14px] text-center mb-3"
+              className="text-[16px] text-center mb-3"
               style={{ fontFamily: "poppinsMedium" }}
             >
               {subscriptionPlan.name}
             </Text>
 
             <Text
-              className="text-[20px] text-center text-primary font-bold"
+              className="text-[22px] text-center text-primary font-bold"
               style={{ fontFamily: "poppinsSemibold" }}
             >
               {`${formatAmount(subscriptionPlan.price)}/Month`}
@@ -157,7 +157,7 @@ export default function InitialSubscriptionScreen({ navigation }) {
             {subscriptionPlan.benefits.map((benefit, index) => (
               <View key={index}>
                 <Text
-                  className="text-[12px] text-center text-[#8C8D8B]"
+                  className="text-[14px] text-center text-[#8C8D8B]"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
                   {benefit}
@@ -170,7 +170,7 @@ export default function InitialSubscriptionScreen({ navigation }) {
         {/* Payment Method Section */}
         <View className="mt-8">
           <Text
-            className="text-[14px] mb-4"
+            className="text-[16px] mb-4"
             style={{ fontFamily: "poppinsMedium" }}
           >
             Choose Payment Method
@@ -182,7 +182,7 @@ export default function InitialSubscriptionScreen({ navigation }) {
           >
             <View className="flex-row items-center justify-between">
               <Text
-                className="text-[14px]"
+                className="text-[16px]"
                 style={{ fontFamily: "poppinsMedium" }}
               >
                 Paystack
@@ -205,7 +205,7 @@ export default function InitialSubscriptionScreen({ navigation }) {
         {/* Information Text */}
         <View className="mt-6 mb-8">
           <Text
-            className="text-[12px] text-[#8C8D8B] text-center leading-5"
+            className="text-[14px] text-[#8C8D8B] text-center leading-5"
             style={{ fontFamily: "poppinsRegular" }}
           >
             This subscription applies only to vendors offering services at a
@@ -234,6 +234,7 @@ export default function InitialSubscriptionScreen({ navigation }) {
       >
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
+            <View style={{ width: 24 }} />
             <Text style={styles.headerTitle}>Payment</Text>
             <TouchableOpacity
               onPress={() => setPaystackModalVisible(false)}
@@ -334,8 +335,8 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: "#fff",
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingTop: 50,
+    paddingBottom: 14,
     paddingHorizontal: 16,
     marginBottom: 20,
     flexDirection: "row",

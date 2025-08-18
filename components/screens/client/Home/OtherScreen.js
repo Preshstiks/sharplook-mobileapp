@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import { useCategories } from "../../../../hooks/useCategories";
+import { HttpClient } from "../../../../api/HttpClient";
+import { getCurrentLocation } from "../../../../utils/locationUtils";
 
 // Categories will be populated dynamically from API
 
@@ -18,7 +21,45 @@ export default function OtherScreen() {
   const navigation = useNavigation();
   const allServices = route.params?.allServices || [];
   const { categories, loading: categoriesLoading } = useCategories();
+  const [nearbyVendors, setNearbyVendors] = useState([]);
+  const [loadingNearby, setLoadingNearby] = useState(true);
 
+  // Fetch nearby vendors
+  const fetchNearbyVendors = async () => {
+    setLoadingNearby(true);
+    try {
+      let location;
+      try {
+        location = await getCurrentLocation();
+      } catch (locationError) {
+        console.error("Location error:", locationError);
+        setNearbyVendors([]);
+        setLoadingNearby(false);
+        return;
+      }
+
+      const latitude = location.latitude;
+      const longitude = location.longitude;
+
+      const res = await HttpClient.get(
+        `/user/nearby-vendors?latitude=${latitude}&longitude=${longitude}`
+      );
+
+      setNearbyVendors(res.data?.data || []);
+    } catch (err) {
+      console.error("Error fetching nearby vendors:", err);
+      setNearbyVendors([]);
+    } finally {
+      setLoadingNearby(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchNearbyVendors();
+    }, [])
+  );
+  console.log({ nearbyVendors });
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -29,7 +70,7 @@ export default function OtherScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Categories
         </Text>
@@ -67,9 +108,18 @@ export default function OtherScreen() {
                     const filteredServices = allServices.filter(
                       (service) => service.serviceName === cat.name
                     );
+
+                    // Filter nearby vendors by category
+                    const filteredNearby = nearbyVendors.filter((vendor) =>
+                      vendor.vendorServices?.some(
+                        (service) => service.serviceName === cat.name
+                      )
+                    );
+
                     navigation.navigate("Categories", {
                       category: cat.name,
                       services: filteredServices,
+                      nearbyVendors: filteredNearby,
                     });
                   }}
                   key={cat.id}
@@ -84,7 +134,7 @@ export default function OtherScreen() {
                       <Ionicons name="sparkles" size={36} color="#EB278D" />
                     </View>
                     <Text
-                      className="text-[10px] text-faintDark text-center mt-1"
+                      className="text-[12px] text-faintDark text-center mt-1"
                       style={{ fontFamily: "poppinsRegular" }}
                     >
                       {cat.name}
@@ -116,7 +166,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#222",
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "poppinsMedium",
     flex: 1,
     textAlign: "center",

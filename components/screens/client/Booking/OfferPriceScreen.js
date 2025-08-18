@@ -8,7 +8,10 @@ import {
   ActivityIndicator,
   StyleSheet,
   StatusBar,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Calendar } from "react-native-calendars";
@@ -252,308 +255,320 @@ export default function BookingHomeServiceAppointScreen() {
     landMark: Yup.string(),
   });
   return (
-    <View className="flex-1 bg-white">
-      {/* Header */}
-      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
-      <View className="pt-[60px] pb-4 px-4">
-        <View className="flex-row items-center">
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="mr-4"
-          >
-            <Ionicons name="chevron-back" size={24} color="black" />
-          </TouchableOpacity>
-          <Text
-            style={{ fontFamily: "poppinsMedium" }}
-            className="text-[16px] flex-1 text-center"
-          >
-            Offer a Price
-          </Text>
-        </View>
-      </View>
-
-      <Formik
-        initialValues={{
-          time: "",
-          fullAddress: "",
-          offerAmount: "",
-          service: "",
-          serviceType: "",
-          landMark: "",
-          servicePicture: "",
-        }}
-        validationSchema={offerPriceValidationSchema}
-        validate={(values) => {
-          const errors = {};
-
-          // Only validate location fields for HOME_SERVICE
-          if (values.serviceType === "HOME_SERVICE") {
-            if (!values.fullAddress) {
-              errors.fullAddress = "Full address is required";
-            }
-            if (!values.landMark) {
-              errors.landMark = "Landmark is required";
-            }
-          }
-
-          return errors;
-        }}
-        onSubmit={async (values, { setSubmitting }) => {
-          setLoading(true);
-          try {
-            await createOffer(values);
-          } catch (error) {
-          } finally {
-            setLoading(false);
-            setSubmitting(false);
-          }
-        }}
+    <SafeAreaView className="flex-1 bg-white">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 20}
       >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          touched,
-          setFieldValue,
-        }) => (
-          <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
-            <View className="px-4 mt-6">
-              <OutlineTextInput
-                label="Offer Amount"
-                keyboardType="numeric"
-                value={values.offerAmount}
-                onChangeText={handleChange("offerAmount")}
-                name="offerAmount"
-              />
-              {touched.offerAmount && errors.offerAmount && (
-                <Text
-                  style={{ color: "#ff0000", fontSize: 12, marginLeft: 12 }}
-                >
-                  {errors.offerAmount}
-                </Text>
-              )}
-              <Dropdown
-                options={SERVICE_OPTIONS}
-                placeholder="Select Service"
-                label="Select Service"
-                value={values.service}
-                onValueChange={handleChange("service")}
-                name="service"
-              />
-              {touched.service && errors.service && (
-                <Text
-                  style={{ color: "#ff0000", fontSize: 12, marginLeft: 12 }}
-                >
-                  {errors.service}
-                </Text>
-              )}
-              <Dropdown
-                options={SERVICE_TYPE_OPTIONS}
-                placeholder="Service Type"
-                value={values.serviceType}
-                onValueChange={handleChange("serviceType")}
-                label="Service Type"
-              />
-              {touched.serviceType && errors.serviceType && (
-                <Text
-                  style={{ color: "#ff0000", fontSize: 12, marginLeft: 12 }}
-                >
-                  {errors.serviceType}
-                </Text>
-              )}
-              <View className="mb-4">
-                <View className="flex-row items-center border rounded-t-[8px] px-3 border-[#E9E9E9] py-5">
+        {/* Header */}
+        <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
+        <View className="pt-[20px] pb-4 px-4">
+          <View className="flex-row items-center">
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              className="mr-4"
+            >
+              <Ionicons name="chevron-back" size={24} color="black" />
+            </TouchableOpacity>
+            <Text
+              style={{ fontFamily: "poppinsMedium" }}
+              className="text-[16px] flex-1 text-center"
+            >
+              Offer a Price
+            </Text>
+          </View>
+        </View>
+
+        <Formik
+          initialValues={{
+            time: "",
+            fullAddress: "",
+            offerAmount: "",
+            service: "",
+            serviceType: "",
+            landMark: "",
+            servicePicture: "",
+          }}
+          validationSchema={offerPriceValidationSchema}
+          validate={(values) => {
+            const errors = {};
+
+            // Only validate location fields for HOME_SERVICE
+            if (values.serviceType === "HOME_SERVICE") {
+              if (!values.fullAddress) {
+                errors.fullAddress = "Full address is required";
+              }
+              if (!values.landMark) {
+                errors.landMark = "Landmark is required";
+              }
+            }
+
+            return errors;
+          }}
+          onSubmit={async (values, { setSubmitting }) => {
+            setLoading(true);
+            try {
+              await createOffer(values);
+            } catch (error) {
+            } finally {
+              setLoading(false);
+              setSubmitting(false);
+            }
+          }}
+        >
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+            setFieldValue,
+          }) => (
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: 150 }}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              enableOnAndroid={true}
+              automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
+              keyboardDismissMode="interactive"
+            >
+              <View className="px-4 mt-6">
+                <OutlineTextInput
+                  label="Offer Amount"
+                  keyboardType="numeric"
+                  value={values.offerAmount}
+                  onChangeText={handleChange("offerAmount")}
+                  name="offerAmount"
+                />
+                {touched.offerAmount && errors.offerAmount && (
                   <Text
-                    className="text-base mb-2"
-                    style={{ fontFamily: "poppinsMedium" }}
+                    style={{ color: "#ff0000", fontSize: 14, marginLeft: 12 }}
                   >
-                    Upload service picture
-                  </Text>
-                </View>
-                <View className="border-x border-[#E9E9E9] border-b pb-3 rounded-b-[8px] px-3 border-t-0">
-                  <TouchableOpacity
-                    className="border-2 border-dashed border-[#F9BCDC] rounded-lg h-[140px] items-center justify-center"
-                    onPress={() => pickImage()}
-                  >
-                    {servicePicture ? (
-                      <Image
-                        source={{ uri: servicePicture }}
-                        className="w-full h-full rounded-lg"
-                      />
-                    ) : (
-                      <View className="items-center justify-center">
-                        <AntDesign name="picture" size={40} color="#8C8D8B" />
-                        <Text
-                          className="text-[#8C8D8B] text-[12px] mt-2"
-                          style={{ fontFamily: "poppinsRegular" }}
-                        >
-                          Click to upload
-                        </Text>
-                        <Text
-                          style={{ fontFamily: "poppinsRegular" }}
-                          className="text-[#8C8D8B] text-[10px]"
-                        >
-                          PNG, JPG, GIF up to 5MB
-                        </Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <Text
-                className="text-[16px] mb-2"
-                style={{ fontFamily: "poppinsMedium" }}
-              >
-                Choose Date and Time
-              </Text>
-
-              {/* Calendar */}
-              <View className="bg-white rounded-xl p-4 mb-4">
-                <Calendar
-                  current={selectedDate}
-                  onDayPress={(day) => setSelectedDate(day.dateString)}
-                  markedDates={{
-                    [selectedDate]: {
-                      selected: true,
-                      selectedColor: "#EB278D",
-                      selectedTextColor: "#fff",
-                    },
-                  }}
-                  theme={{
-                    backgroundColor: "#fff",
-                    calendarBackground: "#fff",
-                    textSectionTitleColor: "#222",
-                    textSectionTitleDisabledColor: "#d9e1e8",
-                    selectedDayBackgroundColor: "#E91E63",
-                    selectedDayTextColor: "#fff",
-                    todayTextColor: "#E91E63",
-                    dayTextColor: "#222",
-                    textDisabledColor: "#d9e1e8",
-                    arrowColor: "#222",
-                    monthTextColor: "#222",
-                    textMonthFontWeight: "bold",
-                    textDayFontFamily: "Poppins-Medium",
-                    textMonthFontFamily: "Poppins-Medium",
-                    textDayHeaderFontFamily: "Poppins-Medium",
-                  }}
-                  renderArrow={(direction) => (
-                    <Ionicons
-                      name={
-                        direction === "left"
-                          ? "chevron-back"
-                          : "chevron-forward"
-                      }
-                      size={20}
-                      color="#222"
-                    />
-                  )}
-                  hideExtraDays={true}
-                  firstDay={1}
-                  style={{ borderRadius: 16 }}
-                />
-              </View>
-
-              <View className="mb-5">
-                <Dropdown
-                  options={timeOptions}
-                  placeholder="Select Time"
-                  value={values.time}
-                  onValueChange={(value) => setFieldValue("time", value)}
-                  label="Select Time"
-                />
-
-                {touched.time && errors.time && (
-                  <Text style={{ color: "#ff0000", fontSize: 12 }}>
-                    {errors.time}
+                    {errors.offerAmount}
                   </Text>
                 )}
-              </View>
-              {values.serviceType === "HOME_SERVICE" && (
-                <View>
-                  <Dropdown
-                    options={locationOption}
-                    placeholder="Select"
-                    value={selectedOption}
-                    onValueChange={setSelectedOption}
-                    label="Are you in the current location you registered with?"
-                  />
-                  <View className="mb-4">
-                    <View className="flex-row items-center border rounded-t-[8px] px-3 border-[#E9E9E9] py-5">
+                <Dropdown
+                  options={SERVICE_OPTIONS}
+                  placeholder="Select Service"
+                  label="Select Service"
+                  value={values.service}
+                  onValueChange={handleChange("service")}
+                  name="service"
+                />
+                {touched.service && errors.service && (
+                  <Text
+                    style={{ color: "#ff0000", fontSize: 14, marginLeft: 12 }}
+                  >
+                    {errors.service}
+                  </Text>
+                )}
+                <Dropdown
+                  options={SERVICE_TYPE_OPTIONS}
+                  placeholder="Service Type"
+                  value={values.serviceType}
+                  onValueChange={handleChange("serviceType")}
+                  label="Service Type"
+                />
+                {touched.serviceType && errors.serviceType && (
+                  <Text
+                    style={{ color: "#ff0000", fontSize: 14, marginLeft: 12 }}
+                  >
+                    {errors.serviceType}
+                  </Text>
+                )}
+                <View className="mb-4">
+                  <View className="flex-row items-center border rounded-t-[8px] px-3 border-[#E9E9E9] py-5">
+                    <Text
+                      className="text-base mb-2"
+                      style={{ fontFamily: "poppinsMedium" }}
+                    >
+                      Upload service picture
+                    </Text>
+                  </View>
+                  <View className="border-x border-[#E9E9E9] border-b pb-3 rounded-b-[8px] px-3 border-t-0">
+                    <TouchableOpacity
+                      className="border-2 border-dashed border-[#F9BCDC] rounded-lg h-[140px] items-center justify-center"
+                      onPress={() => pickImage()}
+                    >
+                      {servicePicture ? (
+                        <Image
+                          source={{ uri: servicePicture }}
+                          className="w-full h-full rounded-lg"
+                        />
+                      ) : (
+                        <View className="items-center justify-center">
+                          <AntDesign name="picture" size={40} color="#8C8D8B" />
+                          <Text
+                            className="text-[#8C8D8B] text-[14px] mt-2"
+                            style={{ fontFamily: "poppinsRegular" }}
+                          >
+                            Click to upload
+                          </Text>
+                          <Text
+                            style={{ fontFamily: "poppinsRegular" }}
+                            className="text-[#8C8D8B] text-[12px]"
+                          >
+                            PNG, JPG, GIF up to 5MB
+                          </Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <Text
+                  className="text-[18px] mb-2"
+                  style={{ fontFamily: "poppinsMedium" }}
+                >
+                  Choose Date and Time
+                </Text>
+
+                {/* Calendar */}
+                <View className="bg-white rounded-xl p-4 mb-4">
+                  <Calendar
+                    current={selectedDate}
+                    onDayPress={(day) => setSelectedDate(day.dateString)}
+                    markedDates={{
+                      [selectedDate]: {
+                        selected: true,
+                        selectedColor: "#EB278D",
+                        selectedTextColor: "#fff",
+                      },
+                    }}
+                    theme={{
+                      backgroundColor: "#fff",
+                      calendarBackground: "#fff",
+                      textSectionTitleColor: "#222",
+                      textSectionTitleDisabledColor: "#d9e1e8",
+                      selectedDayBackgroundColor: "#E91E63",
+                      selectedDayTextColor: "#fff",
+                      todayTextColor: "#E91E63",
+                      dayTextColor: "#222",
+                      textDisabledColor: "#d9e1e8",
+                      arrowColor: "#222",
+                      monthTextColor: "#222",
+                      textMonthFontWeight: "bold",
+                      textDayFontFamily: "Poppins-Medium",
+                      textMonthFontFamily: "Poppins-Medium",
+                      textDayHeaderFontFamily: "Poppins-Medium",
+                    }}
+                    renderArrow={(direction) => (
                       <Ionicons
-                        name="location-outline"
-                        size={24}
-                        color="#000"
+                        name={
+                          direction === "left"
+                            ? "chevron-back"
+                            : "chevron-forward"
+                        }
+                        size={20}
+                        color="#222"
                       />
-                      <Text
-                        className="ml-2 text-[16px"
-                        style={{ fontFamily: "poppinsMedium" }}
-                      >
-                        Service Location
-                      </Text>
-                    </View>
+                    )}
+                    hideExtraDays={true}
+                    firstDay={1}
+                    style={{ borderRadius: 16 }}
+                  />
+                </View>
 
-                    <View className="border-x border-[#E9E9E9] border-b rounded-b-[8px] px-3 border-t-0">
-                      <AuthInput
-                        label="Enter Full Address"
-                        value={values.fullAddress}
-                        onChangeText={handleChange("fullAddress")}
-                        name="fullAddress"
-                      />
-                      {touched.fullAddress &&
-                        errors.fullAddress &&
-                        values.serviceType === "HOME_SERVICE" && (
-                          <Text
-                            style={{
-                              color: "#ff0000",
-                              fontSize: 12,
-                              marginLeft: 12,
-                            }}
-                          >
-                            {errors.fullAddress}
-                          </Text>
-                        )}
-                      <AuthInput
-                        label="Enter Landmark"
-                        value={values.landMark}
-                        onChangeText={handleChange("landMark")}
-                        name="landMark"
-                      />
-                      {touched.landMark &&
-                        errors.landMark &&
-                        values.serviceType === "HOME_SERVICE" && (
-                          <Text
-                            style={{
-                              color: "#ff0000",
-                              fontSize: 12,
-                              marginLeft: 12,
-                            }}
-                          >
-                            {errors.landMark}
-                          </Text>
-                        )}
-                    </View>
+                <View className="mb-5">
+                  <Dropdown
+                    options={timeOptions}
+                    placeholder="Select Time"
+                    value={values.time}
+                    onValueChange={(value) => setFieldValue("time", value)}
+                    label="Select Time"
+                  />
 
-                    {/* Map Container - Using the working pattern */}
-                    {selectedOption === "No" && (
-                      <>
-                        <View
-                          style={{
-                            height: 300,
-                            marginVertical: 16,
-                            borderRadius: 12,
-                            overflow: "hidden",
-                            borderWidth: 1,
-                            borderColor: "#E9E9E9",
-                          }}
+                  {touched.time && errors.time && (
+                    <Text style={{ color: "#ff0000", fontSize: 14 }}>
+                      {errors.time}
+                    </Text>
+                  )}
+                </View>
+                {values.serviceType === "HOME_SERVICE" && (
+                  <View>
+                    <Dropdown
+                      options={locationOption}
+                      placeholder="Select"
+                      value={selectedOption}
+                      onValueChange={setSelectedOption}
+                      label="Are you in the current location you registered with?"
+                    />
+                    <View className="mb-4">
+                      <View className="flex-row items-center border rounded-t-[8px] px-3 border-[#E9E9E9] py-5">
+                        <Ionicons
+                          name="location-outline"
+                          size={24}
+                          color="#000"
+                        />
+                        <Text
+                          className="ml-2 text-[18px]"
+                          style={{ fontFamily: "poppinsMedium" }}
                         >
-                          <View style={{ flex: 1 }}>
-                            <WebView
-                              ref={webviewRef}
-                              originWhitelist={["*"]}
-                              source={{
-                                html: `
+                          Service Location
+                        </Text>
+                      </View>
+
+                      <View className="border-x border-[#E9E9E9] border-b rounded-b-[8px] px-3 border-t-0">
+                        <AuthInput
+                          label="Enter Full Address"
+                          value={values.fullAddress}
+                          onChangeText={handleChange("fullAddress")}
+                          name="fullAddress"
+                        />
+                        {touched.fullAddress &&
+                          errors.fullAddress &&
+                          values.serviceType === "HOME_SERVICE" && (
+                            <Text
+                              style={{
+                                color: "#ff0000",
+                                fontSize: 14,
+                                marginLeft: 12,
+                              }}
+                            >
+                              {errors.fullAddress}
+                            </Text>
+                          )}
+                        <AuthInput
+                          label="Enter Landmark"
+                          value={values.landMark}
+                          onChangeText={handleChange("landMark")}
+                          name="landMark"
+                        />
+                        {touched.landMark &&
+                          errors.landMark &&
+                          values.serviceType === "HOME_SERVICE" && (
+                            <Text
+                              style={{
+                                color: "#ff0000",
+                                fontSize: 14,
+                                marginLeft: 12,
+                              }}
+                            >
+                              {errors.landMark}
+                            </Text>
+                          )}
+                      </View>
+
+                      {/* Map Container - Using the working pattern */}
+                      {selectedOption === "No" && (
+                        <>
+                          <View
+                            style={{
+                              height: 300,
+                              marginVertical: 16,
+                              borderRadius: 12,
+                              overflow: "hidden",
+                              borderWidth: 1,
+                              borderColor: "#E9E9E9",
+                            }}
+                          >
+                            <View style={{ flex: 1 }}>
+                              <WebView
+                                ref={webviewRef}
+                                originWhitelist={["*"]}
+                                source={{
+                                  html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -568,18 +583,42 @@ export default function BookingHomeServiceAppointScreen() {
             <div id="map"></div>
             <script>
               var map = L.map('map').setView([6.5244, 3.3792], 13);
-              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
+              L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
               }).addTo(map);
               var marker = L.marker([6.5244, 3.3792]).addTo(map)
                 .bindPopup('You are here')
                 .openPopup();
 
+              // Function to get location name from coordinates
+              function getLocationName(lat, lng) {
+                fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1')
+                  .then(function(response) { 
+                    if (response.ok) {
+                      return response.json(); 
+                    }
+                    throw new Error('Network response was not ok');
+                  })
+                  .then(function(data) {
+                    if (data.display_name) {
+                      marker.bindPopup(data.display_name).openPopup();
+                    } else {
+                      marker.bindPopup('You are here').openPopup();
+                    }
+                  })
+                  .catch(function(error) { 
+                    console.log('Geocoding error:', error);
+                    marker.bindPopup('You are here').openPopup();
+                  });
+              }
+
               function updateMap(data) {
                 if (data.latitude && data.longitude) {
                   map.setView([data.latitude, data.longitude], 16);
                   marker.setLatLng([data.latitude, data.longitude]);
-                  marker.bindPopup('You are here').openPopup();
+                  getLocationName(data.latitude, data.longitude);
                 }
               }
 
@@ -602,88 +641,89 @@ export default function BookingHomeServiceAppointScreen() {
           </body>
         </html>
       `,
-                              }}
-                              style={{ flex: 1 }}
-                              javaScriptEnabled
-                              domStorageEnabled
-                            />
-                          </View>
-                        </View>
-                        <View className="mb-4">
-                          <TouchableOpacity
-                            style={[
-                              {
-                                flexDirection: "row",
-                                alignItems: "center",
-                                marginBottom: 18,
-                              },
-                              selectedLocation && {
-                                backgroundColor: "#F8F8F8",
-                                borderRadius: 8,
-                                padding: 8,
-                              },
-                            ]}
-                            onPress={() => handleUseCurrentLocation()}
-                            disabled={isLoading}
-                          >
-                            <MaterialIcons
-                              name="my-location"
-                              size={22}
-                              color="#EB278D"
-                            />
-                            <Text
-                              style={{
-                                color: "#EB278D",
-                                fontFamily: "poppinsMedium",
-                                fontSize: 15,
-                                marginLeft: 10,
-                              }}
-                            >
-                              {isLoading
-                                ? "Updating..."
-                                : "Mark your current location"}
-                            </Text>
-                            {isLoading && (
-                              <ActivityIndicator
-                                size="small"
-                                color="#EB278D"
-                                style={{ marginLeft: 10 }}
+                                }}
+                                style={{ flex: 1 }}
+                                javaScriptEnabled
+                                domStorageEnabled
                               />
-                            )}
-                          </TouchableOpacity>
-                        </View>
-                      </>
-                    )}
+                            </View>
+                          </View>
+                          <View className="mb-4">
+                            <TouchableOpacity
+                              style={[
+                                {
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  marginBottom: 18,
+                                },
+                                selectedLocation && {
+                                  backgroundColor: "#F8F8F8",
+                                  borderRadius: 8,
+                                  padding: 8,
+                                },
+                              ]}
+                              onPress={() => handleUseCurrentLocation()}
+                              disabled={isLoading}
+                            >
+                              <MaterialIcons
+                                name="my-location"
+                                size={22}
+                                color="#EB278D"
+                              />
+                              <Text
+                                style={{
+                                  color: "#EB278D",
+                                  fontFamily: "poppinsMedium",
+                                  fontSize: 15,
+                                  marginLeft: 10,
+                                }}
+                              >
+                                {isLoading
+                                  ? "Updating..."
+                                  : "Mark your current location"}
+                              </Text>
+                              {isLoading && (
+                                <ActivityIndicator
+                                  size="small"
+                                  color="#EB278D"
+                                  style={{ marginLeft: 10 }}
+                                />
+                              )}
+                            </TouchableOpacity>
+                          </View>
+                        </>
+                      )}
 
-                    {/* Current Location Button - Using the working pattern */}
+                      {/* Current Location Button - Using the working pattern */}
+                    </View>
                   </View>
-                </View>
-              )}
-            </View>
+                )}
+              </View>
 
-            {/* Submit Button */}
-            <View className="px-4 mt-4">
-              <TouchableOpacity
-                disabled={loading}
-                className="bg-primary rounded-xl py-4 items-center"
-                onPress={handleSubmit}
-              >
-                <Text
-                  className="text-white text-base font-semibold"
-                  style={{ fontFamily: "poppinsMedium" }}
+              {/* Submit Button */}
+              <View className="px-4 mt-4">
+                <TouchableOpacity
+                  disabled={loading}
+                  className="bg-primary rounded-xl py-4 items-center"
+                  onPress={handleSubmit}
                 >
-                  {loading ? (
-                    <BarIndicator color="#fff" size={20} />
-                  ) : (
-                    "Submit Offer"
-                  )}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        )}
-      </Formik>
-    </View>
+                  <Text
+                    className="text-white text-base font-semibold"
+                    style={{ fontFamily: "poppinsMedium" }}
+                  >
+                    {loading ? (
+                      <BarIndicator color="#fff" size={20} />
+                    ) : (
+                      "Submit Offer"
+                    )}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          )}
+        </Formik>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
@@ -704,7 +744,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#222",
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "poppinsMedium",
     flex: 1,
     textAlign: "center",

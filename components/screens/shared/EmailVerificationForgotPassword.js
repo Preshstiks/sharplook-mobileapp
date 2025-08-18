@@ -6,9 +6,6 @@ import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import { Formik } from "formik";
 import { emailVerificationSchema } from "../../../utils/validationSchemas";
 import SuccessModal from "../../Modal/SuccessModal";
-import { showToast } from "../../ToastComponent/Toast";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { HttpClient } from "../../../api/HttpClient";
 
 export default function EmailVerificationForgotPassword({ navigation, route }) {
   const [code, setCode] = useState(["", "", "", ""]);
@@ -77,19 +74,19 @@ export default function EmailVerificationForgotPassword({ navigation, route }) {
         <Text style={{ fontFamily: "poppinsSemiBold" }}>Verification</Text>
       </View>
       <Text
-        className="text-center mb-1 text-sm"
+        className="text-center mb-1 text-[16px]"
         style={{ fontFamily: "poppinsRegular" }}
       >
         We have sent verification code to your email
       </Text>
       <Text
-        className="text-center mb-10 text-sm text-primary"
+        className="text-center mb-10 text-[16px] text-primary"
         style={{ fontFamily: "poppinsRegular" }}
       >
         {email}
       </Text>
       <Text
-        className="text-center mb-4 text-sm"
+        className="text-center mb-4 text-[16px]"
         style={{ fontFamily: "poppinsRegular" }}
       >
         Please enter your verification code
@@ -130,7 +127,7 @@ export default function EmailVerificationForgotPassword({ navigation, route }) {
               </Text>
             )}
             <Text
-              className="text-center text-sm mb-2"
+              className="text-center text-[16px] mb-2"
               style={{ fontFamily: "poppinsRegular" }}
             >
               Resend code in{" "}

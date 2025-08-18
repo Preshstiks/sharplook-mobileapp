@@ -134,7 +134,7 @@ export default function VendorOffersScreen() {
       getMyOffers(activeTab);
     }, [activeTab])
   );
-  console.log({ myOffers });
+
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -168,9 +168,7 @@ export default function VendorOffersScreen() {
         </Text>
 
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <TouchableOpacity style={{ marginRight: 15 }}>
-            <Ionicons name="notifications-outline" size={22} color="#1F2937" />
-          </TouchableOpacity>
+          <View style={{ width: 26 }} />
         </View>
       </View>
 

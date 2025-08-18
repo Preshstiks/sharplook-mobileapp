@@ -67,7 +67,7 @@ export default function NotificationList() {
           }}
         >
           <Text
-            style={{ color: "#fff", fontSize: 16, fontFamily: "poppinsMedium" }}
+            style={{ color: "#fff", fontSize: 18, fontFamily: "poppinsMedium" }}
           >
             Notifications
           </Text>
@@ -130,7 +130,7 @@ export default function NotificationList() {
           }}
         >
           <Text
-            style={{ color: "#fff", fontSize: 16, fontFamily: "poppinsMedium" }}
+            style={{ color: "#fff", fontSize: 18, fontFamily: "poppinsMedium" }}
           >
             Notifications
           </Text>
@@ -149,7 +149,7 @@ export default function NotificationList() {
             className="text-faintDark"
             style={{
               fontFamily: "poppinsRegular",
-              fontSize: 14,
+              fontSize: 16,
               marginTop: 16,
               textAlign: "center",
             }}
@@ -172,7 +172,7 @@ export default function NotificationList() {
         }}
       >
         <Text
-          style={{ color: "#fff", fontSize: 16, fontFamily: "poppinsMedium" }}
+          style={{ color: "#fff", fontSize: 18, fontFamily: "poppinsMedium" }}
         >
           Notifications
         </Text>
@@ -183,7 +183,7 @@ export default function NotificationList() {
         renderSectionHeader={({ section: { title } }) => (
           <Text
             style={{
-              fontSize: 16,
+              fontSize: 18,
               fontFamily: "LatoBold",
               marginTop: 24,
               marginLeft: 20,
@@ -215,14 +215,14 @@ export default function NotificationList() {
             </View>
             <View style={{ flex: 1 }}>
               <Text
-                className="text-[14px] opacity-60"
+                className="text-[16px] opacity-60"
                 style={{ fontFamily: "latoRegular" }}
               >
                 {item.message}
               </Text>
             </View>
             <Text
-              className="text-[10px] opacity-60 mt-1"
+              className="text-[12px] opacity-60 mt-1"
               style={{ fontFamily: "latoRegular" }}
             >
               {getRelativeTime(item.createdAt)}
@@ -257,12 +257,12 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   notificationText: {
-    fontSize: 15,
+    fontSize: 17,
     color: "#222",
     fontFamily: "poppinsRegular",
   },
   timeText: {
-    fontSize: 13,
+    fontSize: 15,
     color: "#888",
     marginLeft: 8,
     minWidth: 70,

@@ -53,6 +53,9 @@ import TermsOfUseEntireAgreementScreen from "./termsofuse/TermsOfUseEntireAgreem
 import TermsOfUseContactUsScreen from "./termsofuse/TermsOfUseContactUsScreen";
 
 import ProfileScreen from "./ProfileScreen";
+import GetStartedScreen from "./GetStarted";
+import PaymentScreen from "./PaymentScreen";
+import BookingSystemScreen from "./BookingSystemScreen";
 const Stack = createNativeStackNavigator();
 
 export default function ProfileStack() {
@@ -221,6 +224,12 @@ export default function ProfileStack() {
         component={AcceptanceOfPolicyScreen}
       />
       <Stack.Screen name="ContactingUsScreen" component={ContactingUsScreen} />
+      <Stack.Screen name="GetStartedScreen" component={GetStartedScreen} />
+      <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
+      <Stack.Screen
+        name="BookingSystemScreen"
+        component={BookingSystemScreen}
+      />
 
       {/* Add other screens here */}
     </Stack.Navigator>

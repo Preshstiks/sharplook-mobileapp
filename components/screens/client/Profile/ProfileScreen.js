@@ -8,47 +8,19 @@ import {
   Modal,
   ActivityIndicator,
 } from "react-native";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../../../context/AuthContext";
 import React, { useState } from "react";
-import TawkToChatForClient from "../../../TawkToChatForClient";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const { user, logout } = useAuth();
 
-  const [chatVisible, setChatVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const clientName = `${user?.lastName || ""} ${user?.firstName || ""}`;
-  const clientEmail = user?.email || "";
-  const clientPhone = user?.phone || "";
-  const clientAvatar = user?.avatar || "";
-  const clientRole = "client";
-
   const handleLogout = async () => {
     await logout();
   };
 
-  const handleChatOpen = () => {
-    setChatVisible(true);
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 10000);
-  };
-
-  const handleChatClose = () => {
-    setChatVisible(false);
-    setIsLoading(true);
-  };
-
-  const handleChatLoad = () => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-  };
   return (
     <SafeAreaView className="flex-1 bg-secondary">
       {/* Header with avatar, name, email */}
@@ -67,13 +39,13 @@ const ProfileScreen = () => {
             className="w-24 h-24 rounded-full mb-4"
           />
           <Text
-            className="text-white text-[16px]"
+            className="text-white text-[18px]"
             style={{ fontFamily: "poppinsMedium" }}
           >
             {`${user?.lastName} ${user?.firstName}`}
           </Text>
           <Text
-            className="text-white text-[12px] mt-1"
+            className="text-white text-[14px] mt-1"
             style={{ fontFamily: "poppinsLight" }}
           >
             {user?.email}
@@ -91,7 +63,7 @@ const ProfileScreen = () => {
             <Ionicons name="person" size={24} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-faintDark"
+            className="flex-1 text-[16px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             My Account
@@ -99,7 +71,7 @@ const ProfileScreen = () => {
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
         </TouchableOpacity>
         {/* Settings */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
           onPress={() => navigation.navigate("Settings")}
         >
@@ -113,17 +85,17 @@ const ProfileScreen = () => {
             Settings
           </Text>
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         {/* Help and Support */}
         <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
-          onPress={handleChatOpen}
+          onPress={() => navigation.navigate("HelpSupportScreen")}
         >
           <View className="bg-primary p-2 rounded-full mr-4">
             <Ionicons name="help-circle" size={24} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-faintDark"
+            className="flex-1 text-[16px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Help and Support
@@ -136,10 +108,10 @@ const ProfileScreen = () => {
           onPress={() => navigation.navigate("LegalScreen")}
         >
           <View className="bg-primary p-2 rounded-full mr-4">
-            <FontAwesome name="legal" size={24} color="#fff" />
+            <MaterialIcons name="gavel" size={24} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-faintDark"
+            className="flex-1 text-[16px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Legal
@@ -155,7 +127,7 @@ const ProfileScreen = () => {
             <Ionicons name="log-out-outline" size={24} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-[#FF0000]"
+            className="flex-1 text-[16px] text-[#FF0000]"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Logout
@@ -174,77 +146,6 @@ const ProfileScreen = () => {
           </Text>
         </TouchableOpacity> */}
       </View>
-      {/* TawkToChatForClient Modal */}
-      <Modal
-        visible={chatVisible}
-        animationType="slide"
-        onRequestClose={handleChatClose}
-      >
-        <View style={{ flex: 1, backgroundColor: "#f5f5f5" }}>
-          {/* Loading Overlay */}
-          {isLoading && (
-            <View
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: "#f5f5f5",
-                justifyContent: "center",
-                alignItems: "center",
-                zIndex: 20,
-              }}
-            >
-              <ActivityIndicator size="large" color="#EB278D" />
-              <Text
-                style={{
-                  marginTop: 20,
-                  fontSize: 16,
-                  fontFamily: "poppinsRegular",
-                  color: "#666",
-                }}
-              >
-                Loading chat...
-              </Text>
-            </View>
-          )}
-          {/* WebView */}
-          <TawkToChatForClient
-            name={clientName}
-            email={clientEmail}
-            phone={clientPhone}
-            avatar={clientAvatar}
-            role={clientRole}
-            onLoadEnd={handleChatLoad}
-          />
-          {/* Close Button */}
-          <TouchableOpacity
-            style={{
-              position: "absolute",
-              top: 40,
-              right: 20,
-              zIndex: 30,
-              backgroundColor: "#fff",
-              borderRadius: 20,
-              paddingHorizontal: 20,
-              paddingVertical: 8,
-              elevation: 2,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.2,
-              shadowRadius: 4,
-            }}
-            onPress={handleChatClose}
-          >
-            <Text
-              style={{ fontSize: 16, color: "#EB278D", fontWeight: "bold" }}
-            >
-              Close
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };

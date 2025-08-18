@@ -15,7 +15,7 @@ export default function OutlineButton({
       {icon && iconPosition === "left" && <View className="mr-4">{icon}</View>}
       <Text
         style={{ fontFamily: "poppinsMedium" }}
-        className="text-center text-[13px] text-primary"
+        className="text-center text-[15px] text-primary"
       >
         {title}
       </Text>

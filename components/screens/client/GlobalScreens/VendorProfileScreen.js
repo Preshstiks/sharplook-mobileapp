@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -9,11 +9,9 @@ import {
   Dimensions,
   Pressable,
   StatusBar,
-  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import WhiteChatIcon from "../../../../assets/icon/whitechat.svg";
-import SpaImg from "../../../../assets/img/vendorprof.svg";
 import BottomModal from "../../../reusuableComponents/BottomModal";
 import { useState } from "react";
 import OutlineButton from "../../../reusuableComponents/buttons/OutlineButton";
@@ -22,13 +20,15 @@ import { formatAmount } from "../../../formatAmount";
 import { CTAbtn } from "../../../reusuableComponents/buttons/CTAbtn";
 
 import { useCart } from "../../../../context/CartContext";
+import { useAuth } from "../../../../context/AuthContext";
 import { HttpClient } from "../../../../api/HttpClient";
 import { showToast } from "../../../ToastComponent/Toast";
-import VendorProfileProductDetails from "./VendorProfileProductDetails";
-import VendorProfileServiceDetails from "./VendorProfileServiceDetails";
+// import VendorProfileProductDetails from "./VendorProfileProductDetails";
+// import VendorProfileServiceDetails from "./VendorProfileServiceDetails";
 import { useChatNavigation } from "../../../../hooks/useChatNavigation";
 import { ChatConnectionLoader } from "../../../reusuableComponents/ChatConnectionLoader";
 import { EmptyData } from "../../../reusuableComponents/EmptyData";
+import { checkUserLocationForBooking } from "../../../../utils/locationUtils";
 
 const { width } = Dimensions.get("window");
 
@@ -46,6 +46,7 @@ const convertTo12HourFormat = (time24) => {
 
 export default function VendorProfileScreen({ navigation, route }) {
   const vendorData = route.params?.vendorData;
+  const { user } = useAuth();
   const { cartItems, fetchCart, loading: cartLoading } = useCart();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -72,13 +73,20 @@ export default function VendorProfileScreen({ navigation, route }) {
   );
 
   const handleServicePress = (service) => {
-    setSelectedService(service);
-    setModalVisible(true);
+    navigation.navigate("VendorProfileServiceDetailsScreen", {
+      service,
+      vendorData,
+    });
   };
 
   const handleProductPress = (product) => {
-    setSelectedProduct(product);
-    setModalVisibleProduct(true);
+    navigation.navigate("VendorProfileProductDetailsScreen", {
+      product,
+      vendorData,
+      onAddToCart: handleAddToCartFromModal,
+      cartProductIds,
+      addingToCart,
+    });
   };
 
   const handleAddToCart = async (product) => {
@@ -109,7 +117,6 @@ export default function VendorProfileScreen({ navigation, route }) {
     for (let i = 0; i < quantity; i++) {
       await handleAddToCart(product);
     }
-    setModalVisibleProduct(false);
   };
 
   // Enhanced booking handler with loading state
@@ -120,6 +127,17 @@ export default function VendorProfileScreen({ navigation, route }) {
     try {
       // Add a small delay to ensure all data is ready
       await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Check if user has location set for home service booking
+      if (vendorServiceType === "HOME_SERVICE") {
+        if (!checkUserLocationForBooking(user, showToast)) {
+          setBookingLoading((prev) => {
+            const { [serviceId]: removed, ...rest } = prev;
+            return rest;
+          });
+          return;
+        }
+      }
 
       // Prepare minimal navigation params to reduce payload
       const navigationParams = {
@@ -163,6 +181,7 @@ export default function VendorProfileScreen({ navigation, route }) {
       }, 500);
     }
   };
+  const firstServiceId = vendorData?.vendorServices;
 
   // Complete renderProduct function
   const renderProduct = (item, index) => {
@@ -250,7 +269,6 @@ export default function VendorProfileScreen({ navigation, route }) {
       />
     );
   };
-
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }} className="pb-[60px]">
       {/* Chat Connection Loader */}
@@ -264,7 +282,7 @@ export default function VendorProfileScreen({ navigation, route }) {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-[14px] text-white"
+          className="text-[16px] text-white"
         >
           Vendor's Profile
         </Text>
@@ -305,7 +323,7 @@ export default function VendorProfileScreen({ navigation, route }) {
         <View style={styles.vendorInfoWrap}>
           <View style={{ flex: 1 }}>
             <Text
-              className="text-faintDark text-[16px]"
+              className="text-faintDark text-[18px]"
               style={{ fontFamily: "poppinsMedium" }}
             >
               {vendorData?.vendorOnboarding?.businessName}
@@ -348,7 +366,7 @@ export default function VendorProfileScreen({ navigation, route }) {
           <AuthButton
             title="See Reviews"
             onPress={() => {
-              const firstServiceId = vendorData?.vendorServices;
+              const firstServiceId = vendorData?.id;
               navigation.navigate("ReviewsScreen", {
                 vendor: firstServiceId,
               });
@@ -369,6 +387,7 @@ export default function VendorProfileScreen({ navigation, route }) {
               onPress={() =>
                 navigation.navigate("VendorPortfolioScreen", {
                   portfolio: vendorData?.vendorOnboarding?.portfolioImages,
+                  vendorData,
                 })
               }
             >
@@ -553,7 +572,7 @@ export default function VendorProfileScreen({ navigation, route }) {
           />
         </View>
       </BottomModal>
-      <VendorProfileProductDetails
+      {/* <VendorProfileProductDetails
         visible={modalVisibleProduct}
         onClose={() => setModalVisibleProduct(false)}
         product={selectedProduct}
@@ -561,13 +580,13 @@ export default function VendorProfileScreen({ navigation, route }) {
         onAddToCart={handleAddToCartFromModal}
         cartProductIds={cartProductIds}
         addingToCart={addingToCart}
-      />
-      <VendorProfileServiceDetails
+      /> */}
+      {/* <VendorProfileServiceDetails
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         service={selectedService}
         vendorData={vendorData}
-      />
+      /> */}
     </View>
   );
 }

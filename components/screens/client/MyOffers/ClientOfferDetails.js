@@ -132,7 +132,7 @@ export default function ClientOfferDetailsScreen() {
         <Text
           className=""
           style={{
-            fontSize: 14,
+            fontSize: 16,
             fontFamily: "poppinsMedium",
             color: "#1F2937",
           }}
@@ -177,7 +177,7 @@ export default function ClientOfferDetailsScreen() {
             <View style={{ flex: 1 }}>
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: "#8C8D8B",
                   marginBottom: 4,
@@ -187,7 +187,7 @@ export default function ClientOfferDetailsScreen() {
               </Text>
               <Text
                 style={{
-                  fontSize: 16,
+                  fontSize: 18,
                   fontFamily: "poppinsMedium",
                   color: "#1F2937",
                 }}
@@ -198,7 +198,7 @@ export default function ClientOfferDetailsScreen() {
             <View style={{ flex: 1, alignItems: "flex-end" }}>
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: "#8C8D8B",
                   marginBottom: 4,
@@ -208,7 +208,7 @@ export default function ClientOfferDetailsScreen() {
               </Text>
               <Text
                 style={{
-                  fontSize: 16,
+                  fontSize: 18,
                   fontFamily: "poppinsMedium",
                   color: "#ED2584",
                 }}
@@ -247,7 +247,7 @@ export default function ClientOfferDetailsScreen() {
             <View style={{ flex: 1 }}>
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: "#8C8D8B",
                   marginBottom: 4,
@@ -257,7 +257,7 @@ export default function ClientOfferDetailsScreen() {
               </Text>
               <Text
                 style={{
-                  fontSize: 16,
+                  fontSize: 18,
                   fontFamily: "poppinsMedium",
                   color: "#1F2937",
                 }}
@@ -312,7 +312,7 @@ export default function ClientOfferDetailsScreen() {
             <View style={{ flex: 1 }}>
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: "#8C8D8B",
                   marginBottom: 4,
@@ -322,7 +322,7 @@ export default function ClientOfferDetailsScreen() {
               </Text>
               <Text
                 style={{
-                  fontSize: 16,
+                  fontSize: 18,
                   fontFamily: "poppinsMedium",
                   color: "#1F2937",
                 }}
@@ -333,7 +333,7 @@ export default function ClientOfferDetailsScreen() {
             <View style={{ alignItems: "flex-end" }}>
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: "#8C8D8B",
                   marginBottom: 4,
@@ -353,7 +353,7 @@ export default function ClientOfferDetailsScreen() {
               >
                 <Text
                   style={{
-                    fontSize: 12,
+                    fontSize: 14,
                     fontFamily: "poppinsMedium",
                     color: getStatusColor(offerDetails.status),
                   }}
@@ -386,7 +386,7 @@ export default function ClientOfferDetailsScreen() {
               <Ionicons name="calendar-outline" size={16} color="#8C8D8B" />
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: "#8C8D8B",
                   marginLeft: 4,
@@ -399,7 +399,7 @@ export default function ClientOfferDetailsScreen() {
               <Ionicons name="time-outline" size={16} color="#8C8D8B" />
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: "#8C8D8B",
                   marginLeft: 4,
@@ -415,7 +415,7 @@ export default function ClientOfferDetailsScreen() {
             <View style={{ marginTop: 16 }}>
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: "#8C8D8B",
                   marginBottom: 4,
@@ -425,7 +425,7 @@ export default function ClientOfferDetailsScreen() {
               </Text>
               <Text
                 style={{
-                  fontSize: 14,
+                  fontSize: 16,
                   fontFamily: "poppinsRegular",
                   color: "#1F2937",
                 }}
@@ -472,7 +472,7 @@ export default function ClientOfferDetailsScreen() {
             >
               <Text
                 style={{
-                  fontSize: 14,
+                  fontSize: 16,
                   fontFamily: "poppinsMedium",
                   color: "#FFFFFF",
                 }}
@@ -494,7 +494,7 @@ export default function ClientOfferDetailsScreen() {
             >
               <Text
                 style={{
-                  fontSize: 14,
+                  fontSize: 16,
                   fontFamily: "poppinsMedium",
                   color: "#ED2584",
                 }}
@@ -513,7 +513,7 @@ export default function ClientOfferDetailsScreen() {
       >
         <View className="mb-8 mt-2">
           <Text
-            className="text-[16px] text-center text-fadedDark"
+            className="text-[18px] text-center text-fadedDark"
             style={{ fontFamily: "latoBold" }}
           >
             Are you sure you want to cancel this offer?
@@ -526,7 +526,7 @@ export default function ClientOfferDetailsScreen() {
           >
             <Text
               style={{ fontFamily: "poppinsMedium" }}
-              className="text-center text-[13px] text-white"
+              className="text-center text-[15px] text-white"
             >
               {isCancelling ? (
                 <BarIndicator color="#FFFFFF" size={16} />
@@ -543,7 +543,7 @@ export default function ClientOfferDetailsScreen() {
           >
             <Text
               style={{ fontFamily: "poppinsMedium" }}
-              className="text-center text-[13px] text-[#ff0000]"
+              className="text-center text-[15px] text-[#ff0000]"
             >
               No
             </Text>

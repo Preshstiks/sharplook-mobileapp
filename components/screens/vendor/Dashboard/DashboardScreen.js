@@ -284,7 +284,7 @@ export default function DashboardScreen({ navigation }) {
       const fetchData = async () => {
         setLoading(true);
         const token = await AsyncStorage.getItem("token");
-        console.log(token);
+
         try {
           const [productsRes, bookingsRes, walletRes] = await Promise.all([
             HttpClient.get("/products/getVendorProducts"),
@@ -330,7 +330,7 @@ export default function DashboardScreen({ navigation }) {
       <View className="flex-row items-center justify-between px-4 mt-2 mb-4">
         <View>
           <Text
-            className="text-[16px] w-[90%]"
+            className="text-[18px] w-[90%]"
             style={{ fontFamily: "latoBold" }}
           >
             Welcome {user?.vendorOnboarding?.businessName}!
@@ -354,7 +354,7 @@ export default function DashboardScreen({ navigation }) {
         <View className="flex-row justify-between items-center mb-2">
           <View className="flex-row items-center gap-2">
             <Text
-              className="text-white text-[12px] opacity-80"
+              className="text-white text-[14px] opacity-80"
               style={{ fontFamily: "latoBold" }}
             >
               Available Balance
@@ -384,7 +384,7 @@ export default function DashboardScreen({ navigation }) {
           {isShowBalance ? (
             <Text
               style={{ fontFamily: "poppinsBold" }}
-              className="text-white opacity-80 text-[24px]"
+              className="text-white opacity-80 text-[26px]"
             >
               {formatAmount(walletBalance)}
             </Text>
@@ -411,7 +411,7 @@ export default function DashboardScreen({ navigation }) {
             <MaterialIcons name="file-download" size={28} color="white" />
             <Text
               style={{ fontFamily: "latoRegular" }}
-              className="text-white text-[12px] mt-1"
+              className="text-white text-[14px] mt-1"
             >
               Fund wallet
             </Text>
@@ -424,7 +424,7 @@ export default function DashboardScreen({ navigation }) {
             <MaterialIcons name="file-upload" size={28} color="white" />
             <Text
               style={{ fontFamily: "latoRegular" }}
-              className="text-white text-[12px] mt-1"
+              className="text-white text-[14px] mt-1"
             >
               Withdraw
             </Text>
@@ -434,12 +434,12 @@ export default function DashboardScreen({ navigation }) {
 
       <View className="px-4 mb-6">
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-[16px]" style={{ fontFamily: "poppinsMedium" }}>
+          <Text className="text-[18px]" style={{ fontFamily: "poppinsMedium" }}>
             Recent Bookings
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate("Bookings")}>
             <Text
-              className="text-primary text-[12px]"
+              className="text-primary text-[14px]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               View all
@@ -452,7 +452,7 @@ export default function DashboardScreen({ navigation }) {
           <View className="items-center justify-center py-8">
             <EmptySVG width={120} height={120} />
             <Text
-              className="text-[14px] text-gray-400 mt-2"
+              className="text-[16px] text-gray-400 mt-2"
               style={{ fontFamily: "poppinsRegular" }}
             >
               No recent bookings
@@ -491,7 +491,7 @@ export default function DashboardScreen({ navigation }) {
                   {b?.service?.serviceName}
                 </Text>
                 <Text
-                  className="text-[14px] text-primary"
+                  className="text-[16px] text-primary"
                   style={{ fontFamily: "latoBold" }}
                 >
                   {formatAmount(b?.price)}
@@ -504,7 +504,7 @@ export default function DashboardScreen({ navigation }) {
 
       <View className="px-4 mb-8">
         <Text
-          className="text-[16px] mb-2"
+          className="text-[18px] mb-2"
           style={{ fontFamily: "poppinsMedium" }}
         >
           My Products
@@ -515,7 +515,7 @@ export default function DashboardScreen({ navigation }) {
           <View className="items-center justify-center py-8">
             <EmptySVG width={120} height={120} />
             <Text
-              className="text-[14px] text-gray-400 mt-2"
+              className="text-[16px] text-gray-400 mt-2"
               style={{ fontFamily: "poppinsRegular" }}
             >
               No products found
@@ -543,7 +543,7 @@ export default function DashboardScreen({ navigation }) {
                     {p.approvalStatus === "PENDING" && (
                       <View className="bg-[#ffffffe8] absolute top-2 right-2 py-[2px] px-3 rounded-[10px] z-10">
                         <Text
-                          className="text-[#ff0000] mt-1 text-[8px]"
+                          className="text-[#ff0000] mt-1 text-[10px]"
                           style={{ fontFamily: "poppinsMedium" }}
                         >
                           Not approved yet
@@ -552,14 +552,14 @@ export default function DashboardScreen({ navigation }) {
                     )}
                     <View className="flex-row justify-between mb-1">
                       <Text
-                        className="text-[14px] w-[70%]"
+                        className="text-[16px] w-[70%]"
                         style={{ fontFamily: "poppinsRegular" }}
                       >
                         {p.productName}
                       </Text>
                       {p.price ? (
                         <Text
-                          className="text-primary mt-1 text-[12px]"
+                          className="text-primary mt-1 text-[14px]"
                           style={{ fontFamily: "poppinsRegular" }}
                         >
                           {formatAmount(p.price)}
@@ -568,7 +568,7 @@ export default function DashboardScreen({ navigation }) {
                     </View>
                     <View className="flex-row justify-between items-center">
                       <Text
-                        className="text-[12px] text-[#00000066]"
+                        className="text-[14px] text-[#00000066]"
                         style={{ fontFamily: "poppinsRegular" }}
                       >
                         {p.qtyAvailable} pieces remaining

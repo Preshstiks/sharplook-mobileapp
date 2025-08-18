@@ -25,6 +25,7 @@ export default function VendorChatListScreen() {
   const [chatPreviews, setChatPreviews] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { navigateToChat } = useVendorChatNavigation();
 
   const userId = user?.id;
@@ -58,9 +59,11 @@ export default function VendorChatListScreen() {
           lastMessage: {
             message: newMessage.message,
             createdAt: newMessage.createdAt,
+            senderId: newMessage.senderId,
           },
           message: newMessage.message,
           time: newMessage.createdAt,
+          senderId: newMessage.senderId,
         };
       } else {
         // If no preview exists, create a basic one
@@ -69,9 +72,11 @@ export default function VendorChatListScreen() {
           lastMessage: {
             message: newMessage.message,
             createdAt: newMessage.createdAt,
+            senderId: newMessage.senderId,
           },
           message: newMessage.message,
           time: newMessage.createdAt,
+          senderId: newMessage.senderId,
         };
       }
 
@@ -102,8 +107,8 @@ export default function VendorChatListScreen() {
     setError(null);
     try {
       const [chatlistRes, chatPreviewRes] = await Promise.all([
-        HttpClient.get(`/messages/chats/${userId}`),
-        HttpClient.get(`/messages/previews/${userId}`),
+        HttpClient.get(`/messages/user/getVendorChats`),
+        HttpClient.get(`/messages/vendor/previews`),
       ]);
       setChats(chatlistRes.data.data || []);
 
@@ -135,21 +140,54 @@ export default function VendorChatListScreen() {
         updateChatPreview(msg);
       });
 
-      return () => {
-        if (socketRef.current) {
-          socketRef.current.disconnect();
+      // Listen for message sent confirmations to update previews
+      socketRef.current.on("messageSent", (data) => {
+        if (data.message) {
+          updateChatPreview(data.message);
         }
-      };
+      });
     }
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("newMessage");
+        socketRef.current.off("messageSent");
+        socketRef.current.disconnect();
+      }
+    };
   }, [userId]);
+
+  // Refresh chat list when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      if (userId) {
+        fetchChats();
+      }
+    }, [userId])
+  );
 
   if (authLoading || loading) {
     return (
       <SafeAreaView className="flex-1 bg-[#FFF8FB] items-center justify-center">
-        <Text style={{ fontFamily: "poppinsRegular" }}>Loading chats...</Text>
+        <Text style={{ fontFamily: "poppinsRegular", fontSize: 16 }}>
+          Loading chats...
+        </Text>
       </SafeAreaView>
     );
   }
+  const filteredChats = chats.filter((chat) => {
+    const clientName = chat?.client?.name?.toLowerCase() || "";
+    const lastMessage =
+      chatPreviews[chat.roomId]?.lastMessage?.message ||
+      chatPreviews[chat.roomId]?.message ||
+      chat?.lastMessage ||
+      chat?.message ||
+      "";
+
+    return (
+      clientName.includes(searchQuery.toLowerCase()) ||
+      lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   if (error) {
     return (
@@ -183,7 +221,7 @@ export default function VendorChatListScreen() {
         {/* Title */}
         <View style={{ flex: 1, alignItems: "center" }}>
           <Text
-            className="text-white text-[14px]"
+            className="text-white text-[16px]"
             style={{ fontFamily: "poppinsMedium" }}
           >
             My Chats
@@ -196,15 +234,17 @@ export default function VendorChatListScreen() {
         <View className="flex-row items-center bg-white border border-[#F9BCDC] rounded-xl px-4 pt-3 pb-2">
           <MaterialIcons name="search" size={24} color="#8c817a" />
           <TextInput
-            className="ml-2 text-xs flex-1"
+            className="ml-2 text-sm flex-1"
             placeholder="Search messages"
             cursorColor="#BF6A37"
+            value={searchQuery}
+            onChangeText={setSearchQuery} // ✅ bind search
             style={{ fontFamily: "poppinsRegular" }}
           />
         </View>
       </View>
       <FlatList
-        data={chats}
+        data={filteredChats}
         keyExtractor={(item) => item.id?.toString()}
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24 }}
         renderItem={({ item }) => {
@@ -212,10 +252,20 @@ export default function VendorChatListScreen() {
           const lastMessage =
             preview?.lastMessage?.message ||
             preview?.message ||
-            item.lastMessage ||
-            item.message;
+            item?.lastMessage ||
+            item?.message;
           const messageTimestamp =
             preview?.lastMessage?.createdAt || preview?.time || item.time;
+
+          // Check if the message is from the current user
+          const isOwnMessage =
+            preview?.lastMessage?.senderId === userId ||
+            preview?.senderId === userId ||
+            item?.senderId === userId;
+
+          // Add "me:" prefix if it's the current user's message
+          const displayMessage =
+            isOwnMessage && lastMessage ? `me: ${lastMessage}` : lastMessage;
 
           return (
             <TouchableOpacity
@@ -223,18 +273,18 @@ export default function VendorChatListScreen() {
               onPress={() =>
                 navigateToChat(navigation, {
                   chat: item,
-                  roomId: item.roomId,
-                  receiverName: item.sender.name,
-                  receiverId: item.sender.id,
-                  clientPhone: item.sender.phone, // Pass the client's phone number
+                  roomId: item?.roomId,
+                  receiverName: item?.client?.name,
+                  receiverId: item?.client?.id,
+                  clientPhone: item?.client?.phone, // Pass the client's phone number
                 })
               }
             >
               <View className="w-14 h-14 rounded-full bg-white items-center justify-center mr-4 overflow-hidden">
                 <Image
                   source={
-                    item.sender.avatar
-                      ? item.sender.avatar
+                    item?.client?.avatar
+                      ? { uri: item?.client?.avatar }
                       : require("../../../../assets/icon/avatar.png")
                   }
                   style={{ width: 48, height: 48 }}
@@ -243,17 +293,24 @@ export default function VendorChatListScreen() {
               </View>
               <View className="flex-1">
                 <Text
-                  className="text-base font-semibold text-faintDark"
+                  className="text-lg font-semibold text-faintDark"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
-                  {item.sender.name}
+                  {item?.client?.name}
                 </Text>
                 <Text
-                  className="text-xs text-[#A9A9A9] mt-1"
+                  className="text-sm text-[#A9A9A9] mt-1"
                   style={{ fontFamily: "poppinsRegular" }}
                   numberOfLines={1}
                 >
-                  {lastMessage || "No messages yet"}
+                  {isOwnMessage && lastMessage ? (
+                    <>
+                      <Text style={{ fontFamily: "poppinsBold" }}>me: </Text>
+                      {lastMessage}
+                    </>
+                  ) : (
+                    displayMessage || "No messages yet"
+                  )}
                 </Text>
               </View>
               <View className="ml-2">

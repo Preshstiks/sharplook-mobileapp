@@ -15,14 +15,13 @@ import { emailVerificationSchema } from "../../../../utils/validationSchemas";
 import { isAxiosError } from "axios";
 import { showToast } from "../../../ToastComponent/Toast";
 import { HttpClient } from "../../../../api/HttpClient";
-import { UIActivityIndicator } from "react-native-indicators";
 import LoaderOverlay from "../../../reusuableComponents/LoaderOverlay";
 import { Feather } from "@expo/vector-icons";
 
 export default function VendorEmailVerificationScreen({ navigation, route }) {
   const [code, setCode] = useState(["", "", "", ""]);
   const [timer, setTimer] = useState(60);
-
+  const [verifying, setVerifying] = useState(false);
   const [loading, setLoading] = useState(false);
   const inputs = useRef([]);
   const email = route?.params?.email || "raj****@gmail.com";
@@ -169,12 +168,12 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
             {timer > 0 ? (
               <Text
                 style={{ fontFamily: "poppinsRegular" }}
-                className="text-center text-[14px] mb-4"
+                className="text-center text-[16px] mb-4"
               >
                 Resend code in{" "}
                 <Text
                   style={{ fontFamily: "latoBold" }}
-                  className="text-primary text-[16px]"
+                  className="text-primary text-[18px]"
                 >
                   {Math.floor(timer / 60)} :{" "}
                   {String(timer % 60).padStart(2, "0")}
@@ -188,7 +187,7 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
               <TouchableOpacity onPress={handleResend}>
                 <Text
                   style={{ fontFamily: "latoBold" }}
-                  className="text-primary text-[14px] underline text-center mb-4"
+                  className="text-primary text-[16px] underline text-center mb-4"
                 >
                   Resend Code
                 </Text>
@@ -216,7 +215,6 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
                     email: route?.params?.email,
                   });
                 } catch (error) {
-                  console.log(error);
                   if (error.response && error.response.data) {
                     const errorMessage =
                       error.response.data.message ||
@@ -235,7 +233,7 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
               <Feather name="phone" size={20} color="#EB278D" />
               <Text
                 style={{ fontFamily: "poppinsRegular" }}
-                className="text-primary text-[12px]"
+                className="text-primary text-[14px]"
               >
                 Verify with Phone Number instead
               </Text>
@@ -244,15 +242,14 @@ export default function VendorEmailVerificationScreen({ navigation, route }) {
             <View className="mb-8">
               <AuthButton
                 title="Verify"
-                loadingMsg="Verifying"
                 onPress={handleSubmit}
-                isloading={loading}
+                isloading={verifying}
               />
             </View>
           </>
         )}
       </Formik>
-      <LoaderOverlay visible={loading} />
+      <LoaderOverlay visible={verifying} />
     </View>
   );
 }

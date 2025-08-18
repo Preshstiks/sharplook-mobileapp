@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -44,15 +45,34 @@ export default function OrderDetailsScreen() {
   const getOrderStatus = () => {
     if (!order?.items || order.items.length === 0) return "Unknown";
 
+    // Check if any item has a dispute
+    const hasDispute = order.items.some((item) => item.hasDispute);
+
     const statuses = order.items.map((item) => item.vendor?.status);
     const uniqueStatuses = [...new Set(statuses)];
 
-    if (uniqueStatuses.length === 1) {
+    if (hasDispute && uniqueStatuses.includes("PENDING")) {
+      return "DISPUTED";
+    } else if (uniqueStatuses.length === 1) {
       return uniqueStatuses[0];
     } else if (uniqueStatuses.includes("PENDING")) {
       return "PARTIALLY_DELIVERED";
     } else {
       return "MIXED_STATUS";
+    }
+  };
+
+  // Then update the getStatusDisplayText function to include the DISPUTED case:
+  const getStatusDisplayText = (status) => {
+    switch (status) {
+      case "PENDING":
+        return "Pending";
+      case "DELIVERED":
+        return "Delivered";
+      case "DISPUTED":
+        return "Disputed";
+      default:
+        return status || "Unknown";
     }
   };
 
@@ -88,12 +108,11 @@ export default function OrderDetailsScreen() {
         vendorOrderIds,
         role: "CLIENT",
       };
-      console.log("Confirm Order Payload:", payload);
+
       const res = await HttpClient.post("/orders/complete", payload);
       showToast.success(res.data.message || "Order confirmed successfully");
       navigation.goBack();
     } catch (error) {
-      console.log(error.response);
       showToast.error(
         error?.response?.data?.message || "Failed to complete order"
       );
@@ -148,18 +167,6 @@ export default function OrderDetailsScreen() {
           type: type,
         });
       }
-      console.log("=== Dispute Order FormData ===");
-      for (let [key, value] of formData.entries()) {
-        if (key === "disputeImage") {
-          console.log(`${key}:`, {
-            name: value.name,
-            type: value.type,
-            uri: value.uri,
-          });
-        } else {
-          console.log(`${key}:`, value);
-        }
-      }
 
       // Send FormData with proper headers
       const res = await HttpClient.post(
@@ -177,7 +184,6 @@ export default function OrderDetailsScreen() {
       setShowDisputeModal(false);
       resetForm();
     } catch (error) {
-      console.log(error.response);
       showToast.error(
         error?.response?.data?.message || "Failed to submit dispute"
       );
@@ -198,19 +204,26 @@ export default function OrderDetailsScreen() {
   };
 
   const { navigateToChat, isConnecting } = useChatNavigation();
+  // Inside OrderDetailsScreen
 
-  const getStatusDisplayText = (status) => {
-    switch (status) {
-      case "PENDING":
-        return "Pending";
-      case "DELIVERED":
-        return "Delivered";
-      case "PARTIALLY_DELIVERED":
-        return "Partially Delivered";
-      case "MIXED_STATUS":
-        return "Mixed Status";
-      default:
-        return status || "Unknown";
+  // Optimized chat navigation for vendors
+  const handleChatVendor = async (vendor) => {
+    try {
+      if (!vendor?.id) return;
+
+      await navigateToChat(navigation, {
+        vendorId: vendor.id,
+        receiverName: vendor.businessName,
+        vendorPhone: vendor.phone,
+        chat: {
+          id: vendor.id,
+          name: vendor.businessName,
+          avatar: vendor.avatar,
+          vendorId: vendor.id,
+        },
+      });
+    } catch (error) {
+      showToast.error("Failed to open chat");
     }
   };
 
@@ -234,7 +247,7 @@ export default function OrderDetailsScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: "poppinsMedium" }} className="text-[16px]">
+        <Text style={{ fontFamily: "poppinsMedium" }} className="text-[18px]">
           Order details
         </Text>
         <View className="relative">
@@ -253,16 +266,22 @@ export default function OrderDetailsScreen() {
           </Text>
           <Text
             style={{ fontFamily: "latoBold" }}
-            className="text-[16px] text-[#00000080] mt-1"
+            className="text-[18px] text-[#00000080] mt-1"
           >
             Order ID:{" "}
             <Text className="text-[#000]">{HexConverter(order?.id)}</Text>
           </Text>
           <Text
             style={{ fontFamily: "latoBold" }}
-            className="text-[12px] text-[#00000080] mt-2"
+            className="text-[14px] text-[#00000080] mt-2"
           >
             {formatDateToDDMMYYYY(order?.createdAt)}
+          </Text>
+          <Text
+            className="text-[14px] text-gray-500 mb-1 mt-3"
+            style={{ fontFamily: "latoRegular" }}
+          >
+            {order?.deliveryType}
           </Text>
         </View>
 
@@ -292,33 +311,27 @@ export default function OrderDetailsScreen() {
                   <View className="flex-1">
                     <Text
                       style={{ fontFamily: "poppinsMedium" }}
-                      className="text-[13px] mb-1"
+                      className="text-[15px] mb-1"
                     >
                       {vendorGroup.vendor?.businessName}
                     </Text>
                     <Text
                       style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[11px] text-faintDark2"
+                      className="text-[13px] text-faintDark2"
                     >
                       {vendorGroup.vendor?.phone}
                     </Text>
                   </View>
                   <TouchableOpacity
-                    onPress={() =>
-                      navigateToChat(navigation, {
-                        vendorId: vendorGroup.vendor?.id,
-                        receiverName: vendorGroup.vendor?.businessName,
-                        vendorPhone: vendorGroup.vendor?.phone,
-                        chat: {
-                          id: vendorGroup.vendor?.id,
-                          name: vendorGroup.vendor?.businessName,
-                          avatar: vendorGroup.vendor?.avatar,
-                          vendorId: vendorGroup.vendor?.id,
-                        },
-                      })
-                    }
+                    onPress={() => handleChatVendor(vendorGroup.vendor)}
+                    disabled={isConnecting}
+                    style={{ opacity: isConnecting ? 0.6 : 1 }}
                   >
-                    <MaterialIcons name="chat" size={18} color="#EB278D" />
+                    {isConnecting ? (
+                      <ActivityIndicator size="small" color="#EB278D" />
+                    ) : (
+                      <MaterialIcons name="chat" size={18} color="#EB278D" />
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -345,12 +358,20 @@ export default function OrderDetailsScreen() {
                     >
                       {`${item?.productName}`}
                     </Text>
-                    <View className="mt-3">
+                    <View className="mt-3 flex-row items-center gap-3">
+                      <Text className="text-primary text-[14px] mb-1">
+                        {formatAmount(item?.price)}
+                      </Text>
+                      <Text className="text-primary text-[14px] mb-1">x</Text>
+                      <Text className="text-primary text-[14px] mb-1">
+                        {`${item?.quantity}`}
+                      </Text>
+                      <Text className="text-primary text-[14px] mb-1">=</Text>
                       <Text
                         style={{ fontFamily: "latoBold" }}
                         className="text-primary text-[14px] mb-1"
                       >
-                        {formatAmount(item?.price)}
+                        {formatAmount(item?.price * item?.quantity)}
                       </Text>
                     </View>
                   </View>
@@ -404,13 +425,13 @@ export default function OrderDetailsScreen() {
           }) => (
             <View className="w-full px-2">
               <Text
-                className="text-[16px] mt-2 mb-1"
+                className="text-[18px] mt-2 mb-1"
                 style={{ fontFamily: "latoBold" }}
               >
                 Dispute Order
               </Text>
               <Text
-                className="text-[14px] text-[#888] mb-4"
+                className="text-[16px] text-[#888] mb-4"
                 style={{ fontFamily: "latoRegular" }}
               >
                 Why are you disputing this order?
@@ -428,7 +449,7 @@ export default function OrderDetailsScreen() {
                 onPress={() => pickImage(setFieldValue)}
               >
                 <Text
-                  className="text-[12px] text-center mr-2"
+                  className="text-[14px] text-center mr-2"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
                   Upload a picture evidence
@@ -460,7 +481,7 @@ export default function OrderDetailsScreen() {
 
               <Text
                 style={{ fontFamily: "poppinsRegular" }}
-                className="text-[10px] text-[#888] mb-2"
+                className="text-[12px] text-[#888] mb-2"
               >
                 Acceptable document type is Jpeg only and it should not be more
                 than 5MB

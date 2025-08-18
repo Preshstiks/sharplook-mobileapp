@@ -85,6 +85,9 @@ import VendorIndemnityScreen from "./vendorprivacypolicy/VendorIndemnityScreen";
 import VendorAcceptanceOfPolicyScreen from "./vendorprivacypolicy/VendorAcceptanceOfPolicyScreen";
 import VendorContactingUsScreen from "./vendorprivacypolicy/VendorContactingUsScreen";
 import ServiceLevelAgreementScreen from "./ServiceLevelAgreement";
+import GetStartedScreen from "./GetStarted";
+import PaymentScreen from "./PaymentScreen";
+import BookingSystemScreen from "./BookingSystemScreen";
 // import ProtectedRoute from "../../reusuableComponents/ProtectedRoute";
 
 const Stack = createNativeStackNavigator();
@@ -778,6 +781,26 @@ export default function VendorNavigator() {
       <Stack.Screen
         name="VendorContactingUsScreen"
         children={(props) => <VendorContactingUsScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorHelpAndSupportScreen"
+        children={(props) => <VendorHelpSupportScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorGetStartedScreen"
+        children={(props) => <GetStartedScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorPaymentScreen"
+        children={(props) => <PaymentScreen {...props} />}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VendorBookingSystemScreen"
+        children={(props) => <BookingSystemScreen {...props} />}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

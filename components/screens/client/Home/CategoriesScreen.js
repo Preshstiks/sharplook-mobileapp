@@ -15,9 +15,13 @@ import { useStatusBar } from "../../../../context/StatusBarContext";
 import { EmptyData } from "../../../reusuableComponents/EmptyData";
 import { useAuth } from "../../../../context/AuthContext";
 import { HttpClient } from "../../../../api/HttpClient";
-import { getCurrentLocation } from "../../../../utils/locationUtils";
-import ServiceDetailsModal from "../ServiceDetailsModal";
+import {
+  getCurrentLocation,
+  checkUserLocationForBooking,
+} from "../../../../utils/locationUtils";
+// import ServiceDetailsModal from "../ServiceDetailsModal";
 import DefaultAvatar from "../../../../assets/icon/avatar.png";
+import { showToast } from "../../../ToastComponent/Toast";
 
 export default function CategoriesScreen() {
   const route = useRoute();
@@ -28,11 +32,12 @@ export default function CategoriesScreen() {
     setBarType("primary");
   }, []);
   const category = route.params?.category || "";
+  const nearbyVendors = route.params?.nearbyVendors || [];
   const services = route.params?.services || [];
   const [search, setSearch] = useState("");
 
   // New state for nearby vendors
-  const [nearbyVendors, setNearbyVendors] = useState([]);
+
   const [loadingNearby, setLoadingNearby] = useState(true);
   const [errorNearby, setErrorNearby] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -44,6 +49,11 @@ export default function CategoriesScreen() {
       service?.vendor?.vendorOnboarding?.serviceType || "IN_SHOP";
 
     if (vendorServiceType === "HOME_SERVICE") {
+      // Check if user has location set for home service booking
+      if (!checkUserLocationForBooking(user, showToast)) {
+        return;
+      }
+
       navigation.navigate("BookingHomeServiceAppointScreen", {
         service,
         vendorData: service?.vendor,
@@ -57,97 +67,53 @@ export default function CategoriesScreen() {
     }
   };
 
-  useEffect(() => {
-    const fetchNearbyVendors = async () => {
-      setLoadingNearby(true);
-      setErrorNearby(null);
-      try {
-        // Get current location with better error handling
-        let location;
-        try {
-          location = await getCurrentLocation();
-        } catch (locationError) {
-          console.error("Location error:", locationError);
-          setErrorNearby(
-            "Unable to get your location. Please check location permissions."
-          );
-          setNearbyVendors([]);
-          setLoadingNearby(false);
-          return;
-        }
+  const filteredServices = services.filter((service) => {
+    const searchLower = search.toLowerCase();
+    const serviceNameMatch = service.serviceName
+      ?.toLowerCase()
+      .includes(searchLower);
+    const vendorNameMatch = service.vendor?.vendorOnboarding?.businessName
+      ?.toLowerCase()
+      .includes(searchLower);
+    return serviceNameMatch || vendorNameMatch;
+  });
 
-        const latitude = location.latitude;
-        const longitude = location.longitude;
+  // Filter nearby vendors by search (vendor business name or their services)
+  const filteredNearbyVendors = nearbyVendors.filter((vendor) => {
+    const searchLower = search.toLowerCase();
+    const vendorNameMatch = vendor?.vendorOnboarding?.businessName
+      ?.toLowerCase()
+      .includes(searchLower);
+    const serviceMatch = vendor.vendorServices?.some((service) =>
+      service.serviceName?.toLowerCase().includes(searchLower)
+    );
+    return vendorNameMatch || serviceMatch;
+  });
 
-        // Use the services endpoint to get all services with vendor information
-        const res = await HttpClient.get("/client/services");
-
-        // Filter services by category
-        let filteredServices = res.data?.data || [];
-        if (category && filteredServices.length > 0) {
-          filteredServices = filteredServices.filter(
-            (service) => service.serviceName === category
-          );
-        }
-
-        // Extract unique vendors from the filtered services
-        const vendorMap = new Map();
-        filteredServices.forEach((service) => {
-          if (service.vendor && !vendorMap.has(service.vendor.id)) {
-            vendorMap.set(service.vendor.id, {
-              ...service.vendor,
-              serviceName: service.serviceName,
-              servicePrice: service.servicePrice,
-              serviceImage: service.serviceImage,
-              description: service.description,
-            });
-          }
-        });
-
-        const uniqueVendors = Array.from(vendorMap.values());
-
-        setNearbyVendors(uniqueVendors);
-      } catch (err) {
-        console.error("Error fetching services:", err);
-
-        setErrorNearby("Failed to fetch vendors. Please try again.");
-        setNearbyVendors([]);
-      } finally {
-        setLoadingNearby(false);
-      }
-    };
-    fetchNearbyVendors();
-  }, [category]); // Add category as dependency
-
-  // Filter services by search
-  const filteredServices = services.filter((service) =>
-    service.serviceName.toLowerCase().includes(search.toLowerCase())
-  );
-
-  // Vendors on Sharplook: all others (not nearby)
-  const vendorsOnSharplook = filteredServices.filter(
-    (service) => !(service.vendorNear === true || service.distance <= 5)
-  );
   const handleServicePress = (vendor) => {
-    // Transform vendor data to match ServiceDetailsModal expected structure
+    // Transform vendor data to match ServiceDetailsScreen expected structure
     let transformedService = {
-      serviceName: vendor.serviceName || category,
-      servicePrice: vendor.servicePrice || "Contact for pricing",
-      serviceImage: vendor.serviceImage || vendor.avatar || DefaultAvatar,
+      id: vendor.id,
+      serviceName: vendor.serviceName,
+      servicePrice: vendor.servicePrice,
+      serviceImage: vendor.serviceImage || vendor.avatar,
       description:
         vendor.description ||
         `${category} service by ${vendor?.vendorOnboarding?.businessName}`,
       vendor: {
-        id: vendor.id,
-        businessName: vendor?.vendorOnboarding?.businessName || "Vendor",
-        location: "Location not available",
-        vendorOnboarding: vendor.vendorOnboarding,
+        id: vendor.userId,
+        businessName: vendor?.vendor?.vendorOnboarding?.businessName,
+        location: vendor?.vendor?.vendorOnboarding?.location,
+        latitude: vendor?.vendor?.vendorOnboarding?.latitude,
+        longitude: vendor?.vendor?.vendorOnboarding?.longitude,
+        vendorOnboarding: vendor?.vendor?.vendorOnboarding,
       },
       rating: vendor.rating || 0,
     };
 
-    setSelectedService(transformedService);
-    setModalVisible(true);
+    navigation.navigate("ServiceDetailsScreen", {
+      service: transformedService,
+    });
   };
 
   // Skeleton loader card for vendor
@@ -222,7 +188,7 @@ export default function CategoriesScreen() {
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
-          className="text-white text-[14px]"
+          className="text-white text-[16px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Categories ({category})
@@ -236,11 +202,12 @@ export default function CategoriesScreen() {
             <MaterialIcons name="search" size={24} color="#8c817a" />
           </View>
           <TextInput
-            className="ml-2 text-xs pb-4 pt-5 placeholder:text-faintDark2"
+            className="ml-2 text-sm pb-4 pt-5 placeholder:text-faintDark2"
             placeholder="Search Vendor"
             cursorColor="#EB278D"
+            value={search}
+            onChangeText={setSearch}
             style={{ fontFamily: "poppinsRegular" }}
-            // onFocus={() => setIsSearchBarActive(true)}
           />
         </View>
 
@@ -251,28 +218,12 @@ export default function CategoriesScreen() {
       {/* Vendors Near You */}
       <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
         <Text
-          className="text-[14px] mt-2 mb-2"
+          className="text-[16px] mt-2 mb-2"
           style={{ fontFamily: "poppinsMedium" }}
         >
           {category} Vendors near you
         </Text>
-        {loadingNearby ? (
-          <View className="pb-6">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              className="mb-4"
-            >
-              {[...Array(3)].map((_, idx) => (
-                <SkeletonCard key={idx} horizontal />
-              ))}
-            </ScrollView>
-          </View>
-        ) : errorNearby ? (
-          <View className="pb-6">
-            <Text>{errorNearby}</Text>
-          </View>
-        ) : nearbyVendors.length === 0 ? (
+        {filteredNearbyVendors.length === 0 ? (
           <View className="pb-6">
             <EmptyData msg={`No ${category} vendors available.`} />
           </View>
@@ -282,35 +233,35 @@ export default function CategoriesScreen() {
             showsHorizontalScrollIndicator={false}
             className="mb-4"
           >
-            {nearbyVendors.map((vendor) => (
+            {filteredNearbyVendors.map((vendor) => (
               <Pressable
-                onPress={() => handleServicePress(vendor)}
+                onPress={() =>
+                  navigation.navigate("VendorProfileScreen", {
+                    vendorData: vendor,
+                  })
+                }
                 key={vendor.id}
                 className="w-[140px] mr-3 bg-white rounded-xl shadow-sm border border-[#F6F6F6]"
               >
                 <Image
                   source={
-                    vendor.serviceImage
-                      ? { uri: vendor.serviceImage }
-                      : vendor.avatar
-                        ? { uri: vendor.avatar }
-                        : DefaultAvatar
+                    vendor?.avatar ? { uri: vendor?.avatar } : DefaultAvatar
                   }
                   className="w-full h-[90px] rounded-t-lg"
                   resizeMode="cover"
                 />
                 <View className="p-3">
                   <Text
-                    className="mt-2 text-[12px]"
+                    className="mt-2 text-[14px]"
                     style={{ fontFamily: "poppinsRegular" }}
                     numberOfLines={1}
                   >
-                    {vendor?.vendorOnboarding?.businessName || "Vendor"}
+                    {vendor?.vendorOnboarding?.businessName}
                   </Text>
                   <View className="bg-primary rounded-[4px] my-1 px-3 self-start">
                     <Text
                       style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[8px] mt-1 text-white"
+                      className="text-[10px] mt-1 text-white"
                     >
                       {vendor?.vendorOnboarding?.serviceType === "HOME_SERVICE"
                         ? "Home Service"
@@ -330,7 +281,7 @@ export default function CategoriesScreen() {
                         }
                       />
                     ))}
-                    <Text className="ml-1 text-[12px] text-[#444]">
+                    <Text className="ml-1 text-[14px] text-[#444]">
                       {(vendor.rating || 0).toFixed(1)}
                     </Text>
                   </View>
@@ -341,20 +292,20 @@ export default function CategoriesScreen() {
         )}
         {/* Vendors on Sharplook */}
         <Text
-          className="text-[14px] mt-2 mb-2"
+          className="text-[16px] mt-2 mb-2"
           style={{ fontFamily: "poppinsMedium" }}
         >
           {category} Vendors on Sharplook
         </Text>
         <View className="flex-row flex-wrap justify-between">
-          {vendorsOnSharplook.length === 0 ? (
+          {filteredServices.length === 0 ? (
             <View style={{ width: "100%", alignItems: "center" }}>
               <View className="w-[60%]">
                 <EmptyData msg="No vendors on Sharplook for this category." />
               </View>
             </View>
           ) : (
-            vendorsOnSharplook.map((service) => (
+            filteredServices.map((service) => (
               <Pressable
                 onPress={() => handleServicePress(service)}
                 key={service.id}
@@ -367,7 +318,7 @@ export default function CategoriesScreen() {
                 />
                 <View className="px-3 pb-3">
                   <Text
-                    className="mt-2 text-[12px]"
+                    className="mt-2 text-[14px]"
                     style={{ fontFamily: "poppinsRegular" }}
                     numberOfLines={1}
                   >
@@ -397,7 +348,7 @@ export default function CategoriesScreen() {
                         }
                       />
                     ))}
-                    <Text className="ml-1 text-[12px] text-[#444]">
+                    <Text className="ml-1 text-[14px] text-[#444]">
                       {(service.rating || 0).toFixed(1)}
                     </Text>
                   </View>
@@ -406,21 +357,21 @@ export default function CategoriesScreen() {
             ))
           )}
         </View>
-        <TouchableOpacity className="items-center mt-2 mb-8">
+        {/* <TouchableOpacity className="items-center mt-2 mb-8">
           <Text
             className="text-[13px] text-primary"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Load More
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </ScrollView>
-      <ServiceDetailsModal
+      {/* <ServiceDetailsModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         service={selectedService}
         onBookNow={handleBookNow}
-      />
+      /> */}
     </View>
   );
 }

@@ -92,7 +92,7 @@ export default function VerifyWithPhoneOTP({ navigation, route }) {
       phone: String(phone), // Ensure phone is sent as string
       otp: values.otp,
     };
-    console.log({ payload });
+
     try {
       const res = await HttpClient.post("/auth/verify-otp", {
         phone: String(phone), // Ensure phone is sent as string
@@ -104,7 +104,7 @@ export default function VerifyWithPhoneOTP({ navigation, route }) {
       // Reset code and focus first input on error
       setCode(["", "", "", ""]);
       inputs.current[0]?.focus();
-      console.log(error.response);
+
       if (error.response && error.response.data) {
         const errorMessage =
           error.response.data.message || "An unknown error occurred";
@@ -132,14 +132,14 @@ export default function VerifyWithPhoneOTP({ navigation, route }) {
           </Pressable>
           <Text
             style={{ fontFamily: "poppinsSemiBold" }}
-            className="text-[16px]"
+            className="text-[18px]"
           >
             Verification
           </Text>
         </View>
 
         <Text
-          className="text-center mb-1 text-[13px]"
+          className="text-center mb-1 text-[15px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           We have sent an OTP code to your phone number
@@ -147,14 +147,14 @@ export default function VerifyWithPhoneOTP({ navigation, route }) {
 
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-center text-[14px] text-primary mb-6"
+          className="text-center text-[16px] text-primary mb-6"
         >
           {maskedPhone}
         </Text>
 
         <Text
           style={{ fontFamily: "poppinsRegular" }}
-          className="text-center text-[12px] mb-4"
+          className="text-center text-[14px] mb-4"
         >
           Please enter the Verification code
         </Text>

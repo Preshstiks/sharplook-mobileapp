@@ -22,7 +22,7 @@ export default function SuccessModal({
           style={[styles.lottie]}
         />
         <Text
-          className="text-[12px] mb-5 text-center"
+          className="text-[15px] mb-5 text-center"
           style={{ fontFamily: "poppinsRegular" }}
         >
           {message}
@@ -33,7 +33,7 @@ export default function SuccessModal({
             onPress={onClose}
           >
             <Text
-              className="text-[16px] text-white"
+              className="text-[19px] text-white"
               style={{ fontFamily: "poppinsMedium" }}
             >
               {buttonText}

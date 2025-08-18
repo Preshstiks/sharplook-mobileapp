@@ -16,45 +16,6 @@ import VendorProfileScreen from "./VendorProfileScreen";
 import MyServicesScreen from "./MyServicesScreen";
 import DashboardStack from "./Dashboard/DashboardStack";
 
-function Bookings() {
-  return (
-    <SafeAreaView
-      className="flex-1 bg-secondary"
-      edges={["bottom", "left", "right"]}
-    >
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text>Bookings Screen</Text>
-      </View>
-    </SafeAreaView>
-  );
-}
-
-function MyProducts() {
-  return (
-    <SafeAreaView
-      className="flex-1 bg-secondary"
-      edges={["bottom", "left", "right"]}
-    >
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text>My Products Screen</Text>
-      </View>
-    </SafeAreaView>
-  );
-}
-
-function ProfileScreen() {
-  return (
-    <SafeAreaView
-      className="flex-1 bg-secondary"
-      edges={["bottom", "left", "right"]}
-    >
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text>Profile Screen</Text>
-      </View>
-    </SafeAreaView>
-  );
-}
-
 const Tab = createBottomTabNavigator();
 
 export default function VendorBottomNav() {

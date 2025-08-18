@@ -11,6 +11,7 @@ import {
   Pressable,
   FlatList,
   Modal,
+  Keyboard,
 } from "react-native";
 import { Feather, Ionicons, AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -23,6 +24,7 @@ import OutlineTextInput from "../../reusuableComponents/inputFields/OutlineTextI
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import Dropdown from "../../reusuableComponents/inputFields/Dropdown";
 import * as ImagePicker from "expo-image-picker";
+import { OutlinePhoneInput } from "../../reusuableComponents/inputFields/OutlinePhoneInput";
 
 // Time picker component
 const TimePicker = ({ value, onValueChange, label, error, touched }) => {
@@ -231,8 +233,8 @@ const StoreManagementScreen = () => {
 
   // Initialize availability from existing user data
   useEffect(() => {
-    if (user?.vendorOnboarding?.availability) {
-      const availability = user.vendorOnboarding.availability;
+    if (user?.vendorAvailability) {
+      const availability = user.vendorAvailability;
       if (availability.days) {
         setSelectedDays(availability.days);
       }
@@ -257,7 +259,7 @@ const StoreManagementScreen = () => {
       user?.vendorOnboarding?.bio ||
       "",
     businessEmail: user?.email || "",
-    phoneNumber: user?.phoneNumber || "",
+    phoneNumber: user?.phone || "",
     location:
       user?.vendorOnboarding?.businessAddress ||
       user?.vendorOnboarding?.location ||
@@ -268,9 +270,9 @@ const StoreManagementScreen = () => {
       "",
     portfolioImages: user?.vendorOnboarding?.portfolioImages || [],
     availability: {
-      days: user?.vendorOnboarding?.availability?.days || [],
-      fromTime: user?.vendorOnboarding?.availability?.fromTime || "",
-      toTime: user?.vendorOnboarding?.availability?.toTime || "",
+      days: user?.vendorAvailability?.days || [],
+      fromTime: user?.vendorAvailability?.fromTime || "",
+      toTime: user?.vendorAvailability?.toTime || "",
     },
   };
 
@@ -308,7 +310,7 @@ const StoreManagementScreen = () => {
         },
       });
       showToast.success(res.data.message || "Profile updated successfully");
-      if (res.data.user) setUser(res.data.user);
+      // Let the polling mechanism handle the state update
     } catch (error) {
       let errorMsg = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
@@ -370,8 +372,8 @@ const StoreManagementScreen = () => {
         },
       });
       if (response.data) {
-        setUser(response.data.user);
         showToast.success(response.data.message);
+        // Let the polling mechanism handle the state update
       }
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -384,7 +386,7 @@ const StoreManagementScreen = () => {
       setIsUploadingImage(false);
     }
   };
-
+  console.log({ user });
   // Get the current image source
   const getImageSource = () => {
     if (selectedImage) {
@@ -398,391 +400,405 @@ const StoreManagementScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-secondary">
-      {/* Header with logo, name, badge, address */}
-      <View className="bg-primary rounded-b-[40px] items-center pt-[70px] pb-8">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="absolute left-4 top-10"
-        >
-          <Ionicons name="chevron-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <View>
-          <Image
-            source={getImageSource()}
-            className="w-24 h-24 rounded-full mb-4 bg-white"
-          />
-          <TouchableOpacity
-            className="absolute bottom-2 right-2 bg-white p-1 rounded-full border border-gray-200"
-            onPress={pickImage}
-            disabled={isUploadingImage}
-          >
-            {isUploadingImage ? (
-              <View className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
-            ) : (
-              <Feather name="edit" size={18} color="#000" />
-            )}
-          </TouchableOpacity>
-        </View>
-        <Text
-          className="text-white text-[16px] text-center"
-          style={{ fontFamily: "poppinsMedium" }}
-        >
-          {user?.vendorOnboarding?.businessName}
-        </Text>
-        <View className="flex-row items-center mt-2">
-          <View className="bg-white px-3 py-1 rounded-lg flex-row items-center mr-2">
-            <View className="w-2 h-2 rounded-full bg-[#ED2584] mr-2" />
-            <Text
-              className="text-[12px] mt-1 text-[#ED2584]"
-              style={{ fontFamily: "poppinsMedium" }}
-            >
-              {user?.vendorOnboarding?.serviceType === "HOME_SERVICE"
-                ? "Home Service"
-                : "In-shop"}
-            </Text>
-          </View>
-        </View>
-        <View className="flex-row mt-2  w-[70%] justify-center">
-          <Ionicons name="location-sharp" size={14} color="#fff" />
-          <Text
-            className="text-white text-center text-[12px] ml-1"
-            style={{ fontFamily: "poppinsLight" }}
-          >
-            {user?.vendorOnboarding?.location}
-          </Text>
-        </View>
-      </View>
-
-      {/* Form Body */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <Formik
-            initialValues={initialValues}
-            validationSchema={vendorBusinessInfoSchema}
-            enableReinitialize
-            onSubmit={handleUpdate}
+        {/* Header with logo, name, badge, address */}
+        <View className="bg-primary rounded-b-[40px] items-center pt-[70px] pb-8">
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="absolute left-4 top-10"
           >
-            {({
-              handleChange,
-              handleBlur,
-              handleSubmit,
-              values,
-              errors,
-              touched,
-              isSubmitting,
-              setFieldValue,
-            }) => {
-              const updateAvailabilityDays = (newDays) => {
-                setSelectedDays(newDays);
-                setFieldValue("availability.days", newDays);
-              };
+            <Ionicons name="chevron-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View>
+            <Image
+              source={getImageSource()}
+              className="w-24 h-24 rounded-full mb-4 bg-white"
+            />
+            <TouchableOpacity
+              className="absolute bottom-2 right-2 bg-white p-1 rounded-full border border-gray-200"
+              onPress={pickImage}
+              disabled={isUploadingImage}
+            >
+              {isUploadingImage ? (
+                <View className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+              ) : (
+                <Feather name="edit" size={18} color="#000" />
+              )}
+            </TouchableOpacity>
+          </View>
+          <Text
+            className="text-white text-[16px] text-center"
+            style={{ fontFamily: "poppinsMedium" }}
+          >
+            {user?.vendorOnboarding?.businessName}
+          </Text>
+          <View className="flex-row items-center mt-2">
+            <View className="bg-white px-3 py-1 rounded-lg flex-row items-center mr-2">
+              <View className="w-2 h-2 rounded-full bg-[#ED2584] mr-2" />
+              <Text
+                className="text-[12px] mt-1 text-[#ED2584]"
+                style={{ fontFamily: "poppinsMedium" }}
+              >
+                {user?.vendorOnboarding?.serviceType === "HOME_SERVICE"
+                  ? "Home Service"
+                  : "In-shop"}
+              </Text>
+            </View>
+          </View>
+          <View className="flex-row mt-2  w-[70%] justify-center">
+            <Ionicons name="location-sharp" size={14} color="#fff" />
+            <Text
+              className="text-white text-center text-[12px] ml-1"
+              style={{ fontFamily: "poppinsLight" }}
+            >
+              {user?.vendorOnboarding?.location}
+            </Text>
+          </View>
+        </View>
 
-              const updateFromTime = (time) => {
-                setFromTime(time);
-                setFieldValue("availability.fromTime", time);
-              };
+        {/* Form Body */}
+        <View style={{ flex: 1 }}>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{
+              paddingBottom: 120,
+              flexGrow: 1,
+            }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            onScrollBeginDrag={() => {
+              setTimeout(() => {
+                Keyboard.dismiss();
+              }, 100);
+            }}
+            automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
+          >
+            <Formik
+              initialValues={initialValues}
+              validationSchema={vendorBusinessInfoSchema}
+              enableReinitialize
+              onSubmit={handleUpdate}
+            >
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                values,
+                errors,
+                touched,
+                isSubmitting,
+                setFieldValue,
+              }) => {
+                const updateAvailabilityDays = (newDays) => {
+                  setSelectedDays(newDays);
+                  setFieldValue("availability.days", newDays);
+                };
 
-              const updateToTime = (time) => {
-                setToTime(time);
-                setFieldValue("availability.toTime", time);
-              };
+                const updateFromTime = (time) => {
+                  setFromTime(time);
+                  setFieldValue("availability.fromTime", time);
+                };
 
-              const toggleDay = (day) => {
-                let newDays;
-                if (selectedDays.includes(day)) {
-                  newDays = selectedDays.filter((d) => d !== day);
-                } else {
-                  newDays = [...selectedDays, day];
-                }
-                updateAvailabilityDays(newDays);
-              };
+                const updateToTime = (time) => {
+                  setToTime(time);
+                  setFieldValue("availability.toTime", time);
+                };
 
-              const pickPortfolioImage = async () => {
-                if (values.portfolioImages.length >= 6) {
-                  showToast.error(
-                    "Maximum 6 images allowed. Please remove some images first."
-                  );
-                  return;
-                }
-
-                let result = await ImagePicker.launchImageLibraryAsync({
-                  mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                  allowsEditing: true,
-                  quality: 1,
-                  allowsMultipleSelection: true,
-                  selectionLimit: 6 - values.portfolioImages.length,
-                });
-
-                if (
-                  !result.canceled &&
-                  result.assets &&
-                  result.assets.length > 0
-                ) {
-                  const newImages = result.assets.map((asset) => asset.uri);
-                  const totalImages =
-                    values.portfolioImages.length + newImages.length;
-
-                  let updatedImages;
-                  if (totalImages > 6) {
-                    showToast.error(
-                      "Maximum 6 images allowed. Only the first images will be added."
-                    );
-                    const remainingSlots = 6 - values.portfolioImages.length;
-                    updatedImages = [
-                      ...values.portfolioImages,
-                      ...newImages.slice(0, remainingSlots),
-                    ];
+                const toggleDay = (day) => {
+                  let newDays;
+                  if (selectedDays.includes(day)) {
+                    newDays = selectedDays.filter((d) => d !== day);
                   } else {
-                    updatedImages = [...values.portfolioImages, ...newImages];
+                    newDays = [...selectedDays, day];
+                  }
+                  updateAvailabilityDays(newDays);
+                };
+
+                const pickPortfolioImage = async () => {
+                  if (values.portfolioImages.length >= 6) {
+                    showToast.error(
+                      "Maximum 6 images allowed. Please remove some images first."
+                    );
+                    return;
                   }
 
+                  let result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    allowsEditing: true,
+                    quality: 1,
+                    allowsMultipleSelection: true,
+                    selectionLimit: 6 - values.portfolioImages.length,
+                  });
+
+                  if (
+                    !result.canceled &&
+                    result.assets &&
+                    result.assets.length > 0
+                  ) {
+                    const newImages = result.assets.map((asset) => asset.uri);
+                    const totalImages =
+                      values.portfolioImages.length + newImages.length;
+
+                    let updatedImages;
+                    if (totalImages > 6) {
+                      showToast.error(
+                        "Maximum 6 images allowed. Only the first images will be added."
+                      );
+                      const remainingSlots = 6 - values.portfolioImages.length;
+                      updatedImages = [
+                        ...values.portfolioImages,
+                        ...newImages.slice(0, remainingSlots),
+                      ];
+                    } else {
+                      updatedImages = [...values.portfolioImages, ...newImages];
+                    }
+
+                    setFieldValue("portfolioImages", updatedImages);
+                  }
+                };
+
+                const removeImage = (index) => {
+                  const updatedImages = values.portfolioImages.filter(
+                    (_, i) => i !== index
+                  );
                   setFieldValue("portfolioImages", updatedImages);
-                }
-              };
+                };
 
-              const removeImage = (index) => {
-                const updatedImages = values.portfolioImages.filter(
-                  (_, i) => i !== index
-                );
-                setFieldValue("portfolioImages", updatedImages);
-              };
+                return (
+                  <View className="flex-1 px-4 pt-10">
+                    <OutlineTextInput
+                      label="Business Name"
+                      value={values.businessName}
+                      onChangeText={handleChange("businessName")}
+                      onBlur={handleBlur("businessName")}
+                      placeholder="Heritage Spa and Beauty Services"
+                      error={errors.businessName}
+                      touched={touched.businessName}
+                    />
+                    <OutlineTextInput
+                      label="Business Description"
+                      value={values.bio}
+                      onChangeText={handleChange("bio")}
+                      onBlur={handleBlur("bio")}
+                      placeholder="Type here"
+                      error={errors.bio}
+                      touched={touched.bio}
+                    />
+                    <OutlineTextInput
+                      label="Business Email Address"
+                      value={values.businessEmail}
+                      onChangeText={handleChange("businessEmail")}
+                      onBlur={handleBlur("businessEmail")}
+                      placeholder="rajibalikis@gmail.com"
+                      keyboardType="email-address"
+                      error={errors.businessEmail}
+                      touched={touched.businessEmail}
+                      editable={false}
+                    />
+                    <OutlinePhoneInput
+                      label="Phone Number"
+                      value={values.phoneNumber}
+                      onChangeText={handleChange("phoneNumber")}
+                      onBlur={handleBlur("phoneNumber")}
+                      placeholder="8065456789"
+                      keyboardType="phone-pad"
+                      error={errors.phoneNumber}
+                      touched={touched.phoneNumber}
+                      isPhoneInput={true}
+                      defaultCountry="NG"
+                    />
 
-              return (
-                <View className="flex-1 px-4 pt-10">
-                  <OutlineTextInput
-                    label="Business Name"
-                    value={values.businessName}
-                    onChangeText={handleChange("businessName")}
-                    onBlur={handleBlur("businessName")}
-                    placeholder="Heritage Spa and Beauty Services"
-                    error={errors.businessName}
-                    touched={touched.businessName}
-                  />
-                  <OutlineTextInput
-                    label="Business Description"
-                    value={values.bio}
-                    onChangeText={handleChange("bio")}
-                    onBlur={handleBlur("bio")}
-                    placeholder="Type here"
-                    error={errors.bio}
-                    touched={touched.bio}
-                  />
-                  <OutlineTextInput
-                    label="Business Email Address"
-                    value={values.businessEmail}
-                    onChangeText={handleChange("businessEmail")}
-                    onBlur={handleBlur("businessEmail")}
-                    placeholder="rajibalikis@gmail.com"
-                    keyboardType="email-address"
-                    error={errors.businessEmail}
-                    touched={touched.businessEmail}
-                    editable={false}
-                  />
-                  <OutlineTextInput
-                    label="Phone Number"
-                    value={values.phoneNumber}
-                    onChangeText={handleChange("phoneNumber")}
-                    onBlur={handleBlur("phoneNumber")}
-                    placeholder="+2348065456789"
-                    keyboardType="phone-pad"
-                    error={errors.phoneNumber}
-                    touched={touched.phoneNumber}
-                  />
-                  <OutlineTextInput
-                    label="Business Address"
-                    value={values.location}
-                    onChangeText={handleChange("location")}
-                    onBlur={handleBlur("location")}
-                    placeholder="Lagos, Nigeria"
-                    error={errors.location}
-                    touched={touched.location}
-                  />
-                  <OutlineTextInput
-                    label="Business Registration Number"
-                    value={values.registerationNumber}
-                    onChangeText={handleChange("registerationNumber")}
-                    onBlur={handleBlur("registerationNumber")}
-                    placeholder="Type here"
-                    error={errors.registerationNumber}
-                    touched={touched.registerationNumber}
-                  />
+                    <OutlineTextInput
+                      label="Business Address"
+                      value={values.location}
+                      onChangeText={handleChange("location")}
+                      onBlur={handleBlur("location")}
+                      placeholder="Lagos, Nigeria"
+                      error={errors.location}
+                      touched={touched.location}
+                    />
+                    <OutlineTextInput
+                      label="Business Registration Number"
+                      value={values.registerationNumber}
+                      onChangeText={handleChange("registerationNumber")}
+                      onBlur={handleBlur("registerationNumber")}
+                      placeholder="Type here"
+                    />
 
-                  {/* Portfolio Images Section */}
-                  <View className="mb-4">
-                    <TouchableOpacity
-                      className={`border border-dashed rounded-lg py-3 px-4 flex-row items-center justify-center ${
-                        values.portfolioImages.length >= 6
-                          ? "border-gray-300 bg-gray-100"
-                          : "border-[#F9BCDC] bg-white"
-                      }`}
-                      onPress={pickPortfolioImage}
-                      disabled={values.portfolioImages.length >= 6}
-                    >
-                      <Text
-                        className={`text-[14px] ml-2 ${
+                    {/* Portfolio Images Section */}
+                    <View className="mb-4">
+                      <TouchableOpacity
+                        className={`border border-dashed rounded-lg py-3 px-4 flex-row items-center justify-center ${
                           values.portfolioImages.length >= 6
-                            ? "text-gray-500"
-                            : "text-black"
+                            ? "border-gray-300 bg-gray-100"
+                            : "border-[#F9BCDC] bg-white"
                         }`}
-                        style={{ fontFamily: "poppinsRegular" }}
+                        onPress={pickPortfolioImage}
+                        disabled={values.portfolioImages.length >= 6}
                       >
-                        {values.portfolioImages.length >= 6
-                          ? "Maximum images reached"
-                          : "Upload past work pictures"}
-                      </Text>
-                      <Feather
-                        name="plus"
-                        size={16}
-                        color={
-                          values.portfolioImages.length >= 6 ? "#999" : "black"
-                        }
-                      />
-                    </TouchableOpacity>
-                    <Text
-                      style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[10px] text-[#00000080] mt-2 mb-2"
-                    >
-                      Acceptable document type is Jpeg only and it should not be
-                      more than 2MB (Maximum of 6 images)
-                    </Text>
-
-                    {values.portfolioImages.length > 0 && (
-                      <View className="flex-row flex-wrap mb-4">
-                        {values.portfolioImages.map((imageUri, index) => (
-                          <View
-                            key={index}
-                            className="relative mb-2 mr-2"
-                            style={{ width: "30%" }}
-                          >
-                            <Image
-                              source={{ uri: imageUri }}
-                              style={{
-                                width: "100%",
-                                height: 100,
-                                borderRadius: 8,
-                              }}
-                              resizeMode="cover"
-                            />
-                            <TouchableOpacity
-                              onPress={() => removeImage(index)}
-                              style={{
-                                position: "absolute",
-                                top: 4,
-                                right: 4,
-                                backgroundColor: "rgba(255,255,255,0.9)",
-                                borderRadius: 12,
-                                padding: 4,
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <AntDesign
-                                name="close"
-                                size={12}
-                                color="#E53935"
-                              />
-                            </TouchableOpacity>
-                          </View>
-                        ))}
-                      </View>
-                    )}
-                  </View>
-
-                  <View className="mb-6">
-                    <View className="border-t border-x rounded-t-[8px] pt-4 pb-3 px-4 border-[#E9E9E9]">
-                      <Text
-                        className="text-[14px] mb-3"
-                        style={{ fontFamily: "poppinsMedium" }}
-                      >
-                        Availability
-                      </Text>
-                    </View>
-
-                    <View className="bg-white border rounded-b-[8px] border-[#E9E9E9] p-4">
-                      <View className="mb-4">
                         <Text
-                          className="text-[12px] mb-2 text-gray-600"
-                          style={{ fontFamily: "poppinsMedium" }}
+                          className={`text-[14px] ml-2 ${
+                            values.portfolioImages.length >= 6
+                              ? "text-gray-500"
+                              : "text-black"
+                          }`}
+                          style={{ fontFamily: "poppinsRegular" }}
                         >
-                          Select Working Days
+                          {values.portfolioImages.length >= 6
+                            ? "Maximum images reached"
+                            : "Upload past work pictures"}
                         </Text>
-                        <View className="flex-row flex-wrap gap-2">
-                          {daysOfWeek.map((day) => (
-                            <TouchableOpacity
-                              key={day}
-                              onPress={() => toggleDay(day)}
-                              className={`px-3 py-2 rounded-lg border ${
-                                isDaySelected(day)
-                                  ? "bg-[#F9BCDC] border-[#ED2584]"
-                                  : "bg-white border-gray-300"
-                              }`}
+                        <Feather
+                          name="plus"
+                          size={16}
+                          color={
+                            values.portfolioImages.length >= 6
+                              ? "#999"
+                              : "black"
+                          }
+                        />
+                      </TouchableOpacity>
+                      <Text
+                        style={{ fontFamily: "poppinsRegular" }}
+                        className="text-[10px] text-[#00000080] mt-2 mb-2"
+                      >
+                        Acceptable document type is Jpeg only and it should not
+                        be more than 2MB (Maximum of 6 images)
+                      </Text>
+
+                      {values.portfolioImages.length > 0 && (
+                        <View className="flex-row flex-wrap mb-4">
+                          {values.portfolioImages.map((imageUri, index) => (
+                            <View
+                              key={index}
+                              className="relative mb-2 mr-2"
+                              style={{ width: "30%" }}
                             >
-                              <Text
-                                className={`text-[12px] ${
-                                  isDaySelected(day)
-                                    ? "text-[#ED2584]"
-                                    : "text-gray-600"
-                                }`}
-                                style={{ fontFamily: "poppinsRegular" }}
+                              <Image
+                                source={{ uri: imageUri }}
+                                style={{
+                                  width: "100%",
+                                  height: 100,
+                                  borderRadius: 8,
+                                }}
+                                resizeMode="cover"
+                              />
+                              <TouchableOpacity
+                                onPress={() => removeImage(index)}
+                                style={{
+                                  position: "absolute",
+                                  top: 4,
+                                  right: 4,
+                                  backgroundColor: "rgba(255,255,255,0.9)",
+                                  borderRadius: 12,
+                                  padding: 4,
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
                               >
-                                {day}
-                              </Text>
-                            </TouchableOpacity>
+                                <AntDesign
+                                  name="close"
+                                  size={12}
+                                  color="#E53935"
+                                />
+                              </TouchableOpacity>
+                            </View>
                           ))}
                         </View>
-                        {errors.availability?.days &&
-                          touched.availability?.days && (
-                            <Text
-                              className="text-red-500 text-[10px] mt-1"
-                              style={{ fontFamily: "poppinsRegular" }}
-                            >
-                              {errors.availability.days}
-                            </Text>
-                          )}
+                      )}
+                    </View>
+
+                    <View className="mb-6">
+                      <View className="border-t border-x rounded-t-[8px] pt-4 pb-3 px-4 border-[#E9E9E9]">
+                        <Text
+                          className="text-[14px] mb-3"
+                          style={{ fontFamily: "poppinsMedium" }}
+                        >
+                          Availability
+                        </Text>
                       </View>
 
-                      <View className="flex-row gap-3">
-                        <TimePicker
-                          label="Opening Time"
-                          value={fromTime}
-                          onValueChange={updateFromTime}
-                          error={errors.availability?.fromTime}
-                          touched={touched.availability?.fromTime}
-                        />
-                        <TimePicker
-                          label="Closing Time"
-                          value={toTime}
-                          onValueChange={updateToTime}
-                          error={errors.availability?.toTime}
-                          touched={touched.availability?.toTime}
-                        />
+                      <View className="bg-white border rounded-b-[8px] border-[#E9E9E9] p-4">
+                        <View className="mb-4">
+                          <Text
+                            className="text-[12px] mb-2 text-gray-600"
+                            style={{ fontFamily: "poppinsMedium" }}
+                          >
+                            Select Working Days
+                          </Text>
+                          <View className="flex-row flex-wrap gap-2">
+                            {daysOfWeek.map((day) => (
+                              <TouchableOpacity
+                                key={day}
+                                onPress={() => toggleDay(day)}
+                                className={`px-3 py-2 rounded-lg border ${
+                                  isDaySelected(day)
+                                    ? "bg-[#F9BCDC] border-[#ED2584]"
+                                    : "bg-white border-gray-300"
+                                }`}
+                              >
+                                <Text
+                                  className={`text-[12px] ${
+                                    isDaySelected(day)
+                                      ? "text-[#ED2584]"
+                                      : "text-gray-600"
+                                  }`}
+                                  style={{ fontFamily: "poppinsRegular" }}
+                                >
+                                  {day}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
+                          </View>
+                          {errors.availability?.days &&
+                            touched.availability?.days && (
+                              <Text
+                                className="text-red-500 text-[10px] mt-1"
+                                style={{ fontFamily: "poppinsRegular" }}
+                              >
+                                {errors.availability.days}
+                              </Text>
+                            )}
+                        </View>
+
+                        <View className="flex-row gap-3">
+                          <TimePicker
+                            label="Opening Time"
+                            value={fromTime}
+                            onValueChange={updateFromTime}
+                            error={errors.availability?.fromTime}
+                            touched={touched.availability?.fromTime}
+                          />
+                          <TimePicker
+                            label="Closing Time"
+                            value={toTime}
+                            onValueChange={updateToTime}
+                            error={errors.availability?.toTime}
+                            touched={touched.availability?.toTime}
+                          />
+                        </View>
                       </View>
                     </View>
-                  </View>
 
-                  {/* Fixed position button container */}
-                  <View className="mb-20">
-                    <AuthButton
-                      title="Save Changes"
-                      isloading={loading || isSubmitting}
-                      loadingMsg="Saving..."
-                      onPress={handleSubmit}
-                    />
+                    {/* Submit button container with extra padding for keyboard */}
+                    <View className="mb-8 mt-4">
+                      <AuthButton
+                        title="Save Changes"
+                        isloading={loading || isSubmitting}
+                        loadingMsg="Saving..."
+                        onPress={handleSubmit}
+                      />
+                    </View>
                   </View>
-                </View>
-              );
-            }}
-          </Formik>
-        </ScrollView>
+                );
+              }}
+            </Formik>
+          </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

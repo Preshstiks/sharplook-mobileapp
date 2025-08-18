@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,29 +6,40 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  ActivityIndicator,
+  Platform,
+  StatusBar,
+  Dimensions,
 } from "react-native";
-import PageModal from "../../reusuableComponents/PageModal";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { formatAmount } from "../../formatAmount";
 import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import OutlinedButton from "../../reusuableComponents/buttons/OutlineButton";
-import { useNavigation } from "@react-navigation/native";
-import { useChatNavigation } from "../../../hooks/useChatNavigation";
-import { ChatConnectionLoader } from "../../reusuableComponents/ChatConnectionLoader";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { useAuth } from "../../../context/AuthContext";
+import { showToast } from "../../ToastComponent/Toast";
 
-export default function ProductDetailsModal({
-  visible,
-  onClose,
-  product,
-  onAddToCart,
-  cartProductIds = [],
-  addingToCart = {},
-}) {
+const { height: screenHeight } = Dimensions.get("window");
+
+export default function ProductDetailsScreen() {
   const [quantity, setQuantity] = useState(1);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const navigation = useNavigation();
-  const { navigateToChat, isConnecting } = useChatNavigation();
+  const route = useRoute();
+  const { user } = useAuth();
 
-  if (!product) return null;
+  // Get data from route params
+  const {
+    product,
+    onAddToCart,
+    cartProductIds = [],
+    addingToCart = {},
+  } = route.params || {};
+
+  if (!product) {
+    navigation.goBack();
+    return null;
+  }
 
   const productId = product.id || product._id;
   const isInCart = cartProductIds.includes(productId);
@@ -42,36 +53,67 @@ export default function ProductDetailsModal({
   const businessInitial = businessName
     ? businessName.charAt(0).toUpperCase()
     : "M";
+  const location =
+    product?.vendor?.vendorOnboarding?.location || "Location not available";
 
+  // Optimized chat navigation
   const handleChatVendor = () => {
-    const vendorId = product?.vendor?.id;
-    const vendorName = product?.vendor?.vendorOnboarding?.businessName;
+    try {
+      const vendorId = product?.vendor?.id;
+      const vendorName = product?.vendor?.vendorOnboarding?.businessName;
 
-    if (vendorId) {
-      navigateToChat(navigation, {
-        vendorId: vendorId,
-        receiverName: vendorName,
-        chat: {
-          id: vendorId,
-          name: vendorName,
-          vendorId: vendorId,
-        },
-      });
+      if (vendorId) {
+        navigation.navigate("ChatDetailScreen", {
+          roomId: `${user?.id}_${vendorId}`,
+          receiverId: vendorId,
+          receiverName: vendorName || "Chat",
+          connectionEstablished: false,
+          socket: null,
+          vendorPhone: product?.vendor?.phone,
+          vendorAvatar: product?.vendor?.vendorOnboarding?.profilePicture,
+        });
+      }
+    } catch (error) {
+      showToast.error("Failed to open chat");
+    }
+  };
+
+  // Optimized reviews navigation
+  const handleSeeReviews = () => {
+    setReviewsLoading(true);
+    try {
+      // Pass only essential data for reviews
+      const reviewsParams = {
+        vendorId: product?.vendor?.id,
+        productId: product.id || product._id,
+        productName: product.productName || product.title,
+        vendorName: product?.vendor?.vendorOnboarding?.businessName,
+      };
+
+      navigation.navigate("ProductReviewsScreen", reviewsParams);
+    } catch (error) {
+      showToast.error("Failed to load reviews");
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const handleAddToCart = () => {
+    if (!isInCart && !isAdding && onAddToCart) {
+      onAddToCart(product, quantity);
     }
   };
 
   return (
-    <PageModal visible={visible} onClose={onClose}>
-      {/* Chat Connection Loader */}
-      <ChatConnectionLoader visible={isConnecting} />
-
+    <View style={{ flex: 1, backgroundColor: "#FFFAFD" }}>
+      <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View>
             {/* Close Button */}
             <View className="absolute top-10 right-10 z-10">
               <TouchableOpacity
-                onPress={onClose}
+                onPress={() => navigation.goBack()}
                 style={{
                   width: 32,
                   height: 32,
@@ -103,7 +145,7 @@ export default function ProductDetailsModal({
             <Text
               style={{
                 fontFamily: "latoBold",
-                fontSize: 18,
+                fontSize: 20,
                 color: "#000",
                 marginBottom: 8,
               }}
@@ -113,19 +155,19 @@ export default function ProductDetailsModal({
             <Text
               style={{
                 fontFamily: "latoBold",
-                fontSize: 16,
+                fontSize: 18,
                 color: "#EB278D",
                 marginBottom: 16,
               }}
             >
-              {formatAmount(product.price)}
+              {formatAmount(product.productPrice)}
             </Text>
 
             <View className="flex-row items-center justify-between mb-4">
               <Text
                 style={{
                   fontFamily: "latoBold",
-                  fontSize: 14,
+                  fontSize: 16,
                   color: "#222",
                   marginBottom: 4,
                 }}
@@ -133,15 +175,20 @@ export default function ProductDetailsModal({
                 Vendor details
               </Text>
               <TouchableOpacity
-                onPress={() => navigation.navigate("ProductReviewsScreen")}
+                onPress={handleSeeReviews}
+                disabled={reviewsLoading}
                 className="border border-primary self-start rounded-lg py-2 px-4 flex-row items-center"
               >
-                <Text
-                  className="mt-1 text-primary"
-                  style={{ fontFamily: "poppinsRegular", fontSize: 12 }}
-                >
-                  See Reviews
-                </Text>
+                {reviewsLoading ? (
+                  <ActivityIndicator size="small" color="#EB278D" />
+                ) : (
+                  <Text
+                    className="mt-1 text-primary"
+                    style={{ fontFamily: "poppinsRegular", fontSize: 14 }}
+                  >
+                    See Reviews
+                  </Text>
+                )}
               </TouchableOpacity>
             </View>
 
@@ -169,7 +216,7 @@ export default function ProductDetailsModal({
                 <Text
                   style={{
                     fontFamily: "latoBold",
-                    fontSize: 16,
+                    fontSize: 18,
                     color: "#666",
                   }}
                 >
@@ -180,7 +227,7 @@ export default function ProductDetailsModal({
                 <Text
                   style={{
                     fontFamily: "latoBold",
-                    fontSize: 14,
+                    fontSize: 16,
                     color: "#000",
                   }}
                 >
@@ -189,13 +236,12 @@ export default function ProductDetailsModal({
                 <Text
                   style={{
                     fontFamily: "latoRegular",
-                    fontSize: 12,
+                    fontSize: 14,
                     marginTop: 4,
                     color: "#A5A5A5",
                   }}
                 >
-                  {product?.vendor?.vendorOnboarding?.location ||
-                    "Location not available"}
+                  {location}
                 </Text>
               </View>
               <TouchableOpacity
@@ -215,7 +261,7 @@ export default function ProductDetailsModal({
                     color: "#EB278D",
                     paddingBottom: 2,
                     fontFamily: "latoBold",
-                    fontSize: 12,
+                    fontSize: 14,
                     marginLeft: 4,
                   }}
                 >
@@ -229,8 +275,9 @@ export default function ProductDetailsModal({
             <Text
               style={{
                 fontFamily: "poppinsMedium",
-                fontSize: 14,
+                fontSize: 16,
                 color: "#000",
+                marginTop: 18,
                 marginBottom: 12,
               }}
             >
@@ -239,7 +286,7 @@ export default function ProductDetailsModal({
             <Text
               style={{
                 fontFamily: "poppinsRegular",
-                fontSize: 12,
+                fontSize: 14,
                 color: "#666",
                 lineHeight: 20,
                 marginBottom: 100, // Extra space for the bottom button
@@ -266,16 +313,12 @@ export default function ProductDetailsModal({
               <AuthButton
                 title={isAdding ? "Adding..." : "Add to Cart"}
                 disabled={isInCart || isAdding}
-                onPress={() => {
-                  if (!isInCart && !isAdding) {
-                    onAddToCart(product, quantity);
-                  }
-                }}
+                onPress={handleAddToCart}
               />
             )}
           </View>
         </View>
       </SafeAreaView>
-    </PageModal>
+    </View>
   );
 }

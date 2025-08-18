@@ -90,7 +90,7 @@ export default function FilterScreen({ navigation }) {
         </TouchableOpacity>
         <View style={{ flex: 1, alignItems: "center" }}>
           <Text
-            style={{ color: "#fff", fontSize: 16, fontFamily: "poppinsMedium" }}
+            style={{ color: "#fff", fontSize: 18, fontFamily: "poppinsMedium" }}
           >
             Filter
           </Text>
@@ -164,7 +164,14 @@ export default function FilterScreen({ navigation }) {
         </View>
 
         {/* Price Range */}
-        {/* <Text style={{ fontSize: 16, fontFamily: "latoBold", marginBottom: 8 }}>
+        <Text
+          style={{
+            fontFamily: "poppinsMedium",
+            fontSize: 16,
+            color: "#222",
+            marginBottom: 12,
+          }}
+        >
           Price Range
         </Text>
         <View
@@ -198,15 +205,21 @@ export default function FilterScreen({ navigation }) {
           >
             ₦ 0
           </Text>
-          <Text style={{ color: "#000", fontFamily: "latoBold", fontSize: 12 }}>
-            ₦ {price.toLocaleString()}
+          <Text
+            style={{
+              fontFamily: "poppinsRegular",
+              fontSize: 14,
+              color: "#666",
+            }}
+          >
+            ₦{price.toLocaleString()}
           </Text>
           <Text
             style={{ color: "#B0B0B0", fontFamily: "latoBold", fontSize: 12 }}
           >
             ₦ 1M
           </Text>
-        </View> */}
+        </View>
 
         {/* Ratings */}
         <Text

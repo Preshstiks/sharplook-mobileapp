@@ -26,12 +26,17 @@ import AddProductReviewScreen from "./reviews/AddProductReview";
 import AddServiceReviewScreen from "./reviews/AddServiceReview";
 import ServiceReviewsScreen from "./reviews/ServiceReview";
 import ProductReviewsScreen from "./reviews/ProductReview";
+import ProductDetailsScreen from "./ProductDetailsScreen";
+import ServiceDetailsScreen from "./ServiceDetailsScreen";
+import VendorProfileProductDetailsScreen from "./VendorProfileProductDetailsScreen";
+import VendorProfileServiceDetailsScreen from "./VendorProfileServiceDetailsScreen";
 import BookingStack from "./Booking/BookingStack";
 import NotificationStack from "./Notification/NotificationStack";
 import ProfileStack from "./Profile/ProfileStack";
 import WalletStack from "./WalletStack";
 import ClientOfferStack from "./MyOffers/ClientOfferStack";
 import MyOrderStack from "./MyOrder/MyOrderStack";
+import GetStartedScreen from "./Profile/GetStarted";
 
 const Drawer = createDrawerNavigator();
 
@@ -242,6 +247,26 @@ export default function ClientNavigator() {
         <Drawer.Screen
           name="BookingHomeServiceAppointScreen"
           component={BookingHomeServiceAppointScreen}
+          options={{ drawerItemStyle: { display: "none" } }}
+        />
+        <Drawer.Screen
+          name="ProductDetailsScreen"
+          component={ProductDetailsScreen}
+          options={{ drawerItemStyle: { display: "none" } }}
+        />
+        <Drawer.Screen
+          name="ServiceDetailsScreen"
+          component={ServiceDetailsScreen}
+          options={{ drawerItemStyle: { display: "none" } }}
+        />
+        <Drawer.Screen
+          name="VendorProfileProductDetailsScreen"
+          component={VendorProfileProductDetailsScreen}
+          options={{ drawerItemStyle: { display: "none" } }}
+        />
+        <Drawer.Screen
+          name="VendorProfileServiceDetailsScreen"
+          component={VendorProfileServiceDetailsScreen}
           options={{ drawerItemStyle: { display: "none" } }}
         />
       </Drawer.Navigator>

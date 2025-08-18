@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -17,12 +17,18 @@ import { useAuth } from "../../../../context/AuthContext";
 import { Formik } from "formik";
 import { showToast } from "../../../ToastComponent/Toast";
 import { HttpClient } from "../../../../api/HttpClient";
+import { OutlinePhoneInput } from "../../../reusuableComponents/inputFields/OutlinePhoneInput";
 
 const EditProfileScreen = ({ navigation }) => {
   const { user, setUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  // Log when user data changes (for debugging)
+  useEffect(() => {
+    console.log("🔄 EditProfileScreen: User data updated:", user);
+  }, [user]);
 
   const pickImage = async () => {
     try {
@@ -71,8 +77,8 @@ const EditProfileScreen = ({ navigation }) => {
       });
 
       if (response.data && response.data.user) {
-        setUser(response.data.user);
         showToast.success(response.data.message);
+        // Let the polling mechanism handle the state update
       }
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -91,9 +97,9 @@ const EditProfileScreen = ({ navigation }) => {
     try {
       const response = await HttpClient.put("/user/updateProfile", values);
       if (response.data && response.data.user) {
-        setUser(response.data.user);
+        showToast.success(response.data.message);
+        // The polling mechanism will refresh the data in 5 seconds
       }
-      showToast.success(response.data.message);
       navigation.goBack();
     } catch (error) {
       const message =
@@ -125,7 +131,7 @@ const EditProfileScreen = ({ navigation }) => {
           </TouchableOpacity>
           <Text
             style={{ fontFamily: "latoBold" }}
-            className="text-[14px] text-faintDark"
+            className="text-[16px] text-faintDark"
           >
             Edit Profile
           </Text>
@@ -199,11 +205,13 @@ const EditProfileScreen = ({ navigation }) => {
                   error={errors.email}
                   touched={touched.email}
                 />
-                <OutlineTextInput
+                <OutlinePhoneInput
                   label="Phone Number"
                   value={values.phone}
                   onChangeText={handleChange("phone")}
                   onBlur={handleBlur("phone")}
+                  isPhoneInput={true}
+                  defaultCountry="NG"
                   error={errors.phone}
                   touched={touched.phone}
                 />

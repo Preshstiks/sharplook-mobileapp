@@ -123,12 +123,13 @@ export default function BookAppointmentScreen() {
           reference,
           paymentMethod: "PAYSTACK",
         };
-
+        console.log({ bookingPayload });
         const bookRes = await HttpClient.post(
           "/bookings/bookVendor",
           bookingPayload
         );
         showToast.success(bookRes.data.message);
+
         navigation.goBack();
       } else {
         showToast.error("Payment verification failed");
@@ -155,7 +156,7 @@ export default function BookAppointmentScreen() {
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
-          className="text-white text-[16px] flex-1 text-center"
+          className="text-white text-[18px] flex-1 text-center"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Book Appointment
@@ -247,7 +248,7 @@ export default function BookAppointmentScreen() {
           <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
             <View className="px-4 mt-6">
               <Text
-                className="text-[16px] mb-2"
+                className="text-[18px] mb-2"
                 style={{ fontFamily: "poppinsMedium" }}
               >
                 Choose Date and Time
@@ -315,7 +316,7 @@ export default function BookAppointmentScreen() {
               {/* Payment Method Radio */}
               <View className="mb-5">
                 <Text
-                  className="text-[16px] mb-3"
+                  className="text-[18px] mb-3"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
                   Payment Method
@@ -394,6 +395,7 @@ export default function BookAppointmentScreen() {
       >
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
+            <View style={{ width: 24 }} />
             <Text style={styles.headerTitle}>Payment</Text>
             <TouchableOpacity
               onPress={() => setPaystackModalVisible(false)}
@@ -460,8 +462,8 @@ export default function BookAppointmentScreen() {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#fff",
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingTop: 50,
+    paddingBottom: 14,
     paddingHorizontal: 16,
     marginBottom: 20,
     flexDirection: "row",

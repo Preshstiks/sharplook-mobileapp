@@ -21,11 +21,16 @@ import { useCart } from "../../../../context/CartContext";
 import { showToast } from "../../../ToastComponent/Toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../../../../context/AuthContext";
-import { getCurrentLocation } from "../../../../utils/locationUtils";
+import {
+  getCurrentLocation,
+  checkUserLocationForBooking,
+  checkUserLocationForCheckout,
+} from "../../../../utils/locationUtils";
 import { calculatePrice } from "../../../reusuableComponents/PriceKmCalculator";
 import WebView from "react-native-webview";
 import LocationSelectionModal from "./LocationSelectionModal";
 import PaymentMethodModal from "./PaymentMethodModal";
+import DeliveryMethodModal from "./DeliveryMethodModal";
 
 export default function CartScreen() {
   const navigation = useNavigation();
@@ -41,11 +46,13 @@ export default function CartScreen() {
 
   // Modal states
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Location and payment data
   const [locationData, setLocationData] = useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState(""); // New state for delivery method
 
   // Calculate subtotal
   const subtotal = cartItems.reduce(
@@ -66,7 +73,7 @@ export default function CartScreen() {
   // Get unique vendor IDs
   const vendorIds = Object.keys(cartItemsByVendor);
 
-  // Calculate delivery and total based on location data
+  // Calculate delivery and total based on location data and delivery method
   const delivery = locationData?.delivery || 0;
   const total = subtotal + delivery;
 
@@ -116,7 +123,6 @@ export default function CartScreen() {
       const payload = { items };
 
       const res = await HttpClient.put("/client/updateCartQty", payload);
-      console.log(res.data);
 
       await fetchCart();
 
@@ -133,8 +139,24 @@ export default function CartScreen() {
     }
   };
 
+  // Handle pickup selection (goes directly to payment)
+  const handlePickupSelected = (pickupData) => {
+    setDeliveryMethod("PICKUP");
+    setLocationData(pickupData);
+    setShowDeliveryModal(false);
+    setShowPaymentModal(true);
+  };
+
+  // Handle when shipping is selected (goes to location modal)
+  const handleShippingToLocation = (data) => {
+    setDeliveryMethod("SHIPPING");
+    setShowDeliveryModal(false);
+    setShowLocationModal(true);
+  };
+
   const handleLocationSelected = (data) => {
-    setLocationData(data);
+    // This is called from location modal with full location data
+    setLocationData({ ...data, deliveryMethod: "SHIPPING" });
     setShowLocationModal(false);
     setShowPaymentModal(true);
   };
@@ -162,14 +184,20 @@ export default function CartScreen() {
     const bookingPayload = {
       totalAmount: total,
       paymentMethod: "SHARP-PAY",
+      deliveryType: deliveryMethod, // Include delivery method
     };
+
     try {
       const res = await HttpClient.post("/orders/checkout", bookingPayload);
       showToast.success(res.data.message);
 
+      // Reset states
+      setDeliveryMethod("");
+      setLocationData(null);
+      setSelectedPaymentMethod("");
+
       navigation.navigate("HomeScreen");
     } catch (error) {
-      console.log(error.response);
       if (error.response?.data?.message === "Insufficient wallet balance") {
         showToast.error(error.response.data.message);
       } else {
@@ -213,6 +241,7 @@ export default function CartScreen() {
           totalAmount: total,
           reference,
           paymentMethod: "PAYSTACK",
+          deliveryType: deliveryMethod,
         };
 
         const checkoutRes = await HttpClient.post(
@@ -220,6 +249,12 @@ export default function CartScreen() {
           bookingPayload
         );
         showToast.success("Order placed successfully using PayStack");
+
+        // Reset states
+        setDeliveryMethod("");
+        setLocationData(null);
+        setSelectedPaymentMethod("");
+
         navigation.navigate("HomeScreen");
       } else {
         showToast.error("Payment verification failed");
@@ -239,11 +274,16 @@ export default function CartScreen() {
 
   // Updated proceed button to handle quantity updates
   const handleProceedToCheckout = async () => {
+    // Check if user has location set for checkout
+    if (!checkUserLocationForCheckout(currentUser, showToast)) {
+      return;
+    }
+
     // First update the quantities
     const quantitiesUpdated = await updateCartQuantities();
 
     if (quantitiesUpdated) {
-      setShowLocationModal(true);
+      setShowDeliveryModal(true);
     }
   };
 
@@ -257,7 +297,7 @@ export default function CartScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[16px] text-faintDark"
+          className="text-[18px] text-faintDark"
         >
           Cart
         </Text>
@@ -288,7 +328,7 @@ export default function CartScreen() {
         >
           <EmptySVG width={120} height={120} />
           <Text
-            className="text-[14px] text-gray-400 mt-2"
+            className="text-[16px] text-gray-400 mt-2"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Your cart is empty
@@ -316,13 +356,13 @@ export default function CartScreen() {
                   <View className="flex-1">
                     <Text
                       style={{ fontFamily: "poppinsMedium" }}
-                      className="text-[14px] text-faintDark"
+                      className="text-[16px] text-faintDark"
                     >
                       {item.product.productName}
                     </Text>
                     <Text
                       style={{ fontFamily: "poppinsMedium" }}
-                      className="text-[12px] text-primary"
+                      className="text-[14px] text-primary"
                     >
                       {formatAmount(item.product.price)}
                     </Text>
@@ -411,7 +451,7 @@ export default function CartScreen() {
               style={{ fontFamily: "poppinsRegular" }}
               className="text-[14px] text-[#868889]"
             >
-              {formatAmount(total)}
+              {formatAmount(subtotal)}
             </Text>
           </View>
           <View className="flex-row justify-between mb-2">
@@ -419,13 +459,13 @@ export default function CartScreen() {
               style={{ fontFamily: "poppinsRegular" }}
               className="text-[14px] text-[#868889]"
             >
-              Shipping
+              Delivery
             </Text>
             <Text
               style={{ fontFamily: "poppinsRegular" }}
               className="text-[14px] text-[#868889]"
             >
-              ₦0
+              {delivery > 0 ? formatAmount(delivery) : "FREE"}
             </Text>
           </View>
           <View className="h-[1px] my-3 border-t border-[#EBEBEB]" />
@@ -440,7 +480,7 @@ export default function CartScreen() {
               style={{ fontFamily: "poppinsSemiBold" }}
               className="text-[16px] text-fadedDark"
             >
-              ₦ {subtotal.toLocaleString()}
+              {formatAmount(total)}
             </Text>
           </View>
 
@@ -451,6 +491,18 @@ export default function CartScreen() {
           />
         </View>
       )}
+
+      {/* Delivery Method Modal */}
+      <DeliveryMethodModal
+        visible={showDeliveryModal}
+        onClose={() => setShowDeliveryModal(false)}
+        subtotal={subtotal}
+        user={currentUser}
+        vendorIds={vendorIds}
+        cartItemsByVendor={cartItemsByVendor}
+        onPickupSelected={handlePickupSelected}
+        onLocationSelected={handleShippingToLocation}
+      />
 
       {/* Location Selection Modal */}
       <LocationSelectionModal
@@ -473,6 +525,7 @@ export default function CartScreen() {
         onPaymentMethodSelected={handlePaymentMethodSelected}
         transportFees={locationData?.transportFees}
         cartItemsByVendor={cartItemsByVendor}
+        deliveryMethod={deliveryMethod}
       />
 
       {/* Paystack Payment Modal */}
@@ -484,6 +537,7 @@ export default function CartScreen() {
       >
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
+            <View style={{ width: 24 }} />
             <Text style={styles.headerTitle}>Payment</Text>
             <TouchableOpacity
               onPress={() => setPaystackModalVisible(false)}
@@ -545,8 +599,8 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#fff",
-    paddingTop: 30,
-    paddingBottom: 16,
+    paddingTop: 50,
+    paddingBottom: 14,
     paddingHorizontal: 16,
     marginBottom: 20,
     flexDirection: "row",

@@ -27,7 +27,7 @@ export default function ChatListScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { navigateToChat } = useChatNavigation();
-
+  const [searchQuery, setSearchQuery] = useState("");
   const userId = user.id;
 
   // Hide bottom tab bar when this screen is focused
@@ -59,9 +59,11 @@ export default function ChatListScreen() {
           lastMessage: {
             message: newMessage.message,
             createdAt: newMessage.createdAt,
+            senderId: newMessage.senderId,
           },
           message: newMessage.message,
           time: newMessage.createdAt,
+          senderId: newMessage.senderId,
         };
       } else {
         // If no preview exists, create a basic one
@@ -70,9 +72,11 @@ export default function ChatListScreen() {
           lastMessage: {
             message: newMessage.message,
             createdAt: newMessage.createdAt,
+            senderId: newMessage.senderId,
           },
           message: newMessage.message,
           time: newMessage.createdAt,
+          senderId: newMessage.senderId,
         };
       }
 
@@ -101,10 +105,12 @@ export default function ChatListScreen() {
     if (!userId) return;
     setLoading(true);
     setError(null);
+    // HttpClient.get(`/messages/previews/${userId}`),
+    // HttpClient.get(`/messages/chats/${userId}`),
     try {
       const [chatlistRes, chatPreviewRes] = await Promise.all([
-        HttpClient.get(`/messages/chats/${userId}`),
-        HttpClient.get(`/messages/previews/${userId}`),
+        HttpClient.get(`/messages/user/getClientChatsList`),
+        HttpClient.get(`/messages/client/previews`),
       ]);
       setChats(chatlistRes.data.data || []);
 
@@ -122,7 +128,6 @@ export default function ChatListScreen() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     if (userId) {
       fetchChats();
@@ -186,7 +191,21 @@ export default function ChatListScreen() {
       </SafeAreaView>
     );
   }
+  const filteredChats = chats.filter((chat) => {
+    const vendorName = chat?.vendor?.name?.toLowerCase() || "";
+    const lastMessage =
+      chatPreviews[chat.roomId]?.lastMessage?.message ||
+      chatPreviews[chat.roomId]?.message ||
+      chat.lastMessage ||
+      chat.message ||
+      "";
 
+    return (
+      vendorName.includes(searchQuery.toLowerCase()) ||
+      lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+  console.log({ filteredChats });
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8FB]">
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
@@ -202,7 +221,7 @@ export default function ChatListScreen() {
         {/* Title */}
         <View style={{ flex: 1, alignItems: "center" }}>
           <Text
-            className="text-white text-[14px]"
+            className="text-white text-[16px]"
             style={{ fontFamily: "poppinsMedium" }}
           >
             My Chats
@@ -215,15 +234,17 @@ export default function ChatListScreen() {
         <View className="flex-row items-center bg-white border border-[#F9BCDC] rounded-xl px-4 pt-3 pb-2">
           <MaterialIcons name="search" size={24} color="#8c817a" />
           <TextInput
-            className="ml-2 text-xs flex-1"
+            className="ml-2 text-sm flex-1"
             placeholder="Search messages"
             cursorColor="#BF6A37"
+            value={searchQuery}
+            onChangeText={setSearchQuery} // ✅ updates searchQuery
             style={{ fontFamily: "poppinsRegular" }}
           />
         </View>
       </View>
       <FlatList
-        data={chats}
+        data={filteredChats}
         keyExtractor={(item) => item.id?.toString()}
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24 }}
         renderItem={({ item }) => {
@@ -235,15 +256,27 @@ export default function ChatListScreen() {
             item.message;
           const messageTimestamp =
             preview?.lastMessage?.createdAt || preview?.time || item.time;
+
+          // Check if the message is from the current user
+          const isOwnMessage =
+            preview?.lastMessage?.senderId === userId ||
+            preview?.senderId === userId ||
+            item?.senderId === userId;
+
+          // Add "me:" prefix if it's the current user's message
+          const displayMessage =
+            isOwnMessage && lastMessage ? `me: ${lastMessage}` : lastMessage;
+
           return (
             <TouchableOpacity
               className="flex-row border-b border-[#E5E5E5] items-center pb-3 mb-4"
               onPress={() =>
                 navigateToChat(navigation, {
                   roomId: item.roomId,
-                  receiverName: item?.receiver?.name,
-                  receiverId: item?.receiver?.id,
-                  vendorPhone: item?.receiver?.phone, // Pass the receiver's phone number
+                  receiverName: item?.vendor?.name,
+                  receiverId: item?.vendor?.id,
+                  vendorPhone: item?.vendor?.phoneNumber, // Fixed: use phoneNumber instead of phone
+                  vendorAvatar: item?.vendor?.avatar, // Pass the vendor avatar
                 })
               }
             >
@@ -251,8 +284,8 @@ export default function ChatListScreen() {
                 <Image
                   className=""
                   source={
-                    item?.avatar
-                      ? item?.avatar
+                    item?.vendor?.avatar
+                      ? { uri: item?.vendor?.avatar }
                       : require("../../../../assets/icon/avatar.png")
                   }
                   style={{ width: 48, height: 48 }}
@@ -261,16 +294,24 @@ export default function ChatListScreen() {
               </View>
               <View className="flex-1 pb-3">
                 <Text
-                  className="text-base font-semibold text-faintDark"
+                  className="text-lg font-semibold text-faintDark"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
-                  {item?.receiver?.name}
+                  {item?.vendor?.name}
                 </Text>
                 <Text
-                  className="text-xs text-[#A9A9A9] mt-1"
+                  numberOfLines={1}
+                  className="text-sm text-[#A9A9A9] mt-1"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
-                  {lastMessage}
+                  {isOwnMessage && lastMessage ? (
+                    <>
+                      <Text style={{ fontFamily: "poppinsBold" }}>me: </Text>
+                      {lastMessage}
+                    </>
+                  ) : (
+                    displayMessage || "No messages yet"
+                  )}
                 </Text>
               </View>
               <View className="ml-2">

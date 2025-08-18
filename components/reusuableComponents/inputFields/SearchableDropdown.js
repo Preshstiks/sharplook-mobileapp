@@ -35,7 +35,7 @@ export default function SearchableDropdown({
     paddingHorizontal: 4,
     top: -10,
     fontFamily: "poppinsRegular",
-    fontSize: 12,
+    fontSize: 14,
     backgroundColor: "#FFFAFD",
     color: isFocused ? "#EB278D" : "#333333",
     zIndex: 2,
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   },
   displayText: {
     fontFamily: "poppinsRegular",
-    fontSize: 16,
+    fontSize: 18,
     color: "#333",
     flex: 1,
   },
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
   },
   error: {
     color: "#EB278D",
-    fontSize: 12,
+    fontSize: 14,
     marginTop: 2,
     fontFamily: "poppinsRegular",
   },
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "poppinsRegular",
     color: "#333",
   },
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF0F5",
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "poppinsRegular",
     color: "#333",
     flex: 1,
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   noResultsText: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "poppinsRegular",
     color: "#666",
   },

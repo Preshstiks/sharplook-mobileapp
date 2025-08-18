@@ -55,16 +55,12 @@ export default function MyOrderScreen() {
           return orderItem.items?.some((item) => item.vendor?.status === tab);
         });
 
-  console.log("Filtered orders:", filteredOrders);
-  console.log("Current tab:", tab);
-  console.log("All orders:", order);
-
   const EmptyState = () => (
     <View className="flex-1 justify-center items-center px-8">
       <Empty width={150} height={150} />
       <Text
         style={{ fontFamily: "poppinsRegular" }}
-        className="text-[12px] text-center"
+        className="text-[14px] text-center"
       >
         {tab === "PENDING"
           ? "You have no pending order"
@@ -163,7 +159,7 @@ export default function MyOrderScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: "poppinsMedium" }} className="text-[16px]">
+        <Text style={{ fontFamily: "poppinsMedium" }} className="text-[18px]">
           Orders
         </Text>
         <View className="relative">
@@ -178,7 +174,7 @@ export default function MyOrderScreen() {
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[14px] ${tab === "" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             All
           </Text>
@@ -189,7 +185,7 @@ export default function MyOrderScreen() {
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "PENDING" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[14px] ${tab === "PENDING" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             Pending
           </Text>
@@ -200,7 +196,7 @@ export default function MyOrderScreen() {
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "DELIVERED" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[14px] ${tab === "DELIVERED" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             Delivered
           </Text>
@@ -216,7 +212,10 @@ export default function MyOrderScreen() {
       ) : filteredOrders.length === 0 ? (
         <EmptyState />
       ) : (
-        <ScrollView className="px-3 mt-2" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="px-3 mt-2 mb-[50px]"
+          showsVerticalScrollIndicator={false}
+        >
           {filteredOrders.map((order) => {
             // Calculate total price from all items
             const totalPrice =
@@ -226,7 +225,11 @@ export default function MyOrderScreen() {
               ) || 0;
 
             // Get the status from the first item (you might want to modify this logic based on your business rules)
-            const orderStatus = order.items?.[0]?.vendor?.status;
+            const orderStatus =
+              order.items?.some((item) => item.hasDispute) &&
+              order.items?.[0]?.vendor?.status === "PENDING"
+                ? "DISPUTED"
+                : order.items?.[0]?.vendor?.status;
 
             // Get vendor name from first item (or you could show multiple vendors)
             const vendorName = `${order.items?.[0]?.vendor?.lastName} ${order.items?.[0]?.vendor?.firstName}`;
@@ -242,19 +245,21 @@ export default function MyOrderScreen() {
                 <View className="flex-col flex-1">
                   <View className="flex-row justify-between items-center mb-2">
                     <Text
-                      className="text-[12px] text-[#0000004D]"
+                      className="text-[14px] text-[#0000004D]"
                       style={{ fontFamily: "latoBold" }}
                     >
                       {HexConverter(order?.id)}{" "}
                       {formatDateTime(order?.createdAt)}
                     </Text>
                     <Text
-                      className={`text-[12px] ${
+                      className={`text-[14px] ${
                         orderStatus === "PENDING"
                           ? "text-pending"
                           : orderStatus === "DELIVERED"
                             ? "text-success"
-                            : "text-[#0D9488]"
+                            : orderStatus === "DISPUTED"
+                              ? "text-[#ff0000]"
+                              : "text-[#0d3394]"
                       }`}
                       style={{ fontFamily: "latoBold" }}
                     >
@@ -263,29 +268,28 @@ export default function MyOrderScreen() {
                   </View>
                   <View className="flex-row items-center justify-between">
                     <Text
-                      className="text-[18px] text-fadedDark"
+                      className="text-[20px] text-fadedDark"
                       style={{ fontFamily: "latoBold" }}
                     >
                       {formatAmount(totalPrice)}
                     </Text>
                     <Text
-                      className="text-[10px] text-gray-500 mb-1"
+                      className="text-[12px] text-gray-500 mb-1"
                       style={{ fontFamily: "latoRegular" }}
                     >
-                      {order.items?.length} item
-                      {order.items?.length > 1 ? "s" : ""}
+                      {order?.deliveryType}
                     </Text>
                   </View>
 
                   <View className="flex-row justify-between items-center mt-2">
                     <Text
-                      className="text-[14px]"
+                      className="text-[16px]"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       {vendorName}
                     </Text>
                     <Text
-                      className="text-faintDark text-[12px]"
+                      className="text-faintDark text-[14px]"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       View details &gt;

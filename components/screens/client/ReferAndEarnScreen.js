@@ -84,7 +84,7 @@ export default function ReferAndEarnScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Refer and Earn
         </Text>
@@ -97,32 +97,61 @@ export default function ReferAndEarnScreen() {
         <View style={styles.headerBox}>
           <Text
             style={{ fontFamily: "latoBold" }}
-            className="text-[30px] text-center mb-2 text-primary"
+            className="text-[32px] text-center mb-2 text-primary"
           >
-            Refer a Friend, Earn{"\n"}
-            <Text>₦100 Each!</Text>
+            ₦{analytics.totalEarnings || 0}
           </Text>
           <Text
-            style={{ fontFamily: "poppinsRegular" }}
-            className="text-[12px] text-center"
+            style={{ fontFamily: "latoRegular" }}
+            className="text-[16px] text-center text-faintDark"
           >
-            Invite your friends to book beauty services with SharpLook. When
-            they join and book, you both get ₦100 credit.
+            Total Earnings
+          </Text>
+          <Text
+            style={{ fontFamily: "latoBold" }}
+            className="text-[18px] text-center mb-2 text-primary"
+          >
+            {analytics.totalReferrals || 0}
+          </Text>
+          <Text
+            style={{ fontFamily: "latoRegular" }}
+            className="text-[14px] text-center text-faintDark"
+          >
+            Total Referrals
+          </Text>
+          <Text
+            style={{ fontFamily: "latoBold" }}
+            className="text-[18px] text-center mb-2 text-primary"
+          >
+            {analytics.successfulReferrals || 0}
+          </Text>
+          <Text
+            style={{ fontFamily: "latoRegular" }}
+            className="text-[14px] text-center text-faintDark"
+          >
+            Successful Referrals
           </Text>
         </View>
 
         <View style={styles.card}>
           <Text
-            style={{ fontFamily: "poppinsMedium" }}
-            className="text-[14px] mb-2"
+            style={{ fontFamily: "latoBold" }}
+            className="text-[16px] text-center mb-2 text-primary"
+          >
+            {referralCode}
+          </Text>
+          <Text
+            style={{ fontFamily: "latoRegular" }}
+            className="text-[14px] text-center text-faintDark mb-4"
           >
             Your Referral Code
           </Text>
           <Text
-            style={{ fontFamily: "poppinsRegular" }}
-            className="text-[10px] text-faintDark2"
+            style={{ fontFamily: "latoBold" }}
+            className="text-[16px] text-center mb-2 text-primary"
           >
-            Share this code with your friends!
+            Share your referral code with friends and earn ₦100 for each
+            successful referral!
           </Text>
           <View style={styles.codeRow} className="border border-[#EBEBEA]">
             <Text style={styles.code}>{user?.referralCode}</Text>
@@ -171,7 +200,12 @@ export default function ReferAndEarnScreen() {
         </View>
 
         <View className="mb-10" style={styles.card}>
-          <Text style={styles.sectionTitle}>Referral History</Text>
+          <Text
+            style={{ fontFamily: "latoBold" }}
+            className="text-[16px] text-faintDark"
+          >
+            Referral History
+          </Text>
           {referralTransactions.length > 0 ? (
             referralTransactions.map((tx, idx) => (
               <View key={idx} style={styles.txRow}>

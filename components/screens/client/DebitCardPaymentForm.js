@@ -84,20 +84,20 @@ export default function DebitCardPaymentForm({ onAddNewCard, onMakePayment }) {
             <View>
               <Text
                 style={{ fontFamily: "latoRegular" }}
-                className="text-[13px] text-white"
+                className="text-[15px] text-white"
               >
                 {card.type}
               </Text>
               <Text
                 style={{ fontFamily: "latoBold" }}
-                className="text-[15px] w-full my-4 tracking-[6px] text-white"
+                className="text-[17px] w-full my-4 tracking-[6px] text-white"
               >
                 {card.number}
               </Text>
               <View className="flex-row items-center justify-between">
                 <Text
                   style={{ fontFamily: "latoBold" }}
-                  className="text-[15px] text-white"
+                  className="text-[17px] text-white"
                 >
                   {card.name}
                 </Text>

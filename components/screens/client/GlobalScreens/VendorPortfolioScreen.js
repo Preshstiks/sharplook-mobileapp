@@ -8,36 +8,53 @@ import {
   StatusBar,
   Modal,
   Dimensions,
+  ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import WhiteChatIcon from "../../../../assets/icon/whitechat.svg";
 import SkeletonBox from "../../../reusuableComponents/SkeletonLoader";
+import { useChatNavigation } from "../../../../hooks/useChatNavigation";
+import { ChatConnectionLoader } from "../../../reusuableComponents/ChatConnectionLoader";
+import { EmptyData } from "../../../reusuableComponents/EmptyData";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-const portfolioImages = [
-  require("../../../../assets/img/makeuppromo.png"),
-  require("../../../../assets/img/nailtech.jpg"),
-  require("../../../../assets/img/ped.jpg"),
-  //   require("../../../assets/img/home2.svg"),
-  require("../../../../assets/img/product1.jpg"),
-];
-
 export default function VendorPortfolioScreen({ navigation, route }) {
   const portfolioImg = route.params.portfolio;
+
+  const vendorData = route.params.vendorData;
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [imageLoadErrors, setImageLoadErrors] = useState(new Set());
+  const { navigateToChat, isConnecting } = useChatNavigation();
   useEffect(() => {
-    // Simulate loading time for images
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
+    // Preload images for better performance
+    preloadImages();
   }, []);
+
+  const preloadImages = async () => {
+    const imageLoadPromises = portfolioImg.map((imageUri, index) => {
+      return new Promise((resolve) => {
+        Image.prefetch(imageUri)
+          .then(() => {
+            setLoadedImages((prev) => new Set([...prev, index]));
+            resolve();
+          })
+          .catch(() => {
+            setImageLoadErrors((prev) => new Set([...prev, index]));
+            resolve(); // Still resolve to not block other images
+          });
+      });
+    });
+
+    // Wait for all images to load or fail, then hide loading
+    await Promise.all(imageLoadPromises);
+    setLoading(false);
+  };
 
   const handleImagePress = (imageUri, index) => {
     setSelectedImage(imageUri);
@@ -80,52 +97,105 @@ export default function VendorPortfolioScreen({ navigation, route }) {
     </View>
   );
 
+  const ImageItem = ({ img, idx }) => {
+    const [imageLoading, setImageLoading] = useState(true);
+    const [hasError, setHasError] = useState(imageLoadErrors.has(idx));
+
+    return (
+      <TouchableOpacity
+        key={idx}
+        className="w-[31%] aspect-square rounded-lg overflow-hidden mb-4 bg-gray-100"
+        onPress={() => handleImagePress(img, idx)}
+        activeOpacity={0.8}
+      >
+        {!hasError ? (
+          <>
+            <Image
+              source={{ uri: img }}
+              className="w-full h-full"
+              resizeMode="cover"
+              onLoad={() => setImageLoading(false)}
+              onError={() => {
+                setHasError(true);
+                setImageLoading(false);
+              }}
+              // Add cache policy for better performance
+              cache="force-cache"
+            />
+            {imageLoading && (
+              <View className="absolute inset-0 justify-center items-center bg-gray-100">
+                <ActivityIndicator size="small" color="#EB278D" />
+              </View>
+            )}
+          </>
+        ) : (
+          <View className="w-full h-full justify-center items-center bg-gray-200">
+            <Ionicons name="image-outline" size={24} color="#9CA3AF" />
+            <Text className="text-sm text-gray-400 mt-1">Failed to load</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
-      <View className="bg-primary pt-[50px] pb-4 flex-row items-center justify-between px-4">
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+      <ChatConnectionLoader visible={isConnecting} />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
-          className="text-white text-[14px] font-semibold flex-1 text-center -ml-6"
           style={{ fontFamily: "poppinsMedium" }}
+          className="text-[16px] text-white"
         >
           Vendor's Portfolio
         </Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate("ChatDetailScreenHardcoded")}
+          onPress={() =>
+            navigateToChat(navigation, {
+              vendorId: vendorData?.id,
+              receiverName: vendorData?.vendorOnboarding?.businessName,
+              vendorPhone: vendorData?.phone,
+              chat: {
+                id: vendorData?.id,
+                name: vendorData?.vendorOnboarding?.businessName,
+                avatar: vendorData?.vendorOnboarding?.profilePicture,
+                vendorId: vendorData?.id,
+              },
+            })
+          }
         >
-          <WhiteChatIcon width={28} height={28} />
+          <WhiteChatIcon width={30} height={30} />
         </TouchableOpacity>
       </View>
 
       {/* Portfolio Grid */}
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16 }}
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true} // Optimize memory usage
+        maxToRenderPerBatch={6} // Render images in batches
+        initialNumToRender={6}
+      >
         {loading ? (
           <PortfolioSkeleton />
-        ) : (
+        ) : portfolioImg.length > 0 ? (
           <View className="flex-row flex-wrap justify-between">
             {portfolioImg.map((img, idx) => (
-              <TouchableOpacity
-                key={idx}
-                className="w-[31%] aspect-square rounded-lg overflow-hidden mb-4 bg-gray-100"
-                onPress={() => handleImagePress(img, idx)}
-                activeOpacity={0.8}
-              >
-                <Image
-                  source={{ uri: img }}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                />
-              </TouchableOpacity>
+              <ImageItem key={idx} img={img} idx={idx} />
             ))}
           </View>
+        ) : (
+          <EmptyData msg="No portfolio images" />
         )}
       </ScrollView>
 
-      {/* Full Screen Image Preview Modal with Background Overlay */}
+      {/* Full Screen Image Preview Modal */}
       <Modal
         visible={imageModalVisible}
         transparent={true}
@@ -133,7 +203,6 @@ export default function VendorPortfolioScreen({ navigation, route }) {
         onRequestClose={closeImageModal}
         statusBarTranslucent={true}
       >
-        {/* Background Overlay */}
         <View className="flex-1 bg-black bg-opacity-95">
           {/* Gradient Overlay for Better Contrast */}
           <View className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black opacity-60" />
@@ -154,7 +223,7 @@ export default function VendorPortfolioScreen({ navigation, route }) {
                 / {portfolioImg.length}
               </Text>
             </View>
-            <View className="w-12" /> {/* Spacer for centering */}
+            <View className="w-12" />
           </View>
 
           {/* Image Container */}
@@ -164,6 +233,7 @@ export default function VendorPortfolioScreen({ navigation, route }) {
                 source={{ uri: selectedImage }}
                 className="w-full h-full"
                 resizeMode="contain"
+                cache="force-cache"
               />
             )}
           </View>
@@ -204,3 +274,15 @@ export default function VendorPortfolioScreen({ navigation, route }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: "#EB278D",
+    paddingTop: 60,
+    paddingBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+  },
+});

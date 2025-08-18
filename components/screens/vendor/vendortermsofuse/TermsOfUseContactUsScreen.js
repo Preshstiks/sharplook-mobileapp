@@ -43,7 +43,11 @@ export default function TermsOfUseContactUsScreen() {
           If you have any questions about these Terms, please contact us at:
           {"\n\n"}
           <Text style={{ fontFamily: "poppinsBold" }}>Email:</Text>{" "}
-          Privacy@sharplook.ng
+          <TouchableOpacity>
+            <Text className="text-primary underline -mb-1">
+              hello@sharplook.beauty
+            </Text>
+          </TouchableOpacity>
           {"\n\n"}
           <Text style={{ fontFamily: "poppinsBold" }}>Phone:</Text> [To be
           provided]

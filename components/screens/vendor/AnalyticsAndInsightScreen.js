@@ -16,7 +16,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../../../context/AuthContext";
 import { EmptyData } from "../../reusuableComponents/EmptyData";
 import { formatAmount } from "../../formatAmount";
-
+import { HexConverter } from "../../reusuableComponents/HexConverter";
+import { getRelativeTime } from "../../reusuableComponents/RelativeTime";
 const months = [
   "January",
   "February",
@@ -43,6 +44,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
 
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState(null);
+  const [filteredAnalytics, setFilteredAnalytics] = useState(null);
   const [tempMonth, setTempMonth] = useState(currentDate.getMonth() + 1);
   const [tempYear, setTempYear] = useState(currentDate.getFullYear());
 
@@ -51,6 +53,62 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
 
   // Skeleton animation
   const shimmerAnim = new Animated.Value(0);
+
+  // Filter analytics data based on selected month and year
+  const filterAnalyticsByMonthYear = useCallback((data, month, year) => {
+    if (!data) return null;
+
+    const filteredData = { ...data };
+
+    // Filter recent earnings by month and year
+    if (data.recentEarnings && Array.isArray(data.recentEarnings)) {
+      filteredData.recentEarnings = data.recentEarnings.filter((earning) => {
+        const earningDate = new Date(earning.date);
+        return (
+          earningDate.getMonth() + 1 === month &&
+          earningDate.getFullYear() === year
+        );
+      });
+    }
+
+    // Recalculate totals based on filtered earnings
+    const filteredTotalRevenue =
+      filteredData.recentEarnings?.reduce(
+        (sum, earning) => sum + earning.amount,
+        0
+      ) || 0;
+    const filteredTotalProductRevenue =
+      filteredData.recentEarnings?.reduce((sum, earning) => {
+        if (earning.type === "PRODUCT") {
+          return sum + earning.amount;
+        }
+        return sum;
+      }, 0) || 0;
+
+    // Update the totals
+    filteredData.totalRevenue = filteredTotalRevenue;
+    filteredData.totalProductRevenue = filteredTotalProductRevenue;
+    filteredData.totalUnitsSold = filteredData.recentEarnings?.length || 0;
+
+    // For now, keep the original counts for bookings and disputes since we don't have date filtering for them
+    // In a real implementation, you would filter these based on their respective dates
+    filteredData.newBookingsCount = data.newBookingsCount;
+    filteredData.disputesCount = data.disputesCount;
+
+    return filteredData;
+  }, []);
+
+  // Apply filtering when month/year changes
+  useEffect(() => {
+    if (analytics) {
+      const filtered = filterAnalyticsByMonthYear(
+        analytics,
+        selectedMonth,
+        selectedYear
+      );
+      setFilteredAnalytics(filtered);
+    }
+  }, [analytics, selectedMonth, selectedYear, filterAnalyticsByMonthYear]);
 
   useEffect(() => {
     const startShimmer = () => {
@@ -88,8 +146,11 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
   };
 
   const prepareChartData = () => {
-    if (!analytics?.recentEarnings || analytics.recentEarnings.length === 0) {
-      // Return default/empty data when no earnings
+    // Use filtered analytics for chart data, but keep recent earnings unfiltered
+    const dataToUse = filteredAnalytics || analytics;
+
+    if (!dataToUse?.recentEarnings || dataToUse.recentEarnings.length === 0) {
+      // Return default/empty data when no earnings for selected month/year
       return [
         { value: 0, label: "" },
         { value: 0, label: "" },
@@ -101,7 +162,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
     }
 
     // Group earnings by day/week/month depending on your needs
-    const chartData = analytics.recentEarnings.map((earning, index) => ({
+    const chartData = dataToUse.recentEarnings.map((earning, index) => ({
       value: earning.amount / 1000, // Convert to thousands for better chart display
       label: "",
     }));
@@ -112,14 +173,16 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
 
   // Alternative: If your API returns daily/monthly revenue data
   const prepareChartDataFromRevenue = () => {
-    if (!analytics?.dailyRevenue || analytics.dailyRevenue.length === 0) {
+    const dataToUse = filteredAnalytics || analytics;
+
+    if (!dataToUse?.dailyRevenue || dataToUse.dailyRevenue.length === 0) {
       return Array.from({ length: 10 }, (_, i) => ({
         value: 0,
         label: (i + 1).toString(),
       }));
     }
 
-    return analytics.dailyRevenue.map((day, index) => ({
+    return dataToUse.dailyRevenue.map((day, index) => ({
       value: day.revenue / 1000,
       label: day.day || (index + 1).toString(),
     }));
@@ -148,7 +211,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
       fetchAnalytics();
     }, [])
   );
-
+  console.log({ analytics });
   // Skeleton Loader Component
   const SkeletonBox = ({ width, height, style }) => {
     const animatedOpacity = shimmerAnim.interpolate({
@@ -386,8 +449,19 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
             className="text-[18px] text-[#ED2584] mb-2"
             style={{ fontFamily: "latoBold" }}
           >
-            {formatAmount(analytics?.totalRevenue)}
+            {formatAmount(
+              filteredAnalytics?.totalRevenue || analytics?.totalRevenue
+            )}
           </Text>
+          {filteredAnalytics &&
+            filteredAnalytics.recentEarnings.length === 0 && (
+              <Text
+                className="text-[12px] text-gray-500 mb-2 text-center"
+                style={{ fontFamily: "poppinsRegular" }}
+              >
+                No data available for {months[selectedMonth - 1]} {selectedYear}
+              </Text>
+            )}
 
           <LineChart
             data={loading ? [] : prepareChartData()}
@@ -453,7 +527,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
                 className="text-white text-[20px]"
                 style={{ fontFamily: "latoBold" }}
               >
-                {analytics?.totalUnitsSold}
+                {analytics?.recentEarnings?.length}
               </Text>
             </View>
             <View className="flex-1 bg-[#ED2584] rounded-xl py-4 items-center">
@@ -487,133 +561,43 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
         ) : analytics.recentEarnings.length === 0 ? (
           <EmptyData msg="No recent earnings." />
         ) : (
-          <View className="mb-4">
-            {/* Earning Item */}
-            <View className="flex-row items-center mb-3">
-              <Ionicons name="checkmark-circle" size={20} color="#ED2584" />
-              <View className="ml-2 flex-1">
-                <Text
-                  className="text-[14px]"
-                  style={{ fontFamily: "latoBold" }}
-                >
-                  #35674
-                </Text>
-                <Text
-                  className="text-[12px] text-[#00000099]"
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  Raji Balikis
-                </Text>
-              </View>
-              <View className="items-end">
-                <Text
-                  className="text-[14px]"
-                  style={{ fontFamily: "latoBold" }}
-                >
-                  ₦210,000.00
-                </Text>
-                <Text
-                  className="text-[12px] text-[#00000099]"
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  30 mins ago
-                </Text>
-              </View>
-            </View>
-            <View className="flex-row items-center mb-3">
-              <Ionicons name="time-outline" size={20} color="#ED2584" />
-              <View className="ml-2 flex-1">
-                <Text
-                  className="text-[14px]"
-                  style={{ fontFamily: "latoBold" }}
-                >
-                  #35674
-                </Text>
-                <Text
-                  className="text-[12px] text-[#00000099]"
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  Akash mira
-                </Text>
-              </View>
-              <View className="items-end">
-                <Text
-                  className="text-[14px]"
-                  style={{ fontFamily: "latoBold" }}
-                >
-                  ₦210,000.00
-                </Text>
-                <Text
-                  className="text-[12px] text-[#00000099]"
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  1 hr ago
-                </Text>
+          analytics?.recentEarnings?.slice(0, 4).map((earning, index) => (
+            <View className="mb-4" key={index}>
+              <View className="flex-row items-center mb-3">
+                <Ionicons name="checkmark-circle" size={20} color="#ED2584" />
+                <View className="ml-2 flex-1">
+                  <Text
+                    className="text-[14px]"
+                    style={{ fontFamily: "latoBold" }}
+                  >
+                    {HexConverter(earning?.sourceId)}
+                  </Text>
+                  <Text
+                    className="text-[12px] text-[#00000099]"
+                    style={{ fontFamily: "poppinsRegular" }}
+                  >
+                    {earning?.clientDetails
+                      ? `${earning?.clientDetails?.lastName} ${earning?.clientDetails?.firstName}`
+                      : "Unknown User"}
+                  </Text>
+                </View>
+                <View className="items-end">
+                  <Text
+                    className="text-[14px]"
+                    style={{ fontFamily: "latoBold" }}
+                  >
+                    {formatAmount(earning?.amount)}
+                  </Text>
+                  <Text
+                    className="text-[12px] text-[#00000099]"
+                    style={{ fontFamily: "poppinsRegular" }}
+                  >
+                    {getRelativeTime(earning?.date)}
+                  </Text>
+                </View>
               </View>
             </View>
-            <View className="flex-row items-center mb-3">
-              <Ionicons name="checkmark-circle" size={20} color="#ED2584" />
-              <View className="ml-2 flex-1">
-                <Text
-                  className="text-[14px]"
-                  style={{ fontFamily: "latoBold" }}
-                >
-                  #35674
-                </Text>
-                <Text
-                  className="text-[12px] text-[#00000099]"
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  Raji Balikis
-                </Text>
-              </View>
-              <View className="items-end">
-                <Text
-                  className="text-[14px]"
-                  style={{ fontFamily: "latoBold" }}
-                >
-                  ₦210,000.00
-                </Text>
-                <Text
-                  className="text-[12px] text-[#00000099]"
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  30 mins ago
-                </Text>
-              </View>
-            </View>
-            <View className="flex-row items-center mb-3">
-              <Ionicons name="time-outline" size={20} color="#ED2584" />
-              <View className="ml-2 flex-1">
-                <Text
-                  className="text-[14px]"
-                  style={{ fontFamily: "latoBold" }}
-                >
-                  #35674
-                </Text>
-                <Text
-                  className="text-[12px] text-[#00000099]"
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  Akash mira
-                </Text>
-              </View>
-              <View className="items-end">
-                <Text
-                  className="text-[14px]"
-                  style={{ fontFamily: "latoBold" }}
-                >
-                  ₦210,000.00
-                </Text>
-                <Text
-                  className="text-[12px] text-[#00000099]"
-                  style={{ fontFamily: "poppinsRegular" }}
-                >
-                  1 hr ago
-                </Text>
-              </View>
-            </View>
-          </View>
+          ))
         )}
       </ScrollView>
     </View>

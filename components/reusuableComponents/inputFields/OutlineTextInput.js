@@ -22,7 +22,7 @@ export default function OutlineTextInput({
       {label && (
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-[12px] pb-1"
+          className="text-[14px] pb-1"
         >
           {label}
         </Text>
@@ -39,7 +39,7 @@ export default function OutlineTextInput({
           { fontFamily: "poppinsRegular", textAlignVertical: "top" },
           style,
         ]}
-        className={`border px-4 py-4 text-[12px] rounded-[12px] ${isFocused ? "border-primary" : error && touched ? "border-[#FF0000]" : "border-[#F9BCDC]"}`}
+        className={`border px-4 py-4 text-[14px] rounded-[12px] ${isFocused ? "border-primary" : error && touched ? "border-[#FF0000]" : "border-[#F9BCDC]"}`}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         {...rest}
@@ -69,7 +69,7 @@ export function OutlineTextAreaInput({
       {label && (
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-[12px] pb-1"
+          className="text-[14px] pb-1"
         >
           {label}
         </Text>
@@ -81,7 +81,7 @@ export function OutlineTextAreaInput({
         placeholderTextColor="#C4C4C4"
         multiline
         numberOfLines={numberOfLines}
-        className={`border px-4 text-[12px] py-4 rounded-[12px] ${isFocused ? "border-primary" : error && touched ? "border-[#FF0000]" : "border-[#F9BCDC]"}`}
+        className={`border px-4 text-[14px] py-4 rounded-[12px] ${isFocused ? "border-primary" : error && touched ? "border-[#FF0000]" : "border-[#F9BCDC]"}`}
         style={[
           { fontFamily: "poppinsRegular", minHeight, textAlignVertical: "top" },
           style,
@@ -106,20 +106,20 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 44,
-    fontSize: 15,
+    fontSize: 17,
     color: "#201E1F",
     fontFamily: "poppinsRegular",
   },
   label: {
     fontFamily: "poppinsRegular",
-    fontSize: 13,
+    fontSize: 15,
     color: "#201E1F",
     marginBottom: 2,
     marginTop: 6,
   },
   errorText: {
     color: "#FF0000",
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "poppinsRegular",
     marginTop: 4,
     marginLeft: 12,

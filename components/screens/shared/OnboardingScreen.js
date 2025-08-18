@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipText: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#000",
     fontFamily: "poppinsMedium",
   },
@@ -225,14 +225,14 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     marginBottom: 12,
     textAlign: "center",
     color: "#000",
     fontFamily: "poppinsBold",
   },
   description: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#000",
     textAlign: "center",
     marginBottom: 16,
@@ -285,7 +285,7 @@ const sheetStyles = RNStyleSheet.create({
     backgroundColor: "transparent",
   },
   roleText: {
-    fontSize: 20,
+    fontSize: 22,
     color: "#BF6A37",
     fontFamily: "poppinsRegular",
   },

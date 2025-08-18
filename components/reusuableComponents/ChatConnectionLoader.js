@@ -21,7 +21,7 @@ export const ChatConnectionLoader = ({
         <View className="flex-row items-center mt-2">
           <Ionicons name="chatbubble-ellipses" size={16} color="#EB278D" />
           <Text
-            className="text-xs text-gray-500 ml-1"
+            className="text-sm text-gray-500 ml-1"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Connecting to SharpChat...

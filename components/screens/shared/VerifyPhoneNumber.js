@@ -34,7 +34,7 @@ export default function ClientVerifyPhoneNumber({ navigation, route }) {
     }
 
     setLoading(true);
-    console.log(String(phone));
+
     try {
       const res = await HttpClient.post("/auth/send-otp", {
         phone: String(phone), // This will be in format +2348155262536
@@ -69,21 +69,21 @@ export default function ClientVerifyPhoneNumber({ navigation, route }) {
           </Pressable>
           <Text
             style={{ fontFamily: "poppinsSemiBold" }}
-            className="text-[16px]"
+            className="text-[18px]"
           >
             Verification with Phone Number
           </Text>
         </View>
 
         <Text
-          className="text-center mb-1 text-[14px]"
+          className="text-center mb-1 text-[16px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Please fill your phone number below
         </Text>
 
         <Text
-          className="text-center mb-4 text-[12px]"
+          className="text-center mb-4 text-[14px]"
           style={{ fontFamily: "poppinsRegular" }}
         >
           We will send you an OTP to verify your account

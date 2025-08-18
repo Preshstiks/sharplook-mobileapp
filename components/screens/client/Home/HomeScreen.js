@@ -25,7 +25,6 @@ import Feather from "@expo/vector-icons/Feather";
 import { useCart } from "../../../../context/CartContext";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Menu from "../../../../assets/icon/homemenubtn.svg";
-import OptionsIcon from "../../../../assets/icon/options.svg";
 import ProductOne from "../../../../assets/img/product1.jpg";
 import ProductTwo from "../../../../assets/img/product2.jpg";
 import ProductThree from "../../../../assets/img/product3.jpg";
@@ -35,11 +34,12 @@ import ProductSix from "../../../../assets/img/product6.jpg";
 import { useAuth } from "../../../../context/AuthContext";
 import { HttpClient } from "../../../../api/HttpClient";
 import DefaultAvatar from "../../../../assets/icon/avatar.png";
-import { useStatusBar } from "../../../../context/StatusBarContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useChatNavigation } from "../../../../hooks/useChatNavigation";
 import { useCategories } from "../../../../hooks/useCategories";
 import { useFilter } from "../../../../context/FilterContext";
+import { getCurrentLocation } from "../../../../utils/locationUtils";
+// import ProductDetailsModal from "../ProductDetailsModal";
 // Categories will be populated dynamically from API
 
 const recommendedProducts = [
@@ -49,21 +49,6 @@ const recommendedProducts = [
   { image: ProductFour },
   { image: ProductFive },
   { image: ProductSix },
-];
-
-const bestOffers = [
-  {
-    title: "For all Makeup",
-    discount: "40% OFF",
-    bg: "bg-[#FCDFEE]",
-    img: MakeupPromo,
-  },
-  {
-    title: "Refer friends to get",
-    discount: "10% OFF",
-    bg: "bg-[#BAB9BA]",
-    img: Refer,
-  },
 ];
 
 // SkeletonBox component for loading placeholders
@@ -121,17 +106,22 @@ export default function HomeScreen() {
   const [loadingVendors, setLoadingVendors] = useState(true);
   const [allServices, setAllServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
+  const [loadingNearby, setLoadingNearby] = useState(true);
+  const [nearbyVendors, setNearbyVendors] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const searchInputRef = React.useRef(null); // <-- add ref
   const { navigateToChatList } = useChatNavigation();
   const { categories, loading: categoriesLoading } = useCategories();
   const { filterVendors, filters } = useFilter();
+  const { cartItems, fetchCart, loading: cartLoading } = useCart();
+  const [addingToCart, setAddingToCart] = useState({});
   const toggleSearchBar = () => {
     setIsSearchBarActive(!isSearchBarActive);
     setSearchInput(""); // Reset search input when toggling
     setFilteredVendors([]); // Reset filtered vendors
   };
   const user = useAuth();
-  const { cartItems, fetchCart } = useCart();
 
   useFocusEffect(
     useCallback(() => {
@@ -150,7 +140,7 @@ export default function HomeScreen() {
       };
       const fetchTopVendors = async () => {
         const token = await AsyncStorage.getItem("token");
-        console.log(token);
+        console.log({ token });
         setLoadingVendors(true);
         try {
           const res = await HttpClient.get("/user/topVendors");
@@ -170,9 +160,40 @@ export default function HomeScreen() {
           setLoadingServices(false);
         }
       };
+      const fetchNearbyVendors = async () => {
+        setLoadingNearby(true);
+        try {
+          let location;
+          try {
+            location = await getCurrentLocation();
+          } catch (locationError) {
+            console.error("Location error:", locationError);
+            setNearbyVendors([]);
+            setLoadingNearby(false);
+            return;
+          }
+
+          const latitude = location.latitude;
+          const longitude = location.longitude;
+
+          const res = await HttpClient.get(
+            `/user/nearby-vendors?latitude=${latitude}&longitude=${longitude} ⁠`
+          );
+
+          setNearbyVendors(res.data?.data || []);
+        } catch (err) {
+          console.error("Error fetching services:", err);
+
+          setErrorNearby("Failed to fetch vendors. Please try again.");
+          setNearbyVendors([]);
+        } finally {
+          setLoadingNearby(false);
+        }
+      };
       fetchRecommendedProducts();
       fetchTopVendors();
       fetchAllServices();
+      fetchNearbyVendors();
     }, [fetchCart])
   );
 
@@ -180,7 +201,12 @@ export default function HomeScreen() {
     if (searchInput.trim() === "") {
       setFilteredVendors([]);
     } else {
-      const filtered = topVendors.filter((vendor) => {
+      // Filter out vendors without businessName first, then apply search
+      const vendorsWithBusinessName = topVendors.filter((vendor) =>
+        vendor?.vendorOnboarding?.businessName?.trim()
+      );
+
+      const filtered = vendorsWithBusinessName.filter((vendor) => {
         const name = vendor?.vendorOnboarding?.businessName || "";
         return name.toLowerCase().includes(searchInput.toLowerCase());
       });
@@ -189,6 +215,51 @@ export default function HomeScreen() {
   }, [searchInput, topVendors]);
 
   const currentUser = user.user;
+  console.log({ currentUser });
+  const handleProductPress = (product) => {
+    navigation.navigate("ProductDetailsScreen", {
+      product,
+      onAddToCart: handleAddToCartFromModal,
+      cartProductIds,
+      addingToCart,
+    });
+  };
+  const cartProductIds = cartItems.map(
+    (item) =>
+      item.product?.id ||
+      item.product?._id ||
+      item.productId ||
+      item.id ||
+      item._id
+  );
+  const handleAddToCart = async (product) => {
+    const productId = product.id || product._id;
+
+    setAddingToCart((prev) => ({ ...prev, [productId]: true }));
+    try {
+      const res = await HttpClient.post("/client/addProductTocart", {
+        productId: productId,
+      });
+      await fetchCart();
+      showToast.success(res.data.message);
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.message ||
+        "Failed to add to cart.";
+      showToast.error(message);
+    } finally {
+      setAddingToCart((prev) => {
+        const { [productId]: removed, ...rest } = prev;
+        return rest;
+      });
+    }
+  };
+  const handleAddToCartFromModal = async (product, quantity) => {
+    for (let i = 0; i < quantity; i++) {
+      await handleAddToCart(product);
+    }
+  };
   return (
     <View className="flex-1 bg-secondary" style={{ position: "relative" }}>
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />
@@ -226,7 +297,7 @@ export default function HomeScreen() {
               <Feather name="shopping-cart" size={24} color="#EB278D" />
               {cartItems.length > 0 && (
                 <View className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary items-center justify-center">
-                  <Text className="text-[8px] text-white font-medium">
+                  <Text className="text-[10px] text-white font-medium">
                     {cartItems.length}
                   </Text>
                 </View>
@@ -253,7 +324,7 @@ export default function HomeScreen() {
             </Pressable>
             <TextInput
               ref={searchInputRef} // <-- attach ref
-              className="ml-2 text-xs pb-4 pt-5 placeholder:text-faintDark2"
+              className="ml-2 text-sm pb-4 pt-5 placeholder:text-faintDark2"
               placeholder="Search Shop or Vendor"
               cursorColor="#EB278D"
               style={{ fontFamily: "poppinsRegular" }}
@@ -278,7 +349,7 @@ export default function HomeScreen() {
             <View className="bg-[#FCE4F0] rounded-lg p-3">
               <Text
                 style={{ fontFamily: "poppinsMedium" }}
-                className="text-[12px] text-primary mb-1"
+                className="text-[14px] text-primary mb-1"
               >
                 Active Filters:
               </Text>
@@ -287,7 +358,7 @@ export default function HomeScreen() {
                   <View className="bg-primary rounded-full px-3 py-1">
                     <Text
                       style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[10px] text-white"
+                      className="text-[12px] text-white"
                     >
                       {filters.rating}+ Stars
                     </Text>
@@ -297,7 +368,7 @@ export default function HomeScreen() {
                   <View className="bg-primary rounded-full px-3 py-1">
                     <Text
                       style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[10px] text-white"
+                      className="text-[12px] text-white"
                     >
                       {filters.serviceType === "HOME_SERVICE"
                         ? "Home Service"
@@ -317,7 +388,7 @@ export default function HomeScreen() {
               <View className="items-center justify-center py-8">
                 <EmptySVG width={120} height={120} />
                 <Text
-                  className="text-[14px] text-gray-400 mt-2"
+                  className="text-[16px] text-gray-400 mt-2"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
                   No vendors found
@@ -353,7 +424,7 @@ export default function HomeScreen() {
                   </View>
                   <View className="p-4">
                     <Text
-                      className="text-base font-medium text-faintDark"
+                      className="text-lg font-medium text-faintDark"
                       style={{ fontFamily: "poppinsRegular" }}
                     >
                       {vendor?.vendorOnboarding?.businessName}
@@ -361,7 +432,7 @@ export default function HomeScreen() {
                     <View className="bg-primary rounded-[4px] my-1 px-3 self-start">
                       <Text
                         style={{ fontFamily: "poppinsRegular" }}
-                        className="text-[8px] mt-1 text-white"
+                        className="text-[10px] mt-1 text-white"
                       >
                         {vendor?.vendorOnboarding?.serviceType ===
                         "HOME_SERVICE"
@@ -419,9 +490,18 @@ export default function HomeScreen() {
                             const filteredServices = allServices.filter(
                               (service) => service.serviceName === cat.name
                             );
+
+                            const filteredNearby = nearbyVendors.filter(
+                              (vendor) =>
+                                vendor.vendorServices?.some(
+                                  (service) => service.serviceName === cat.name
+                                )
+                            );
+
                             navigation.navigate("Categories", {
                               category: cat.name,
                               services: filteredServices,
+                              nearbyVendors: filteredNearby,
                             });
                           }}
                         >
@@ -489,7 +569,12 @@ export default function HomeScreen() {
               </ScrollView>
             ) : (
               (() => {
-                const filteredVendors = filterVendors(topVendors);
+                // First filter out vendors without businessName, then apply user filters
+                const vendorsWithBusinessName = topVendors.filter((vendor) =>
+                  vendor?.vendorOnboarding?.businessName?.trim()
+                );
+                const filteredVendors = filterVendors(vendorsWithBusinessName);
+
                 if (filteredVendors.length === 0) {
                   return (
                     <View className="items-center justify-center py-8">
@@ -516,7 +601,7 @@ export default function HomeScreen() {
                       <Pressable
                         onPress={() =>
                           navigation.navigate("VendorProfileScreen", {
-                            vendorData: vendor, // Only pass vendorData
+                            vendorData: vendor,
                           })
                         }
                         key={vendor.id || idx}
@@ -627,7 +712,9 @@ export default function HomeScreen() {
                 className="flex-row px-5 mt-4"
               >
                 {recommendedProducts.map((prod, idx) => (
-                  <View
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() => handleProductPress(prod)}
                     key={prod.id || idx}
                     className="rounded-[4px] mr-4 items-center justify-center w-[220px] h-[202px] overflow-hidden shadow-sm"
                   >
@@ -636,41 +723,9 @@ export default function HomeScreen() {
                       style={{ width: "100%", height: "100%" }}
                       resizeMode="cover"
                     />
-                    <View
-                      style={{
-                        position: "absolute",
-                        bottom: 8,
-                        left: 8,
-                        right: 8,
-                        backgroundColor: "rgba(255,255,255,0.85)",
-                        borderRadius: 6,
-                        padding: 6,
-                      }}
-                    >
-                      {/* <Text
-                        style={{ fontFamily: "poppinsSemiBold", fontSize: 14 }}
-                        numberOfLines={1}
-                      >
-                        {prod.productName}
-                      </Text>
-                      <Text
-                        style={{ fontFamily: "poppinsRegular", fontSize: 12 }}
-                      >
-                        ₦{prod.price}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: "poppinsRegular",
-                          fontSize: 11,
-                          color: "#888",
-                        }}
-                        numberOfLines={1}
-                      >
-                        By {prod.vendor?.name}
-                      </Text> */}
-                    </View>
-                  </View>
+                  </TouchableOpacity>
                 ))}
+                {/* ProductDetailsModal removed - now using ProductDetailsScreen */}
               </ScrollView>
             )}
             {/* Best Offers */}

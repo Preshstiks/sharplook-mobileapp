@@ -28,6 +28,7 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import { useAuth } from "../../../../context/AuthContext";
 import * as ImagePicker from "expo-image-picker";
+import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 export default function BookingHomeServiceAppointScreen() {
   const navigation = useNavigation();
   const route = useRoute();
@@ -44,7 +45,7 @@ export default function BookingHomeServiceAppointScreen() {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [distanceApart, setDistanceApart] = useState(null);
+  const [totalTp, setTotalTp] = useState(null);
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [paystackModalVisible, setPaystackModalVisible] = useState(false);
@@ -75,22 +76,36 @@ export default function BookingHomeServiceAppointScreen() {
       setReferencePhoto(result.assets[0].uri);
     }
   };
+  const vendorIds = Array(service.userId || vendorId);
 
-  const fetchCurrentLocation = async () => {
-    if (!currentLocation || !selectedLocation) return;
+  const fetchCurrentLocation = async (usePreferredLocation = false) => {
+    if (!currentLocation && !usePreferredLocation) return;
+    if (
+      usePreferredLocation &&
+      (!user.preferredLatitude || !user.preferredLongitude)
+    )
+      return;
+
     setIsLoading(true);
     try {
       const payload = {
-        clientLat: currentLocation.latitude,
-        clientLng: currentLocation.longitude,
-        vendorId: service.userId || vendorId, // Use service.userId as fallback
+        clientLat: usePreferredLocation
+          ? user.preferredLatitude
+          : currentLocation.latitude,
+        clientLng: usePreferredLocation
+          ? user.preferredLongitude
+          : currentLocation.longitude,
+        vendorIds: vendorIds,
       };
+
+      console.log("Distance calculation payload:", payload);
 
       const response = await HttpClient.post("/distance/calcDistance", payload);
 
-      setDistanceApart(response.data.distanceKm);
+      setTotalTp(response.data.totalTransportCost);
+      console.log({ response: response.data });
     } catch (error) {
-      console.error("API error:", error);
+      console.error("API error:", error.response);
       if (error.response && error.response.data) {
         const errorMessage =
           error.response.data.message || "An unknown error occurred";
@@ -112,7 +127,8 @@ export default function BookingHomeServiceAppointScreen() {
         if (webviewRef.current) {
           webviewRef.current.postMessage(JSON.stringify(location));
         }
-        fetchCurrentLocation();
+        // Don't automatically fetch distance calculation on mount
+        // Let user choose their preference first
       } catch (error) {
         if (error.response && error.response.data) {
           const errorMessage =
@@ -134,7 +150,7 @@ export default function BookingHomeServiceAppointScreen() {
       setSelectedLocation(location);
 
       webviewRef.current.postMessage(JSON.stringify(location));
-      fetchCurrentLocation();
+      fetchCurrentLocation(false);
     } catch (error) {
       if (error.response && error.response.data) {
         const errorMessage =
@@ -145,7 +161,7 @@ export default function BookingHomeServiceAppointScreen() {
       setIsLoading(false);
     }
   };
-
+  console.log({ user });
   const handleBookNow = async (
     values,
     paymentReference,
@@ -176,8 +192,8 @@ export default function BookingHomeServiceAppointScreen() {
         serviceName: service.serviceName,
         paymentMethod: paymentMethod,
         price: service.servicePrice,
-        totalAmount: service.servicePrice + calculatePrice(distanceApart),
-        date: new Date(`${selectedDate}T${time24Hour}:00.000Z`).toISOString(),
+        totalAmount: service.servicePrice + totalTp,
+        date: new Date(selectedDate).toISOString(),
         time: values.time,
         reference: paymentReference,
         serviceType: "HOME_SERVICE",
@@ -250,7 +266,7 @@ export default function BookingHomeServiceAppointScreen() {
       const res = await HttpClient.post("/payment/paystack/initiate", {
         paymentFor: "BOOKING",
         description: "Payment for Home Service Booking",
-        amount: service.servicePrice + calculatePrice(distanceApart),
+        amount: service.servicePrice + totalTp,
       });
       setPaystackPaymentUrl(res.data.paymentUrl);
       setPaymentReference(res.data.reference);
@@ -322,7 +338,7 @@ export default function BookingHomeServiceAppointScreen() {
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
-          className="text-white text-[16px] flex-1 text-center"
+          className="text-white text-[18px] flex-1 text-center"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Book Appointment
@@ -371,7 +387,7 @@ export default function BookingHomeServiceAppointScreen() {
           <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
             <View className="px-4 mt-6">
               <Text
-                className="text-[16px] mb-2"
+                className="text-[18px] mb-2"
                 style={{ fontFamily: "poppinsMedium" }}
               >
                 Choose Date and Time
@@ -476,7 +492,18 @@ export default function BookingHomeServiceAppointScreen() {
                   options={locationOption}
                   placeholder="Select"
                   value={selectedOption}
-                  onValueChange={setSelectedOption}
+                  onValueChange={(value) => {
+                    setSelectedOption(value);
+                    // If user selects "Yes", use preferred location for distance calculation
+                    if (value === "Yes") {
+                      fetchCurrentLocation(true);
+                    }
+                    // If user selects "No", use current GPS location for distance calculation
+                    else if (value === "No" && currentLocation) {
+                      fetchCurrentLocation(false);
+                    }
+                    // If user deselects, don't run any distance calculation
+                  }}
                   label="Are you in the current location you registered with?"
                 />
 
@@ -513,18 +540,42 @@ export default function BookingHomeServiceAppointScreen() {
             <div id="map"></div>
             <script>
               var map = L.map('map').setView([6.5244, 3.3792], 13);
-              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
+              L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
               }).addTo(map);
               var marker = L.marker([6.5244, 3.3792]).addTo(map)
                 .bindPopup('You are here')
                 .openPopup();
 
+              // Function to get location name from coordinates
+              function getLocationName(lat, lng) {
+                fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1')
+                  .then(function(response) { 
+                    if (response.ok) {
+                      return response.json(); 
+                    }
+                    throw new Error('Network response was not ok');
+                  })
+                  .then(function(data) {
+                    if (data.display_name) {
+                      marker.bindPopup(data.display_name).openPopup();
+                    } else {
+                      marker.bindPopup('You are here').openPopup();
+                    }
+                  })
+                  .catch(function(error) { 
+                    console.log('Geocoding error:', error);
+                    marker.bindPopup('You are here').openPopup();
+                  });
+              }
+
               function updateMap(data) {
                 if (data.latitude && data.longitude) {
                   map.setView([data.latitude, data.longitude], 16);
                   marker.setLatLng([data.latitude, data.longitude]);
-                  marker.bindPopup('You are here').openPopup();
+                  getLocationName(data.latitude, data.longitude);
                 }
               }
 
@@ -580,7 +631,7 @@ export default function BookingHomeServiceAppointScreen() {
                           style={{
                             color: "#EB278D",
                             fontFamily: "poppinsMedium",
-                            fontSize: 15,
+                            fontSize: 17,
                             marginLeft: 10,
                           }}
                         >
@@ -665,10 +716,10 @@ export default function BookingHomeServiceAppointScreen() {
               </View>
 
               {/* Distance Info */}
-              <View className="bg-[#E9E9E9] pl-4 rounded-xl h-[60px] flex-row items-center mb-2">
+              <View className="bg-[#E9E9E9] pl-4 pr-3 rounded-xl h-auto min-h-[60px] flex-row items-center mb-2">
                 <Ionicons name="alert-circle-outline" size={14} color="#000" />
                 <Text
-                  className="ml-2 text-[11px] text-[#000]"
+                  className="ml-2 text-[11px] text-[#000] flex-1"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
                   ₦1,000 for first 5km,{" "}
@@ -680,6 +731,7 @@ export default function BookingHomeServiceAppointScreen() {
                   </Text>
                 </Text>
               </View>
+
               <View className="mb-5 mt-4">
                 <Text
                   className="text-[16px] mb-3"
@@ -741,7 +793,7 @@ export default function BookingHomeServiceAppointScreen() {
                     className="text-primary text-[16px]"
                     style={{ fontFamily: "poppinsMedium" }}
                   >
-                    {formatAmount(calculatePrice(distanceApart))}
+                    {formatAmount(totalTp)}
                   </Text>
                 </View>
               </View>
@@ -760,9 +812,7 @@ export default function BookingHomeServiceAppointScreen() {
                   className="text-primary text-lg font-bold"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
-                  {formatAmount(
-                    service?.servicePrice + calculatePrice(distanceApart)
-                  )}
+                  {formatAmount(service?.servicePrice + totalTp)}
                 </Text>
               </View>
             </View>
@@ -793,6 +843,7 @@ export default function BookingHomeServiceAppointScreen() {
       >
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
+            <View style={{ width: 24 }} />
             <Text style={styles.headerTitle}>Payment</Text>
             <TouchableOpacity
               onPress={() => setPaystackModalVisible(false)}
@@ -859,8 +910,8 @@ export default function BookingHomeServiceAppointScreen() {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#fff",
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingTop: 50,
+    paddingBottom: 14,
     paddingHorizontal: 16,
     marginBottom: 20,
     flexDirection: "row",
@@ -874,7 +925,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#222",
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: "poppinsMedium",
     flex: 1,
     textAlign: "center",

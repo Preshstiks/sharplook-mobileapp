@@ -21,7 +21,7 @@ bg-primary border-primary ${isloading ? "cursor-not-allowed bg-[#c681a5]" : ""} 
         <View className="flex-row items-center gap-2">
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-center text-[13px] text-white"
+            className="text-center text-[15px] text-white"
           >
             <BarIndicator color="#fff" size={20} />
           </Text>
@@ -31,7 +31,7 @@ bg-primary border-primary ${isloading ? "cursor-not-allowed bg-[#c681a5]" : ""} 
           {iconLeft && <View className="mr-2">{iconLeft}</View>}
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className={`text-center text-[13px] ${disabled ? "text-white" : "text-white"}`}
+            className={`text-center text-[15px] ${disabled ? "text-white" : "text-white"}`}
           >
             {title}
           </Text>

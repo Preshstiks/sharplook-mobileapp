@@ -28,12 +28,21 @@ import CallScreen from "./components/screens/client/GlobalScreens/CallScreen";
 import InitialSubscriptionScreen from "./components/screens/vendor/auth/InitialSubscriptionScreen";
 import PhoneNumberVerificationScreen from "./components/screens/vendor/auth/PhoneNumberVerificationScreen";
 import OTPVerificationScreen from "./components/screens/vendor/auth/OTPVerificationScreen";
+import AuthPrivacyPolicy from "./components/screens/shared/PrivacyPolicy";
+import AuthTermsOfUse from "./components/screens/shared/TermsOfUse";
+import notificationService from "./utils/notificationService";
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator({ linking }) {
   const { isAuthenticated, userType, isLoading } = useAuth();
   const fontsLoaded = useCustomFonts();
+
+  // Set up navigation reference for notification service
+  const onReady = (navigationRef) => {
+    // Always set navigation ref for notification service
+    notificationService.setNavigationRef(navigationRef, userType);
+  };
 
   if (!fontsLoaded || isLoading) {
     return (
@@ -51,7 +60,7 @@ export default function AppNavigator({ linking }) {
   }
 
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer linking={linking} onReady={onReady}>
       <Stack.Navigator
         initialRouteName={
           isAuthenticated
@@ -191,6 +200,16 @@ export default function AppNavigator({ linking }) {
             <Stack.Screen
               name="ResetPassword"
               component={ResetPasswordScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="AuthPrivacyPolicy"
+              component={AuthPrivacyPolicy}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="AuthTermsOfUse"
+              component={AuthTermsOfUse}
               options={{ headerShown: false }}
             />
           </>

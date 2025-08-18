@@ -89,7 +89,7 @@ export default function WalletScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[16px] text-faintDark"
+          className="text-[18px] text-faintDark"
         >
           SharpPay
         </Text>

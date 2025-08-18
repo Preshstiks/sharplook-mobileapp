@@ -80,9 +80,6 @@ export const vendorBusinessInfoSchema = Yup.object().shape({
   businessName: Yup.string().required("Business name is required"),
   bio: Yup.string().required("Business description is required"),
   location: Yup.string().required("Location is required"),
-  registerationNumber: Yup.string().required(
-    "Business registration number is required"
-  ),
   portfolioImages: Yup.array().of(Yup.mixed()).nullable(),
   availability: Yup.object().shape({
     days: Yup.array()

@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Ionicons, FontAwesome } from "@expo/vector-icons";
+import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../../context/AuthContext";
 import { StatusBar } from "expo-status-bar";
@@ -121,7 +121,7 @@ const VendorProfileScreen = () => {
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
         </TouchableOpacity>
         {/* Settings */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
           onPress={() => navigation.navigate("VendorSettingsScreen")}
         >
@@ -135,11 +135,11 @@ const VendorProfileScreen = () => {
             Settings
           </Text>
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         {/* Help and Support */}
         <TouchableOpacity
+          onPress={() => navigation.navigate("VendorHelpAndSupportScreen")}
           className="flex-row items-center mb-1 bg-white rounded-xl px-4 py-4 shadow-sm"
-          onPress={handleChatOpen}
         >
           <View className="bg-primary p-2 rounded-full mr-4">
             <Ionicons name="help-circle" size={24} color="#fff" />
@@ -158,7 +158,7 @@ const VendorProfileScreen = () => {
           onPress={() => navigation.navigate("VendorLegalScreen")}
         >
           <View className="bg-primary p-2 rounded-full mr-4">
-            <FontAwesome name="legal" size={24} color="#fff" />
+            <MaterialIcons name="gavel" size={24} color="#fff" />
           </View>
           <Text
             className="flex-1 text-[14px] text-faintDark"

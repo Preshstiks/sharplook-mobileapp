@@ -195,13 +195,13 @@ export default function AddLocationScreen({ navigation }) {
       </View>
 
       {/* Search Bar */}
-      <View style={styles.searchBarContainer}>
+      {/* <View style={styles.searchBarContainer}>
         <TextInput
           placeholder="Search..."
           placeholderTextColor="#BDBDBD"
           style={styles.searchBar}
         />
-      </View>
+      </View> */}
 
       <View
         style={{
@@ -233,18 +233,42 @@ export default function AddLocationScreen({ navigation }) {
             <div id="map"></div>
             <script>
               var map = L.map('map').setView([6.5244, 3.3792], 13);
-              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
+              L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
               }).addTo(map);
               var marker = L.marker([6.5244, 3.3792]).addTo(map)
                 .bindPopup('You are here')
                 .openPopup();
 
+              // Function to get location name from coordinates
+              function getLocationName(lat, lng) {
+                fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1')
+                  .then(function(response) { 
+                    if (response.ok) {
+                      return response.json(); 
+                    }
+                    throw new Error('Network response was not ok');
+                  })
+                  .then(function(data) {
+                    if (data.display_name) {
+                      marker.bindPopup(data.display_name).openPopup();
+                    } else {
+                      marker.bindPopup('You are here').openPopup();
+                    }
+                  })
+                  .catch(function(error) { 
+                    console.log('Geocoding error:', error);
+                    marker.bindPopup('You are here').openPopup();
+                  });
+              }
+
               function updateMap(data) {
                 if (data.latitude && data.longitude) {
                   map.setView([data.latitude, data.longitude], 16);
                   marker.setLatLng([data.latitude, data.longitude]);
-                  marker.bindPopup('You are here').openPopup();
+                  getLocationName(data.latitude, data.longitude);
                 }
               }
 
@@ -322,12 +346,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: "#fff",
     fontFamily: "poppinsMedium",
-    fontSize: 16,
+    fontSize: 18,
   },
   skipText: {
     color: "#fff",
     fontFamily: "poppinsRegular",
-    fontSize: 10,
+    fontSize: 12,
   },
   searchBarContainer: {
     position: "absolute",
@@ -341,7 +365,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    fontSize: 16,
+    fontSize: 18,
     elevation: 2,
     shadowColor: "#000",
     shadowOpacity: 0.1,
@@ -375,13 +399,13 @@ const styles = StyleSheet.create({
   currentLocationText: {
     color: "#EB278D",
     fontFamily: "poppinsMedium",
-    fontSize: 15,
+    fontSize: 17,
     marginLeft: 10,
   },
   locationText: {
     color: "#222",
     fontFamily: "poppinsRegular",
-    fontSize: 15,
+    fontSize: 17,
     marginLeft: 10,
   },
   selectedLocationOption: {

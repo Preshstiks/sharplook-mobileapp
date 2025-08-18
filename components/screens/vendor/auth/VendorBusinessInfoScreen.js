@@ -47,7 +47,7 @@ const TimePicker = ({ value, onValueChange, label, error, touched }) => {
   return (
     <View className="flex-1">
       <Text
-        className="text-[12px] mb-1 text-gray-600"
+        className="text-[14px] mb-1 text-gray-600"
         style={{ fontFamily: "poppinsMedium" }}
       >
         {label}
@@ -59,7 +59,7 @@ const TimePicker = ({ value, onValueChange, label, error, touched }) => {
         }`}
       >
         <Text
-          className={`text-[14px] ${value ? "text-black" : "text-gray-400"}`}
+          className={`text-[16px] ${value ? "text-black" : "text-gray-400"}`}
           style={{ fontFamily: "poppinsRegular" }}
         >
           {value || "00:00"}
@@ -67,7 +67,7 @@ const TimePicker = ({ value, onValueChange, label, error, touched }) => {
       </TouchableOpacity>
       {error && touched && (
         <Text
-          className="text-red-500 text-[10px] mt-1"
+          className="text-red-500 text-[12px] mt-1"
           style={{ fontFamily: "poppinsRegular" }}
         >
           {error}
@@ -90,7 +90,7 @@ const TimePicker = ({ value, onValueChange, label, error, touched }) => {
         >
           <View className="bg-white rounded-lg p-4 w-80">
             <Text
-              className="text-center text-lg mb-4"
+              className="text-center text-xl mb-4"
               style={{ fontFamily: "poppinsMedium" }}
             >
               Select Time
@@ -99,7 +99,7 @@ const TimePicker = ({ value, onValueChange, label, error, touched }) => {
             <View className="flex-row justify-center items-center mb-4">
               <View className="flex-1">
                 <Text
-                  className="text-center text-sm mb-2"
+                  className="text-center text-base mb-2"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
                   Hour
@@ -135,11 +135,11 @@ const TimePicker = ({ value, onValueChange, label, error, touched }) => {
                 </ScrollView>
               </View>
 
-              <Text className="text-2xl mx-4">:</Text>
+              <Text className="text-3xl mx-4">:</Text>
 
               <View className="flex-1">
                 <Text
-                  className="text-center text-sm mb-2"
+                  className="text-center text-base mb-2"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
                   Minute
@@ -260,25 +260,6 @@ export default function VendorBusinessInfoScreen({ navigation }) {
           type,
         });
       });
-
-      // Log the complete payload in JSON format
-      const payloadForLogging = {
-        businessName: values.businessName,
-        bio: values.bio,
-        location: values.location,
-        registerationNumber: values.registerationNumber,
-        availability: availabilityData,
-        portfolioImages: values.portfolioImages.map((imageUri, index) => {
-          const filename = imageUri.split("/").pop();
-          const match = /\.(\w+)$/.exec(filename ?? "");
-          const type = match ? `image/${match[1]}` : `image`;
-          return {
-            uri: imageUri,
-            name: filename,
-            type,
-          };
-        }),
-      };
 
       const res = await HttpClient.put("/vendor/complete-profile", formData, {
         headers: {
@@ -487,14 +468,12 @@ export default function VendorBusinessInfoScreen({ navigation }) {
                   value={values.registerationNumber}
                   onChangeText={handleChange("registerationNumber")}
                   onBlur={handleBlur("registerationNumber")}
-                  error={errors.registerationNumber}
-                  touched={touched.registerationNumber}
                 />
 
                 {/* Portfolio Images Section */}
                 <View className="mb-4">
                   <Text
-                    className="text-[12px] mb-1 text-gray-600"
+                    className="text-[14px] mb-1 text-gray-600"
                     style={{ fontFamily: "poppinsMedium" }}
                   >
                     Portfolio Images
@@ -509,7 +488,7 @@ export default function VendorBusinessInfoScreen({ navigation }) {
                     disabled={values.portfolioImages.length >= 6}
                   >
                     <Text
-                      className={`text-[14px] ml-2 ${
+                      className={`text-[16px] ml-2 ${
                         values.portfolioImages.length >= 6
                           ? "text-gray-500"
                           : "text-black"
@@ -530,7 +509,7 @@ export default function VendorBusinessInfoScreen({ navigation }) {
                   </TouchableOpacity>
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
-                    className="text-[10px] text-[#00000080] mt-2 mb-2"
+                    className="text-[12px] text-[#00000080] mt-2 mb-2"
                   >
                     Acceptable document type is Jpeg only and it should not be
                     more than 2MB (Maximum of 6 images)
@@ -578,7 +557,7 @@ export default function VendorBusinessInfoScreen({ navigation }) {
                 <View className="mb-6">
                   <View className="border-t border-x rounded-t-[8px] pt-4 pb-3 px-4 border-[#E9E9E9]">
                     <Text
-                      className="text-[14px] mb-3"
+                      className="text-[16px] mb-3"
                       style={{ fontFamily: "poppinsMedium" }}
                     >
                       Availability
@@ -588,7 +567,7 @@ export default function VendorBusinessInfoScreen({ navigation }) {
                   <View className="bg-white border rounded-b-[8px] border-[#E9E9E9] p-4">
                     <View className="mb-4">
                       <Text
-                        className="text-[12px] mb-2 text-gray-600"
+                        className="text-[14px] mb-2 text-gray-600"
                         style={{ fontFamily: "poppinsMedium" }}
                       >
                         Select Working Days
@@ -605,7 +584,7 @@ export default function VendorBusinessInfoScreen({ navigation }) {
                             }`}
                           >
                             <Text
-                              className={`text-[12px] ${
+                              className={`text-[14px] ${
                                 isDaySelected(day)
                                   ? "text-[#ED2584]"
                                   : "text-gray-600"
@@ -620,7 +599,7 @@ export default function VendorBusinessInfoScreen({ navigation }) {
                       {errors.availability?.days &&
                         touched.availability?.days && (
                           <Text
-                            className="text-red-500 text-[10px] mt-1"
+                            className="text-red-500 text-[12px] mt-1"
                             style={{ fontFamily: "poppinsRegular" }}
                           >
                             {errors.availability.days}

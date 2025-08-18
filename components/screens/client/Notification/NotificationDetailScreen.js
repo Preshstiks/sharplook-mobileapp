@@ -54,11 +54,11 @@ export default function NotificationDetailScreen() {
         </TouchableOpacity>
       </View>
       <View style={styles.body}>
-        <Text className="text-[14px]" style={{ fontFamily: "latoRegular" }}>
+        <Text className="text-[16px]" style={{ fontFamily: "latoRegular" }}>
           {notification.message}
         </Text>
         <Text
-          className="text-[14px] mt-6"
+          className="text-[16px] mt-6"
           style={{ fontFamily: "latoRegular" }}
         >
           Thank you!
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: "poppinsMedium",
     flex: 1,
     textAlign: "center",
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   detailText: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#222",
     fontFamily: "poppinsRegular",
     marginBottom: 16,

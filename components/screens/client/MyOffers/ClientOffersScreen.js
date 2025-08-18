@@ -44,7 +44,7 @@ export default function ClientOffersScreen() {
       // Get all my offers and filter for accepted ones
       const response = await HttpClient.get("/offers/myOffers");
       const allOffers = response.data.offers || [];
-      console.log({ allOffers });
+
       const acceptedOffersData = allOffers.filter((offer) => {
         // Check if offer has vendor offers and any of them has isAccepted: false
         return (
@@ -121,7 +121,7 @@ export default function ClientOffersScreen() {
         return status;
     }
   };
-  console.log({ acceptedOffers });
+
   const renderOfferCard = (offer) => (
     <TouchableOpacity
       key={offer.id}
@@ -146,7 +146,7 @@ export default function ClientOffersScreen() {
         <View style={{ flex: 1 }}>
           <Text
             style={{
-              fontSize: 14,
+              fontSize: 16,
               fontFamily: "poppinsMedium",
               color: "#1F2937",
               marginBottom: 4,
@@ -156,7 +156,7 @@ export default function ClientOffersScreen() {
           </Text>
           <Text
             style={{
-              fontSize: 10,
+              fontSize: 12,
               fontFamily: "poppinsRegular",
               color: "#8C8D8B",
               marginBottom: 4,
@@ -166,7 +166,7 @@ export default function ClientOffersScreen() {
           </Text>
           <Text
             style={{
-              fontSize: 14,
+              fontSize: 16,
               fontFamily: "poppinsMedium",
               color: "#ED2584",
             }}
@@ -189,7 +189,7 @@ export default function ClientOffersScreen() {
           >
             <Text
               style={{
-                fontSize: 12,
+                fontSize: 14,
                 fontFamily: "poppinsMedium",
                 color: getStatusColor(offer.status),
               }}
@@ -199,7 +199,7 @@ export default function ClientOffersScreen() {
           </View>
           <Text
             style={{
-              fontSize: 12,
+              fontSize: 14,
               fontFamily: "poppinsRegular",
               color: "#9CA3AF",
             }}
@@ -247,7 +247,7 @@ export default function ClientOffersScreen() {
         <View style={{ flex: 1 }}>
           <Text
             style={{
-              fontSize: 14,
+              fontSize: 16,
               fontFamily: "poppinsMedium",
               color: "#1F2937",
               marginBottom: 8,
@@ -257,7 +257,7 @@ export default function ClientOffersScreen() {
           </Text>
           <Text
             style={{
-              fontSize: 12,
+              fontSize: 14,
               fontFamily: "poppinsRegular",
               color: "#6B7280",
             }}
@@ -277,7 +277,7 @@ export default function ClientOffersScreen() {
         >
           <Text
             style={{
-              fontSize: 12,
+              fontSize: 14,
               fontFamily: "poppinsMedium",
               color: "#D97706",
             }}
@@ -298,7 +298,7 @@ export default function ClientOffersScreen() {
         <View>
           <Text
             style={{
-              fontSize: 20,
+              fontSize: 22,
               fontFamily: "poppinsBold",
               color: "#ED2584",
             }}
@@ -307,7 +307,7 @@ export default function ClientOffersScreen() {
           </Text>
           <Text
             style={{
-              fontSize: 12,
+              fontSize: 14,
               fontFamily: "poppinsRegular",
               color: "#9CA3AF",
               marginTop: 2,
@@ -327,7 +327,7 @@ export default function ClientOffersScreen() {
         >
           <Text
             style={{
-              fontSize: 12,
+              fontSize: 14,
               fontFamily: "poppinsMedium",
               color: "#FFFFFF",
             }}
@@ -364,7 +364,7 @@ export default function ClientOffersScreen() {
 
           <Text
             style={{
-              fontSize: 14,
+              fontSize: 16,
               fontFamily: "poppinsMedium",
               color: "#1F2937",
             }}
@@ -407,7 +407,7 @@ export default function ClientOffersScreen() {
               <Text
                 style={{
                   textAlign: "center",
-                  fontSize: 12,
+                  fontSize: 14,
                   fontFamily: "poppinsRegular",
                   color: activeFilter === filter ? "#FFFFFF" : "#6B7280",
                 }}
@@ -448,7 +448,7 @@ export default function ClientOffersScreen() {
 
         <Text
           style={{
-            fontSize: 14,
+            fontSize: 16,
             fontFamily: "poppinsMedium",
             color: "#1F2937",
           }}
@@ -487,7 +487,7 @@ export default function ClientOffersScreen() {
             <Text
               style={{
                 textAlign: "center",
-                fontSize: 12,
+                fontSize: 14,
                 fontFamily: "poppinsRegular",
                 color: activeFilter === filter ? "#FFFFFF" : "#6B7280",
               }}
@@ -503,7 +503,7 @@ export default function ClientOffersScreen() {
         <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
           <Text
             style={{
-              fontSize: 14,
+              fontSize: 16,
               fontFamily: "poppinsRegular",
               color: "#EF4444",
               textAlign: "center",

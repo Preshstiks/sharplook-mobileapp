@@ -39,7 +39,7 @@ export default function Search({ navigation }) {
         <View className="flex-row items-center flex-1 bg-secondary border border-[#F9BCDC] rounded-xl px-4 pt-3 pb-2 mr-3">
           <MaterialIcons name="search" size={24} color="#8c817a" />
           <TextInput
-            className="ml-2 text-xs placeholder:text-faintDark2"
+            className="ml-2 text-sm placeholder:text-faintDark2"
             placeholder="Search Shop or Vendor"
             cursorColor="#BF6A37"
             style={{ fontFamily: "poppinsRegular" }}
@@ -100,7 +100,7 @@ export default function Search({ navigation }) {
               </View>
               <View className="p-4">
                 <Text
-                  className="text-base font-medium text-faintDark"
+                  className="text-lg font-medium text-faintDark"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
                   {service.title}

@@ -55,7 +55,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
               </Text>
               <Text
                 style={{ fontFamily: "poppinsRegular" }}
-                className="text-center text-[12px] text-faintDark"
+                className="text-center text-[14px] text-faintDark"
               >
                 Your new password must be different from the old one
               </Text>

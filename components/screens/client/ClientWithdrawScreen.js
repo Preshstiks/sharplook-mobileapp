@@ -120,7 +120,7 @@ export default function ClientWithdrawScreen({ navigation }) {
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text
-          className="flex-1 text-center text-[14px]"
+          className="flex-1 text-center text-[16px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Withdraw
@@ -153,7 +153,7 @@ export default function ClientWithdrawScreen({ navigation }) {
               showsVerticalScrollIndicator={false}
             >
               <Text
-                className="text-[14px] mt-6 mb-4"
+                className="text-[16px] mt-6 mb-4"
                 style={{ fontFamily: "latoBold" }}
               >
                 Please fill the details below
@@ -207,7 +207,7 @@ export default function ClientWithdrawScreen({ navigation }) {
                 <View className="-mt-3">
                   <Text
                     style={{ fontFamily: "poppinsRegular" }}
-                    className={`text-[11px] ${isVerifying ? "text-[#666666]" : accountVerified ? "text-primary" : "text-[#ff0000]"}`}
+                    className={`text-[13px] ${isVerifying ? "text-[#666666]" : accountVerified ? "text-primary" : "text-[#ff0000]"}`}
                   >
                     {isVerifying ? "Verifying account..." : accountName}
                   </Text>

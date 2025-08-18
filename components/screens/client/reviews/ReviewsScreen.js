@@ -17,6 +17,7 @@ import {
 import { useState } from "react";
 import { HttpClient } from "../../../../api/HttpClient";
 import { EmptyData } from "../../../reusuableComponents/EmptyData";
+import { useAuth } from "../../../../context/AuthContext";
 
 // Inline ReviewSkeleton component
 function ReviewSkeleton() {
@@ -117,9 +118,10 @@ export default function ReviewsScreen() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const vendorId = vendor?.[0].userId;
+  const vendorId = vendor;
+  const { user } = useAuth();
   const hasReviewedThisProduct = reviews.some(
-    (review) => review.vendorId === vendorId
+    (review) => review.clientId === user?.id
   );
   useFocusEffect(
     useCallback(() => {
@@ -132,8 +134,9 @@ export default function ReviewsScreen() {
             type: "VENDOR",
           });
           setReviews(res.data?.data || []);
+          console.log({ reviews: res.data.data });
         } catch (err) {
-          console.error(err);
+          console.error(err.response);
           setError("Failed to load reviews");
           setReviews([]);
         } finally {
@@ -143,7 +146,7 @@ export default function ReviewsScreen() {
       fetchReviews();
     }, [vendorId])
   );
-
+  console.log({ reviews });
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -153,7 +156,7 @@ export default function ReviewsScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "poppinsMedium" }}
-          className="text-[14px] text-white"
+          className="text-[16px] text-white"
         >
           Reviews
         </Text>
@@ -168,14 +171,14 @@ export default function ReviewsScreen() {
         <View className="flex-row items-center justify-between my-6">
           <View>
             <Text
-              className="text-[12px] text-faintDark"
+              className="text-[14px] text-faintDark"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {reviews.length} Reviews
             </Text>
             <View className="flex-row items-center mt-1">
               <Text
-                className="text-[12px] mt-1 mr-2"
+                className="text-[14px] mt-1 mr-2"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 {/* Show average rating if available */}
@@ -221,7 +224,7 @@ export default function ReviewsScreen() {
                 className="mr-1"
               />
               <Text
-                className="text-white mt-1 text-[12px] ml-2"
+                className="text-white mt-1 text-[14px] ml-2"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 Add Review
@@ -261,20 +264,20 @@ export default function ReviewsScreen() {
             <View className="flex-1">
               <View className="flex-row items-center justify-between">
                 <Text
-                  className="text-[12px] font-semibold text-faintDark"
+                  className="text-[14px] font-semibold text-faintDark"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
                   {review?.client?.lastName} {review?.client?.firstName}
                 </Text>
                 <View className="flex-row items-center">
                   <Text
-                    className="text-[12px] mr-1"
+                    className="text-[14px] mr-1"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     {review.rating}
                   </Text>
                   <Text
-                    className="text-[10px] mr-1"
+                    className="text-[12px] mr-1"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     rating
@@ -290,7 +293,7 @@ export default function ReviewsScreen() {
                     className="mr-1"
                   />
                   <Text
-                    className="text-[10px] mt-1"
+                    className="text-[12px] mt-1"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     {review.date || review.createdAt?.slice(0, 10) || "-"}
@@ -312,7 +315,7 @@ export default function ReviewsScreen() {
                 </View>
               </View>
               <Text
-                className="text-[10px] text-faintDark"
+                className="text-[12px] text-faintDark"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 {review.text || review.comment || ""}
