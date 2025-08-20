@@ -57,7 +57,10 @@
       "useNextNotificationsApi": true,
       "googleServicesFile": "./google-services.json",
       "allowBackup": true,
-      "foregroundServiceType": ["dataSync", "location"],
+      "foregroundServiceType": [
+        "dataSync",
+        "location"
+      ],
       "notification": {
         "icon": "./assets/icon/app-icon.png",
         "color": "#EB278D",
@@ -76,7 +79,6 @@
           "icon": "./assets/icon/app-icon.png"
         }
       ],
-
       [
         "@react-native-firebase/messaging",
         {
@@ -87,7 +89,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "5fefe00a-d2c0-4a4e-974a-85bafc3c0f16"
+        "projectId": "704cc27d-eb97-43a5-bdca-aa813b95f72c"
       }
     }
   }

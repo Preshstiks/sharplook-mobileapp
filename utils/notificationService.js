@@ -436,7 +436,7 @@ class NotificationService {
   async getNotificationPermissions() {
     try {
       if (messaging) {
-        const authStatus = await messaging().hasPermission();
+        const authStatus = await messaging().requestPermission();
         const status =
           authStatus === messaging.AuthorizationStatus.AUTHORIZED
             ? "granted"
