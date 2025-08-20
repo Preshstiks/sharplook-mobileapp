@@ -63,7 +63,7 @@ const TimePicker = ({ value, onValueChange, label, error, touched }) => {
         }`}
       >
         <Text
-          className={`text-[14px] ${value ? "text-black" : "text-gray-400"}`}
+          className={`text-[16px] ${value ? "text-black" : "text-gray-400"}`}
           style={{ fontFamily: "poppinsRegular" }}
         >
           {value || "00:00"}
@@ -71,7 +71,7 @@ const TimePicker = ({ value, onValueChange, label, error, touched }) => {
       </TouchableOpacity>
       {error && touched && (
         <Text
-          className="text-red-500 text-[10px] mt-1"
+          className="text-red-500 text-[12px] mt-1"
           style={{ fontFamily: "poppinsRegular" }}
         >
           {error}
@@ -197,7 +197,7 @@ const TimePicker = ({ value, onValueChange, label, error, touched }) => {
                 className="px-4 py-2 rounded bg-[#ED2584]"
               >
                 <Text
-                  className="text-white mt-1 text-[13px]"
+                  className="text-white mt-1 text-[15px]"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
                   Confirm
@@ -386,7 +386,6 @@ const StoreManagementScreen = () => {
       setIsUploadingImage(false);
     }
   };
-  console.log({ user });
   // Get the current image source
   const getImageSource = () => {
     if (selectedImage) {
@@ -431,7 +430,7 @@ const StoreManagementScreen = () => {
             </TouchableOpacity>
           </View>
           <Text
-            className="text-white text-[16px] text-center"
+            className="text-white text-[18px] text-center"
             style={{ fontFamily: "poppinsMedium" }}
           >
             {user?.vendorOnboarding?.businessName}
@@ -452,7 +451,7 @@ const StoreManagementScreen = () => {
           <View className="flex-row mt-2  w-[70%] justify-center">
             <Ionicons name="location-sharp" size={14} color="#fff" />
             <Text
-              className="text-white text-center text-[12px] ml-1"
+              className="text-white text-center text-[14px] ml-1"
               style={{ fontFamily: "poppinsLight" }}
             >
               {user?.vendorOnboarding?.location}
@@ -641,7 +640,7 @@ const StoreManagementScreen = () => {
                         disabled={values.portfolioImages.length >= 6}
                       >
                         <Text
-                          className={`text-[14px] ml-2 ${
+                          className={`text-[16px] ml-2 ${
                             values.portfolioImages.length >= 6
                               ? "text-gray-500"
                               : "text-black"
@@ -664,7 +663,7 @@ const StoreManagementScreen = () => {
                       </TouchableOpacity>
                       <Text
                         style={{ fontFamily: "poppinsRegular" }}
-                        className="text-[10px] text-[#00000080] mt-2 mb-2"
+                        className="text-[12px] text-[#00000080] mt-2 mb-2"
                       >
                         Acceptable document type is Jpeg only and it should not
                         be more than 2MB (Maximum of 6 images)
@@ -715,7 +714,7 @@ const StoreManagementScreen = () => {
                     <View className="mb-6">
                       <View className="border-t border-x rounded-t-[8px] pt-4 pb-3 px-4 border-[#E9E9E9]">
                         <Text
-                          className="text-[14px] mb-3"
+                          className="text-[16px] mb-3"
                           style={{ fontFamily: "poppinsMedium" }}
                         >
                           Availability
@@ -725,7 +724,7 @@ const StoreManagementScreen = () => {
                       <View className="bg-white border rounded-b-[8px] border-[#E9E9E9] p-4">
                         <View className="mb-4">
                           <Text
-                            className="text-[12px] mb-2 text-gray-600"
+                            className="text-[14px] mb-2 text-gray-600"
                             style={{ fontFamily: "poppinsMedium" }}
                           >
                             Select Working Days
@@ -757,7 +756,7 @@ const StoreManagementScreen = () => {
                           {errors.availability?.days &&
                             touched.availability?.days && (
                               <Text
-                                className="text-red-500 text-[10px] mt-1"
+                                className="text-red-500 text-[12px] mt-1"
                                 style={{ fontFamily: "poppinsRegular" }}
                               >
                                 {errors.availability.days}

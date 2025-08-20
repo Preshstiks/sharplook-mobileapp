@@ -18,7 +18,7 @@ export default function SettingsScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Settings
         </Text>
@@ -26,12 +26,12 @@ export default function SettingsScreen() {
       </View>
       {/* Notification Section */}
       <View className="px-4 mt-4">
-        <Text className="text-[16px] mb-2" style={{ fontFamily: "latoBold" }}>
+        <Text className="text-[18px] mb-2" style={{ fontFamily: "latoBold" }}>
           Notification
         </Text>
         <View className="flex-row items-center justify-between bg-white rounded-xl px-4 py-4 mb-4 border-b border-[#0000000D]">
           <Text
-            className="text-[14px] text-[#555555]"
+            className="text-[16px] text-[#555555]"
             style={{ fontFamily: "latoRegular" }}
           >
             Email Notification
@@ -45,12 +45,12 @@ export default function SettingsScreen() {
       </View>
       {/* Security Section */}
       <View className="px-4 mt-2">
-        <Text className="text-[16px] mb-2" style={{ fontFamily: "latoBold" }}>
+        <Text className="text-[18px] mb-2" style={{ fontFamily: "latoBold" }}>
           Security
         </Text>
         <TouchableOpacity className="flex-row items-center justify-between bg-white rounded-xl px-4 py-4 mb-4">
           <Text
-            className="text-[14px] text-[#555555]"
+            className="text-[16px] text-[#555555]"
             style={{ fontFamily: "latoRegular" }}
           >
             Change Password
@@ -59,7 +59,7 @@ export default function SettingsScreen() {
         </TouchableOpacity>
         <TouchableOpacity className="flex-row items-center justify-between bg-white rounded-xl px-4 py-4 mb-4 border-b border-[#0000000D]">
           <Text
-            className="text-[14px] text-[#555555]"
+            className="text-[16px] text-[#555555]"
             style={{ fontFamily: "latoRegular" }}
           >
             Reset Pin
@@ -68,7 +68,7 @@ export default function SettingsScreen() {
         </TouchableOpacity>
         <View className="flex-row items-center justify-between bg-white rounded-xl px-4 py-4 mb-4">
           <Text
-            className="text-[14px] text-[#555555]"
+            className="text-[16px] text-[#555555]"
             style={{ fontFamily: "latoRegular" }}
           >
             Biometric (Face ID)
@@ -82,12 +82,12 @@ export default function SettingsScreen() {
       </View>
       {/* Theme Section */}
       <View className="px-4 mt-2">
-        <Text className="text-[16px] mb-2" style={{ fontFamily: "latoBold" }}>
+        <Text className="text-[18px] mb-2" style={{ fontFamily: "latoBold" }}>
           Theme
         </Text>
         <View className="flex-row items-center justify-between bg-white rounded-xl px-4 py-4 mb-4 border-b border-[#0000000D]">
           <Text
-            className="text-[14px] text-[#555555]"
+            className="text-[16px] text-[#555555]"
             style={{ fontFamily: "latoRegular" }}
           >
             Dark mode

@@ -73,7 +73,7 @@ const VendorProfileScreen = () => {
             />
           </View>
           <Text
-            className="text-white text-[16px] text-center"
+            className="text-white text-[18px] text-center"
             style={{ fontFamily: "poppinsMedium" }}
           >
             {user?.vendorOnboarding?.businessName}
@@ -82,7 +82,7 @@ const VendorProfileScreen = () => {
             <View className="bg-white px-3 py-1 rounded-lg flex-row items-center mr-2">
               <View className="w-2 h-2 rounded-full bg-[#ED2584] mr-2" />
               <Text
-                className="text-[12px] text-[#ED2584]"
+                className="text-[14px] text-[#ED2584]"
                 style={{ fontFamily: "poppinsMedium" }}
               >
                 {user?.vendorOnboarding?.serviceType === "IN_SHOP"
@@ -94,7 +94,7 @@ const VendorProfileScreen = () => {
           <View className="flex-row justify-center w-[70%] mt-2">
             <Ionicons name="location-sharp" size={14} color="#fff" />
             <Text
-              className="text-white text-center text-[12px] ml-1"
+              className="text-white text-center text-[14px] ml-1"
               style={{ fontFamily: "poppinsLight" }}
             >
               {user?.vendorOnboarding?.location}
@@ -113,7 +113,7 @@ const VendorProfileScreen = () => {
             <Ionicons name="storefront" size={24} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-faintDark"
+            className="flex-1 text-[16px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Store Setup and Management
@@ -145,7 +145,7 @@ const VendorProfileScreen = () => {
             <Ionicons name="help-circle" size={24} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-faintDark"
+            className="flex-1 text-[16px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Help and Support
@@ -161,7 +161,7 @@ const VendorProfileScreen = () => {
             <MaterialIcons name="gavel" size={24} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-faintDark"
+            className="flex-1 text-[16px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Legal
@@ -178,7 +178,7 @@ const VendorProfileScreen = () => {
             <Ionicons name="log-out-outline" size={24} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-[#FF0000]"
+            className="flex-1 text-[16px] text-[#FF0000]"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Logout

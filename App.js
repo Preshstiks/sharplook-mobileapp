@@ -11,11 +11,13 @@ import { CartProvider } from "./context/CartContext";
 import { CallProvider } from "./context/CallContext";
 import { FilterProvider } from "./context/FilterContext";
 import notificationService from "./utils/notificationService";
+
 if (__DEV__) {
   global.XMLHttpRequest = global.originalXMLHttpRequest
     ? global.originalXMLHttpRequest
     : global.XMLHttpRequest;
 }
+
 const linking = {
   prefixes: ["sharplook://"],
   config: {
@@ -28,15 +30,21 @@ const linking = {
     },
   },
 };
+
 export default function App() {
   useEffect(() => {
     // Initialize notification service when app starts
     const initializeNotifications = async () => {
       try {
-        await notificationService.initialize();
-        console.log("Notification service initialized successfully");
+        console.log("Initializing notification service...");
+        const success = await notificationService.initialize();
+        console.log("Notification service initialization result:", success);
+
+        if (!success) {
+          console.warn("Failed to initialize notification service");
+        }
       } catch (error) {
-        console.error("Failed to initialize notification service:", error);
+        console.error("Error initializing notification service:", error);
       }
     };
 

@@ -319,6 +319,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useState, useContext, useEffect, useRef } from "react";
 import { HttpClient } from "../api/HttpClient";
 import { AppState } from "react-native";
+import notificationService from "../utils/notificationService";
 
 const AuthContext = createContext();
 
@@ -354,15 +355,11 @@ export const AuthProvider = ({ children }) => {
         appStateRef.current.match(/inactive|background/) &&
         nextAppState === "active"
       ) {
-        // App has come to the foreground
-        console.log("App has come to the foreground!");
         startPolling();
       } else if (
         appStateRef.current === "active" &&
         nextAppState.match(/inactive|background/)
       ) {
-        // App has gone to the background
-        console.log("App has gone to the background!");
         stopPolling();
       }
       appStateRef.current = nextAppState;
@@ -394,7 +391,6 @@ export const AuthProvider = ({ children }) => {
     // Set up new interval - refresh every 5 seconds
     pollingIntervalRef.current = setInterval(async () => {
       try {
-        console.log("🔄 Auto-refreshing user data...");
         const response = await HttpClient.get("/auth/me");
         if (response.data && response.data.user) {
           const userData = response.data.user;
@@ -402,25 +398,8 @@ export const AuthProvider = ({ children }) => {
           // Use functional state update to prevent unnecessary re-renders
           setUser((prevUser) => {
             if (JSON.stringify(prevUser) !== JSON.stringify(userData)) {
-              console.log(
-                "✅ User data changed detected by polling - updating state"
-              );
-              console.log("Changes detected in:", {
-                avatar:
-                  userData.avatar !== prevUser?.avatar
-                    ? "Avatar updated"
-                    : null,
-                name: userData.name !== prevUser?.name ? "Name updated" : null,
-                email:
-                  userData.email !== prevUser?.email ? "Email updated" : null,
-                vendorOnboarding:
-                  userData.vendorOnboarding !== prevUser?.vendorOnboarding
-                    ? "Vendor profile updated"
-                    : null,
-              });
               return userData;
             } else {
-              console.log("⏰ No changes detected in user data");
               return prevUser; // Return previous state to prevent re-render
             }
           });
@@ -442,7 +421,6 @@ export const AuthProvider = ({ children }) => {
           });
         }
       } catch (error) {
-        console.error("Error during auto-refresh:", error);
         // If there's an auth error, stop polling and logout
         if (error.response?.status === 401) {
           stopPolling();
@@ -467,7 +445,6 @@ export const AuthProvider = ({ children }) => {
       );
       setHasSeenOnboarding(onboardingCompleted === "true");
     } catch (error) {
-      console.error("Error checking onboarding status:", error);
       setHasSeenOnboarding(false);
     }
   };
@@ -476,18 +453,14 @@ export const AuthProvider = ({ children }) => {
     try {
       await AsyncStorage.setItem("onboardingCompleted", "true");
       setHasSeenOnboarding(true);
-    } catch (error) {
-      console.error("Error marking onboarding as completed:", error);
-    }
+    } catch (error) {}
   };
 
   const resetOnboardingStatus = async () => {
     try {
       await AsyncStorage.removeItem("onboardingCompleted");
       setHasSeenOnboarding(false);
-    } catch (error) {
-      console.error("Error resetting onboarding status:", error);
-    }
+    } catch (error) {}
   };
 
   const checkAuthStatus = async () => {
@@ -519,7 +492,6 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(false);
       }
     } catch (error) {
-      console.error("Error checking auth status:", error);
       // If token is invalid, clear it
       await AsyncStorage.removeItem("token");
       setUser(null);
@@ -555,7 +527,6 @@ export const AuthProvider = ({ children }) => {
         startPolling();
       }
     } catch (error) {
-      console.error("Error during login or fetching user details:", error);
       // Clear token if login fails
       await AsyncStorage.removeItem("token");
       setIsAuthenticated(false);
@@ -570,6 +541,10 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(true);
       // Stop polling before logout
       stopPolling();
+
+      // Clear notification service data
+      await notificationService.clearStoredToken();
+      notificationService.cleanup();
 
       await AsyncStorage.removeItem("token");
       setUser(null);
@@ -633,7 +608,6 @@ export const AuthProvider = ({ children }) => {
         return userData;
       }
     } catch (error) {
-      console.error("Error refreshing user data:", error);
       throw error;
     }
   };

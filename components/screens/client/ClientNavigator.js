@@ -36,7 +36,6 @@ import ProfileStack from "./Profile/ProfileStack";
 import WalletStack from "./WalletStack";
 import ClientOfferStack from "./MyOffers/ClientOfferStack";
 import MyOrderStack from "./MyOrder/MyOrderStack";
-import GetStartedScreen from "./Profile/GetStarted";
 
 const Drawer = createDrawerNavigator();
 
@@ -119,7 +118,7 @@ export default function ClientNavigator() {
           }}
         />
 
-        <Drawer.Screen
+        {/* <Drawer.Screen
           name="Settings"
           component={SettingsScreen}
           options={{
@@ -127,7 +126,7 @@ export default function ClientNavigator() {
               <Ionicons name="settings-outline" size={size} color={color} />
             ),
           }}
-        />
+        /> */}
 
         {/* ScreenSTacks */}
 

@@ -98,14 +98,10 @@ export default function BookingHomeServiceAppointScreen() {
         vendorIds: vendorIds,
       };
 
-      console.log("Distance calculation payload:", payload);
-
       const response = await HttpClient.post("/distance/calcDistance", payload);
 
       setTotalTp(response.data.totalTransportCost);
-      console.log({ response: response.data });
     } catch (error) {
-      console.error("API error:", error.response);
       if (error.response && error.response.data) {
         const errorMessage =
           error.response.data.message || "An unknown error occurred";
@@ -161,7 +157,6 @@ export default function BookingHomeServiceAppointScreen() {
       setIsLoading(false);
     }
   };
-  console.log({ user });
   const handleBookNow = async (
     values,
     paymentReference,
@@ -245,9 +240,12 @@ export default function BookingHomeServiceAppointScreen() {
           "/bookings/createHomeServiceBooking",
           payload
         );
-        showToast.success(res.data.message);
-
-        navigation.goBack();
+        if (res.data.data.message === "Insufficient wallet balance") {
+          showToast.error(res.data.data.message);
+        } else {
+          showToast.success(res.data.message);
+          navigation.goBack();
+        }
       }
     } catch (error) {
       if (error.response?.data?.message === "Insufficient wallet balance") {
@@ -338,7 +336,7 @@ export default function BookingHomeServiceAppointScreen() {
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
-          className="text-white text-[18px] flex-1 text-center"
+          className="text-white text-[16px] flex-1 text-center"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Book Appointment
@@ -566,7 +564,6 @@ export default function BookingHomeServiceAppointScreen() {
                     }
                   })
                   .catch(function(error) { 
-                    console.log('Geocoding error:', error);
                     marker.bindPopup('You are here').openPopup();
                   });
               }
@@ -773,7 +770,7 @@ export default function BookingHomeServiceAppointScreen() {
                     className="text-[#A5A5A5] text-[12px]"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
-                    Service Charge
+                    Home Service Charge
                   </Text>
                   <Text
                     className="text-primary text-[16px]"
@@ -787,7 +784,7 @@ export default function BookingHomeServiceAppointScreen() {
                     className="text-[#A5A5A5] text-[12px]"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
-                    Home Service Charge
+                    Transport fee
                   </Text>
                   <Text
                     className="text-primary text-[16px]"

@@ -20,7 +20,23 @@ export default function AddProductReviewScreen() {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const { user } = useAuth();
-  const clientId = user.id;
+  const clientId = user?.id;
+
+  // Validate required parameters
+  if (!vendorId || !productId) {
+    console.error("Missing required parameters: vendorId or productId");
+    showToast.error("Missing required information. Please try again.");
+    navigation.goBack();
+    return null;
+  }
+
+  // Validate user authentication
+  if (!user || !clientId) {
+    console.error("User not authenticated");
+    showToast.error("Please log in to add a review.");
+    navigation.goBack();
+    return null;
+  }
   const handleAddReview = async (values) => {
     setLoading(true);
     const payload = {
@@ -43,6 +59,10 @@ export default function AddProductReviewScreen() {
       showToast.success(res.data.message);
       navigation.goBack();
     } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to submit review. Please try again.";
+      showToast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -126,23 +146,24 @@ export default function AddProductReviewScreen() {
                   minimumTrackTintColor="#EB278D"
                   maximumTrackTintColor="#666"
                   thumbTintColor="#EB278D"
-                  value={values.star}
+                  value={values.rating}
                   onValueChange={(value) => setFieldValue("rating", value)}
                 />
                 <Text className="text-[14px] ml-2">5.0</Text>
               </View>
 
               {/* Display star rating error if any */}
-              {touched.star && errors.star && (
+              {touched.rating && errors.rating && (
                 <Text className="text-red-500 text-[14px] mb-2">
-                  {errors.star}
+                  {errors.rating}
                 </Text>
               )}
             </View>
 
             <View className="px-4 mb-8">
               <AuthButton
-                title={loading ? "Submitting" : "Submit Review"}
+                title="Submit Review"
+                isloading={loading}
                 onPress={handleSubmit}
                 disabled={loading}
               />

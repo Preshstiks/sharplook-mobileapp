@@ -187,7 +187,7 @@ export default function VendorLoginScreen({ navigation }) {
               <View className="mt-8 w-full items-center">
                 <View className="flex-row justify-center gap-1 items-center mt-2">
                   <Text
-                    className="text-base text-[#6B6B6B]"
+                    className="text-[15px] text-[#6B6B6B]"
                     style={{ fontFamily: "latoRegular" }}
                   >
                     Don't have a vendor account?
@@ -196,7 +196,7 @@ export default function VendorLoginScreen({ navigation }) {
                     onPress={() => navigation.navigate("VendorRegister")}
                   >
                     <Text
-                      className="text-base text-primary"
+                      className="text-[15px] text-primary"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       Register
@@ -206,7 +206,7 @@ export default function VendorLoginScreen({ navigation }) {
                 <View className="flex-row justify-center gap-1 items-center mt-5">
                   <Pressable onPress={() => navigation.navigate("Login")}>
                     <Text
-                      className="text-base text-primary"
+                      className="text-[15px] text-primary"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       Switch to Client Login

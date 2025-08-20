@@ -3,6 +3,7 @@ import * as Device from "expo-device";
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { HttpClient } from "../api/HttpClient";
+import Constants from "expo-constants";
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
@@ -14,15 +15,27 @@ Notifications.setNotificationHandler({
 });
 
 // Storage key for device token (independent of user auth)
-const DEVICE_TOKEN_KEY = "@device_push_token";
+const DEVICE_TOKEN_KEY = "@device_fcm_token";
+
+// Try to import Firebase messaging, but handle gracefully if not available
+let messaging = null;
+try {
+  messaging = require("@react-native-firebase/messaging").default;
+} catch (error) {
+  console.log("Firebase messaging not available:", error.message);
+}
 
 class NotificationService {
   constructor() {
-    this.expoPushToken = null;
+    this.fcmToken = null;
     this.notificationListener = null;
     this.responseListener = null;
     this.navigationRef = null;
     this.userType = null; // 'CLIENT' or 'VENDOR'
+    this.backgroundMessageUnsubscribe = null;
+    this.tokenRefreshUnsubscribe = null;
+    this.isInitialized = false;
+    this.firebaseAvailable = !!messaging;
   }
 
   /**
@@ -38,24 +51,20 @@ class NotificationService {
    * Navigate based on notification data
    */
   handleNotificationNavigation(data) {
-    console.log("handleNotificationNavigation called with data:", data);
-    console.log("Navigation ref exists:", !!this.navigationRef);
-    console.log("User type:", this.userType);
-
     if (!this.navigationRef || !this.userType) {
-      console.log("Navigation ref or user type not set");
+      console.log(
+        "No navigation ref or user type available for notification navigation"
+      );
       return;
     }
 
     try {
       console.log(
-        "Attempting to navigate to notification list for user type:",
+        "Handling notification navigation for user type:",
         this.userType
       );
-
       // Navigate to notification list for both client and vendor
       if (this.userType === "CLIENT") {
-        console.log("Navigating to ClientApp -> Main -> NotificationStack");
         this.navigationRef.navigate("ClientApp", {
           screen: "Main",
           params: {
@@ -63,15 +72,12 @@ class NotificationService {
           },
         });
       } else if (this.userType === "VENDOR") {
-        console.log("Navigating to VendorApp -> NotificationList");
         this.navigationRef.navigate("VendorApp", {
           screen: "NotificationList",
         });
-      } else {
-        console.log("Unknown user type:", this.userType);
       }
     } catch (error) {
-      console.error("Error handling notification navigation:", error);
+      console.error("Navigation error:", error);
     }
   }
 
@@ -80,13 +86,46 @@ class NotificationService {
    */
   async registerForPushNotifications() {
     try {
+      console.log("Starting push notification registration...");
+
       // Check if device supports notifications
       if (!Device.isDevice) {
-        console.log("Must use physical device for Push Notifications");
+        console.log("Not a physical device, skipping notification setup");
         return false;
       }
 
-      // Request permissions
+      // Set up Android notification channel
+      if (Platform.OS === "android") {
+        console.log("Setting up Android notification channels...");
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "Default Notifications",
+          description: "Default notification channel for app notifications",
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: "#ffffff",
+          sound: "default",
+          enableVibrate: true,
+          enableLights: true,
+          lockscreenVisibility:
+            Notifications.AndroidNotificationVisibility.PUBLIC,
+        });
+
+        await Notifications.setNotificationChannelAsync("high-priority", {
+          name: "High Priority",
+          description: "High priority notifications for important updates",
+          importance: Notifications.AndroidImportance.HIGH,
+          vibrationPattern: [0, 500, 250, 500],
+          lightColor: "#ffffff",
+          sound: "default",
+          enableVibrate: true,
+          enableLights: true,
+          lockscreenVisibility:
+            Notifications.AndroidNotificationVisibility.PUBLIC,
+        });
+      }
+
+      // ✅ Request Expo notification permissions (iOS + Android 13+)
+      console.log("Requesting Expo notification permissions...");
       const { status: existingStatus } =
         await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
@@ -96,33 +135,109 @@ class NotificationService {
         finalStatus = status;
       }
 
+      console.log("Expo notification permission status:", finalStatus);
       if (finalStatus !== "granted") {
-        console.log("Failed to get push token for push notification!");
+        console.log("Expo notification permission denied");
         return false;
       }
 
-      // Get the token
-      const token = await Notifications.getExpoPushTokenAsync({
-        projectId: "5fefe00a-d2c0-4a4e-974a-85bafc3c0f16", // Your EAS project ID
-      });
+      // ✅ Request FCM permission (Firebase) - only if available
+      if (messaging) {
+        console.log("Requesting FCM permissions...");
+        try {
+          const authStatus = await messaging().requestPermission();
+          const enabled =
+            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-      this.expoPushToken = token.data;
-      console.log("Expo push token:", this.expoPushToken);
+          console.log(
+            "FCM permission status:",
+            authStatus,
+            "Enabled:",
+            enabled
+          );
+          if (!enabled) {
+            console.log("FCM permission denied");
+            return false;
+          }
 
-      // Store token locally (independent of user auth)
-      await this.storePushToken(this.expoPushToken);
+          // Get FCM token
+          console.log("Getting FCM token...");
+          const fcmToken = await messaging().getToken();
+          if (!fcmToken) {
+            console.log("Failed to get FCM token");
+            return false;
+          }
 
-      // Register token with your backend
-      await this.registerTokenWithBackend(this.expoPushToken);
+          console.log("FCM token obtained:", fcmToken.substring(0, 20) + "...");
+          this.fcmToken = fcmToken;
 
-      // Set up notification listeners
-      this.setupNotificationListeners();
+          await this.storePushToken(this.fcmToken);
+          await this.registerTokenWithBackend(this.fcmToken);
 
-      return true;
+          this.setupNotificationListeners();
+          this.setupTokenRefreshListener();
+          this.setupBackgroundMessageHandler();
+
+          console.log("Push notification registration completed successfully");
+          return true;
+        } catch (error) {
+          console.error("Firebase messaging error:", error);
+          // Fall back to local notifications only
+          console.log("Falling back to local notifications only");
+          return this.setupLocalNotificationsOnly();
+        }
+      } else {
+        console.log(
+          "Firebase messaging not available, using local notifications only"
+        );
+        return this.setupLocalNotificationsOnly();
+      }
     } catch (error) {
-      console.error("Error registering for push notifications:", error);
+      console.error("Error in registerForPushNotifications:", error);
       return false;
     }
+  }
+
+  /**
+   * Setup local notifications only (fallback when Firebase is not available)
+   */
+  async setupLocalNotificationsOnly() {
+    try {
+      console.log("Setting up local notifications only...");
+
+      // Set up basic notification listeners for local notifications
+      this.setupLocalNotificationListeners();
+
+      console.log("Local notifications setup completed");
+      return true;
+    } catch (error) {
+      console.error("Error setting up local notifications:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Set up local notification listeners
+   */
+  setupLocalNotificationListeners() {
+    console.log("Setting up local notification listeners...");
+
+    // Listen for notification responses
+    this.responseListener =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log("Notification response received:", response);
+        this.handleNotificationNavigation(
+          response.notification.request.content.data || {}
+        );
+      });
+
+    // Listen for notifications received while app is in foreground
+    this.notificationListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log("Notification received:", notification);
+      }
+    );
   }
 
   /**
@@ -131,7 +246,7 @@ class NotificationService {
   async storePushToken(token) {
     try {
       await AsyncStorage.setItem(DEVICE_TOKEN_KEY, token);
-      console.log("Device token stored locally:", token);
+      console.log("Push token stored locally");
     } catch (error) {
       console.error("Error storing push token:", error);
     }
@@ -143,7 +258,10 @@ class NotificationService {
   async getStoredPushToken() {
     try {
       const token = await AsyncStorage.getItem(DEVICE_TOKEN_KEY);
-      console.log("Retrieved stored device token:", token);
+      console.log(
+        "Retrieved stored push token:",
+        token ? "exists" : "not found"
+      );
       return token;
     } catch (error) {
       console.error("Error getting stored push token:", error);
@@ -156,14 +274,15 @@ class NotificationService {
    */
   async registerTokenWithBackend(token) {
     try {
+      console.log("Registering token with backend...");
       const response = await HttpClient.put("/user/updateFcmToken", {
         fcmToken: token,
       });
-
-      // Only log the token registration success, not the entire user object
-      console.log("TOKEN REGISTERED WITH BACKEND:", response);
+      console.log("Token registered with backend successfully");
+      return response;
     } catch (error) {
       console.error("Error registering token with backend:", error);
+      throw error;
     }
   }
 
@@ -171,50 +290,109 @@ class NotificationService {
    * Set up notification listeners
    */
   setupNotificationListeners() {
-    // Listen for incoming notifications when app is in foreground
-    this.notificationListener = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        console.log("Notification received:", notification);
-        this.handleNotificationReceived(notification);
+    if (!messaging) {
+      console.log("Firebase messaging not available, skipping FCM listeners");
+      return;
+    }
+
+    console.log("Setting up notification listeners...");
+
+    // Listen for foreground messages
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      console.log("Received foreground message:", remoteMessage);
+      // Show local notification when app is in foreground
+      await this.showLocalNotification(
+        remoteMessage.notification?.title || "New Notification",
+        remoteMessage.notification?.body || "",
+        remoteMessage.data || {}
+      );
+    });
+
+    // Listen for notification opened app (when app is in background)
+    messaging().onNotificationOpenedApp((remoteMessage) => {
+      console.log("Notification opened app:", remoteMessage);
+      this.handleNotificationNavigation(remoteMessage.data || {});
+    });
+
+    // Check whether an initial notification is available (when app was closed)
+    messaging()
+      .getInitialNotification()
+      .then((remoteMessage) => {
+        if (remoteMessage) {
+          console.log("Initial notification found:", remoteMessage);
+          this.handleNotificationNavigation(remoteMessage.data || {});
+        }
+      });
+
+    this.notificationListener = unsubscribe;
+    console.log("Notification listeners set up successfully");
+  }
+
+  /**
+   * Set up token refresh listener
+   */
+  setupTokenRefreshListener() {
+    if (!messaging) {
+      console.log(
+        "Firebase messaging not available, skipping token refresh listener"
+      );
+      return;
+    }
+
+    console.log("Setting up token refresh listener...");
+    this.tokenRefreshUnsubscribe = messaging().onTokenRefresh(
+      async (fcmToken) => {
+        console.log("FCM token refreshed");
+        this.fcmToken = fcmToken;
+
+        // Store new token
+        await this.storePushToken(fcmToken);
+
+        // Update backend with new token
+        try {
+          await this.registerTokenWithBackend(fcmToken);
+        } catch (error) {
+          console.error("Failed to update backend with new FCM token:", error);
+        }
       }
     );
-
-    // Listen for user interaction with notifications
-    this.responseListener =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log("Notification response:", response);
-        this.handleNotificationResponse(response);
-      });
   }
 
   /**
-   * Handle received notifications
+   * Set up background message handler
    */
-  handleNotificationReceived(notification) {
-    // You can add custom logic here to handle different types of notifications
-    const { title, body, data } = notification.request.content;
+  setupBackgroundMessageHandler() {
+    if (!messaging) {
+      console.log(
+        "Firebase messaging not available, skipping background message handler"
+      );
+      return;
+    }
 
-    // Example: Update badge count, show custom UI, etc.
-    console.log("Received notification:", { title, body, data });
+    console.log("Setting up background message handler...");
+    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+      console.log("Received background message:", remoteMessage);
+      try {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: remoteMessage.notification?.title || "New Notification",
+            body: remoteMessage.notification?.body || "",
+            data: remoteMessage.data || {},
+          },
+          trigger: null, // show immediately
+        });
+      } catch (error) {
+        console.error("Error showing background notification:", error);
+      }
+    });
   }
 
   /**
-   * Handle user interaction with notifications
+   * Show local notification (for foreground messages)
    */
-  handleNotificationResponse(response) {
-    const { title, body, data } = response.notification.request.content;
-
-    console.log("User tapped notification:", { title, body, data });
-
-    // Always navigate to notification list when user taps notification
-    this.handleNotificationNavigation(data);
-  }
-
-  /**
-   * Send local notification (for testing)
-   */
-  async sendLocalNotification(title, body, data = {}) {
+  async showLocalNotification(title, body, data = {}) {
     try {
+      console.log("Showing local notification:", title, body);
       await Notifications.scheduleNotificationAsync({
         content: {
           title,
@@ -223,6 +401,18 @@ class NotificationService {
         },
         trigger: null, // Send immediately
       });
+    } catch (error) {
+      console.error("Error showing local notification:", error);
+    }
+  }
+
+  /**
+   * Send local notification (for testing)
+   */
+  async sendLocalNotification(title, body, data = {}) {
+    try {
+      console.log("Sending test notification:", title, body);
+      await this.showLocalNotification(title, body, data);
     } catch (error) {
       console.error("Error sending local notification:", error);
     }
@@ -234,6 +424,7 @@ class NotificationService {
   async clearBadge() {
     try {
       await Notifications.setBadgeCountAsync(0);
+      console.log("Badge cleared");
     } catch (error) {
       console.error("Error clearing badge:", error);
     }
@@ -244,7 +435,19 @@ class NotificationService {
    */
   async getNotificationPermissions() {
     try {
-      return await Notifications.getPermissionsAsync();
+      if (messaging) {
+        const authStatus = await messaging().hasPermission();
+        const status =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED
+            ? "granted"
+            : "denied";
+        console.log("Current notification permission status:", status);
+        return { status };
+      } else {
+        const { status } = await Notifications.getPermissionsAsync();
+        console.log("Current Expo notification permission status:", status);
+        return { status };
+      }
     } catch (error) {
       console.error("Error getting notification permissions:", error);
       return null;
@@ -255,11 +458,15 @@ class NotificationService {
    * Clean up listeners
    */
   cleanup() {
+    console.log("Cleaning up notification listeners...");
     if (this.notificationListener) {
-      this.notificationListener.remove();
+      this.notificationListener();
     }
     if (this.responseListener) {
       this.responseListener.remove();
+    }
+    if (this.tokenRefreshUnsubscribe) {
+      this.tokenRefreshUnsubscribe();
     }
   }
 
@@ -267,31 +474,48 @@ class NotificationService {
    * Initialize notification service
    */
   async initialize() {
+    if (this.isInitialized) {
+      console.log("Notification service already initialized");
+      return true;
+    }
+
     try {
+      console.log("Initializing notification service...");
+      console.log("Firebase available:", this.firebaseAvailable);
+
       // Check if we already have a stored token
       const storedToken = await this.getStoredPushToken();
 
-      if (storedToken) {
-        console.log("Using stored device token:", storedToken);
-        this.expoPushToken = storedToken;
+      if (storedToken && this.firebaseAvailable) {
+        console.log("Using stored token for initialization");
+        this.fcmToken = storedToken;
 
         // Set up listeners
         this.setupNotificationListeners();
+        this.setupTokenRefreshListener();
+        this.setupBackgroundMessageHandler();
 
-        // Register stored token with backend
-        await this.registerTokenWithBackend(storedToken);
+        // Verify token is still valid and register with backend
+        try {
+          await this.registerTokenWithBackend(storedToken);
+        } catch (error) {
+          console.log("Stored token invalid, generating new one...");
+          await this.registerForPushNotifications();
+        }
 
+        this.isInitialized = true;
         return true;
       } else {
-        console.log("No stored token found - generating new token");
-
-        // Set up listeners
-        this.setupNotificationListeners();
-
-        // Generate and register new token
-        await this.registerForPushNotifications();
-
-        return true;
+        console.log(
+          "No stored token found or Firebase not available, generating new one..."
+        );
+        // Set up listeners and generate new token
+        if (this.firebaseAvailable) {
+          this.setupBackgroundMessageHandler();
+        }
+        const success = await this.registerForPushNotifications();
+        this.isInitialized = success;
+        return success;
       }
     } catch (error) {
       console.error("Error initializing notification service:", error);
@@ -304,12 +528,30 @@ class NotificationService {
    */
   async clearStoredToken() {
     try {
+      console.log("Clearing stored token...");
       await AsyncStorage.removeItem(DEVICE_TOKEN_KEY);
-      this.expoPushToken = null;
-      console.log("Stored device token cleared");
+      if (messaging) {
+        await messaging().deleteToken();
+      }
+      this.fcmToken = null;
+      this.isInitialized = false;
     } catch (error) {
       console.error("Error clearing stored token:", error);
     }
+  }
+
+  /**
+   * Get current push token
+   */
+  getCurrentToken() {
+    return this.fcmToken;
+  }
+
+  /**
+   * Check if Firebase is available
+   */
+  isFirebaseAvailable() {
+    return this.firebaseAvailable;
   }
 }
 

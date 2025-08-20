@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     left: 12,
     top: -10,
     paddingHorizontal: 4,
-    fontSize: 14,
+    fontSize: 12.5,
     backgroundColor: "#FFFAFD",
     fontFamily: "poppinsRegular",
     zIndex: 2,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9BCDC",
   },
   itemText: {
-    fontSize: 17,
+    fontSize: 15,
     color: "#333333",
     fontFamily: "poppinsRegular",
   },

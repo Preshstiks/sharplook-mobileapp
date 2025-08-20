@@ -169,7 +169,7 @@ export default function MyProductsScreen({ navigation }) {
                   {p.approvalStatus === "PENDING" && (
                     <View className="bg-[#ffffffe8] absolute top-2 right-2 py-[2px] px-3 rounded-[10px] z-10">
                       <Text
-                        className="text-[#ff0000] mt-1 text-[8px]"
+                        className="text-[#ff0000] mt-1 text-[10px]"
                         style={{ fontFamily: "poppinsMedium" }}
                       >
                         Not approved yet
@@ -187,7 +187,7 @@ export default function MyProductsScreen({ navigation }) {
                       <View className="flex-row mt-1 items-center justify-between">
                         <View>
                           <Text
-                            className="text-primary text-[14px]"
+                            className="text-primary text-[16px]"
                             style={{ fontFamily: "latoBold" }}
                           >
                             {formatAmount(p.price)}
@@ -205,7 +205,7 @@ export default function MyProductsScreen({ navigation }) {
                       <View className="flex-row mt-2 items-center justify-between">
                         <View>
                           <Text
-                            className="text-[8px] mt-1 text-[#00000066] mb-1"
+                            className="text-[10px] mt-1 text-[#00000066] mb-1"
                             style={{ fontFamily: "latoBold" }}
                           >
                             {p.qtyAvailable} pieces remaining
@@ -240,7 +240,7 @@ export default function MyProductsScreen({ navigation }) {
       >
         <View className="mb-8 mt-2">
           <Text
-            className="text-[16px] text-center text-fadedDark"
+            className="text-[18px] text-center text-fadedDark"
             style={{ fontFamily: "latoBold" }}
           >
             Are you sure you want to delete this Product?
@@ -253,7 +253,7 @@ export default function MyProductsScreen({ navigation }) {
           >
             <Text
               style={{ fontFamily: "poppinsMedium" }}
-              className="text-center text-[13px] text-white"
+              className="text-center text-[15px] text-white"
             >
               Yes
             </Text>
@@ -267,7 +267,7 @@ export default function MyProductsScreen({ navigation }) {
           >
             <Text
               style={{ fontFamily: "poppinsMedium" }}
-              className="text-center text-[13px] text-[#ff0000]"
+              className="text-center text-[15px] text-[#ff0000]"
             >
               No
             </Text>

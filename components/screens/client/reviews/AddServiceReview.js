@@ -23,14 +23,14 @@ export default function AddServiceReviewScreen() {
   const clientId = user.id;
   const handleAddReview = async (values) => {
     setLoading(true);
-    const payload = {
-      type: "SERVICE",
-      clientId,
-      vendorId,
-      serviceId,
-      comment: values.comment,
-      rating: values.rating,
-    };
+    // const payload = {
+    //   type: "SERVICE",
+    //   clientId,
+    //   vendorId,
+    //   serviceId,
+    //   comment: values.comment,
+    //   rating: values.rating,
+    // };
     try {
       const res = await HttpClient.post("/reviews/postReview", {
         type: "SERVICE",
@@ -41,6 +41,7 @@ export default function AddServiceReviewScreen() {
         rating: values.rating,
       });
       showToast.success(res.data.message);
+      navigation.goBack();
     } catch (error) {
       showToast.error(error.response.data.message);
     } finally {
@@ -143,7 +144,7 @@ export default function AddServiceReviewScreen() {
             <View className="px-4 mb-8">
               <AuthButton
                 title="Submit Review"
-                loadingMsg="Submitting"
+                isloading={loading}
                 onPress={handleSubmit}
                 disabled={loading}
               />

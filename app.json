@@ -2,7 +2,7 @@
   "expo": {
     "name": "sharplook",
     "slug": "sharplook",
-    "version": "1.0.9",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/icon/app-icon.png",
     "userInterfaceStyle": "light",
@@ -23,9 +23,17 @@
         "NSMicrophoneUsageDescription": "This app uses the microphone to allow audio input for communication and video recording.",
         "NSLocationWhenInUseUsageDescription": "This app uses your location to provide nearby services and improve recommendations.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses your location in the background to keep features updated.",
-        "UIBackgroundModes": ["remote-notification", "background-processing"],
-        "NSUserNotificationsUsageDescription": "This app uses notifications to keep you updated about bookings, messages, and important updates."
-      }
+        "NSPhotoLibraryUsageDescription": "This app uses your photo library to allow you to select and upload profile and service photos.",
+        "NSPhotoLibraryAddUsageDescription": "This app saves photos to your library for profile pictures and service images.",
+        "UIBackgroundModes": [
+          "remote-notification",
+          "processing",
+          "background-fetch"
+        ],
+        "NSUserNotificationsUsageDescription": "This app uses notifications to keep you updated about bookings, messages, and important updates.",
+        "NSUserNotificationAlertStyle": "alert"
+      },
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "edgeToEdgeEnabled": true,
@@ -40,9 +48,22 @@
         "RECORD_AUDIO",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "INTERNET"
+        "INTERNET",
+        "POST_NOTIFICATIONS",
+        "RECEIVE_NOTIFICATIONS",
+        "SYSTEM_ALERT_WINDOW",
+        "ACCESS_NETWORK_STATE"
       ],
-      "useNextNotificationsApi": true
+      "useNextNotificationsApi": true,
+      "googleServicesFile": "./google-services.json",
+      "allowBackup": true,
+      "foregroundServiceType": ["dataSync", "location"],
+      "notification": {
+        "icon": "./assets/icon/app-icon.png",
+        "color": "#EB278D",
+        "androidMode": "default",
+        "androidCollapsedTitle": "New Notification"
+      }
     },
     "web": {
       "bundler": "metro"
@@ -52,8 +73,15 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/icon/app-icon.png",
-          "color": "#EB278D"
+          "icon": "./assets/icon/app-icon.png"
+        }
+      ],
+
+      [
+        "@react-native-firebase/messaging",
+        {
+          "defaultNotificationColor": "#ffffff",
+          "defaultNotificationIcon": "./assets/icon/app-icon.png"
         }
       ]
     ],

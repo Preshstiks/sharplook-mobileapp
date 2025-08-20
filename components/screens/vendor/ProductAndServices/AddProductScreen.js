@@ -141,7 +141,7 @@ export default function AddProductScreen({ navigation }) {
                       <Ionicons name="chevron-back" size={24} color="black" />
                     </TouchableOpacity>
                     <View style={{ flex: 1, alignItems: "center" }}>
-                      <Text style={{ fontSize: 18, fontFamily: "latoBold" }}>
+                      <Text style={{ fontSize: 20, fontFamily: "latoBold" }}>
                         Add New Product
                       </Text>
                     </View>
@@ -150,13 +150,13 @@ export default function AddProductScreen({ navigation }) {
                 </View>
                 <View className="px-4 pt-[30px]">
                   <Text
-                    className="text-[16px] mb-1"
+                    className="text-[18px] mb-1"
                     style={{ fontFamily: "poppinsMedium" }}
                   >
                     Please fill the details below
                   </Text>
                   <Text
-                    className="text-[14px] mb-4"
+                    className="text-[16px] mb-4"
                     style={{ fontFamily: "latoRegular" }}
                   >
                     Make sure all information about the product is correct
@@ -201,7 +201,7 @@ export default function AddProductScreen({ navigation }) {
                     onPress={pickImage}
                   >
                     <Text
-                      className="text-[16px] mr-1"
+                      className="text-[18px] mr-1"
                       style={{ fontFamily: "poppinsMedium" }}
                     >
                       Add Picture

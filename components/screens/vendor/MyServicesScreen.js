@@ -158,7 +158,7 @@ export default function MyServicesScreen({ navigation }) {
           >
             <EmptySVG width={120} height={120} />
             <Text
-              className="text-[14px] text-gray-400 mt-2"
+              className="text-[16px] text-gray-400 mt-2"
               style={{ fontFamily: "poppinsRegular" }}
             >
               No services found
@@ -185,7 +185,7 @@ export default function MyServicesScreen({ navigation }) {
                   </Text>
                   <View className="flex-row mt-1 items-center justify-between">
                     <Text
-                      className="text-primary text-[14px]"
+                      className="text-primary text-[16px]"
                       style={{ fontFamily: "latoBold" }}
                     >
                       {formatAmount(s.servicePrice)}
@@ -207,7 +207,7 @@ export default function MyServicesScreen({ navigation }) {
                   >
                     <Text
                       style={{ fontFamily: "poppinsRegular" }}
-                      className="text-[11px] text-center text-white"
+                      className="text-[13px] text-center text-white"
                     >
                       Edit
                     </Text>
@@ -228,7 +228,7 @@ export default function MyServicesScreen({ navigation }) {
       >
         <View className="mb-8 mt-2">
           <Text
-            className="text-[16px] text-center text-fadedDark"
+            className="text-[18px] text-center text-fadedDark"
             style={{ fontFamily: "latoBold" }}
           >
             Are you sure you want to delete this Product?
@@ -244,7 +244,7 @@ export default function MyServicesScreen({ navigation }) {
             ) : (
               <Text
                 style={{ fontFamily: "poppinsMedium" }}
-                className="text-center text-[13px] text-white"
+                className="text-center text-[15px] text-white"
               >
                 Yes
               </Text>
@@ -259,7 +259,7 @@ export default function MyServicesScreen({ navigation }) {
           >
             <Text
               style={{ fontFamily: "poppinsMedium" }}
-              className="text-center text-[13px] text-[#ff0000]"
+              className="text-center text-[15px] text-[#ff0000]"
             >
               No
             </Text>

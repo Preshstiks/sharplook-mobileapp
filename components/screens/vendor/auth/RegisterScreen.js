@@ -287,10 +287,10 @@ export default function VendorRegisterScreen({ navigation }) {
                   Acceptable document type is PDF and Image only and it should
                   not be more than 5MB
                 </Text>
-                <View className="flex-row items-center justify-between mt-4 mb-2">
-                  <View className="flex-row items-center">
+                <View className="flex-row items-start justify-between mt-4 mb-2">
+                  <View className="flex-row items-start flex-1">
                     <Pressable
-                      className="w-5 h-5 border border-primary rounded mr-2 items-center justify-center"
+                      className="w-5 h-5 border border-primary rounded mr-2 items-center justify-center mt-0.5"
                       onPress={() =>
                         setFieldValue(
                           "acceptedPersonalData",
@@ -302,39 +302,30 @@ export default function VendorRegisterScreen({ navigation }) {
                         <MaterialIcons name="check" size={16} color="#EB278D" />
                       )}
                     </Pressable>
-                    <View className="flex-row items-center gap-1">
+                    <View className="flex-1">
                       <Text
                         className="text-sm"
                         style={{ fontFamily: "poppinsRegular" }}
                       >
-                        By signing up, you agree to our
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => navigation.navigate("AuthPrivacyPolicy")}
-                      >
+                        By signing up, you agree to our{" "}
                         <Text
                           className="text-sm text-primary underline"
                           style={{ fontFamily: "poppinsRegular" }}
+                          onPress={() =>
+                            navigation.navigate("AuthPrivacyPolicy")
+                          }
                         >
                           Privacy Policy
-                        </Text>
-                      </TouchableOpacity>
-                      <Text
-                        className="text-sm"
-                        style={{ fontFamily: "poppinsRegular" }}
-                      >
-                        and
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => navigation.navigate("AuthTermsOfUse")}
-                      >
+                        </Text>{" "}
+                        and{" "}
                         <Text
                           className="text-sm text-primary underline"
                           style={{ fontFamily: "poppinsRegular" }}
+                          onPress={() => navigation.navigate("AuthTermsOfUse")}
                         >
                           Terms of Use
                         </Text>
-                      </TouchableOpacity>
+                      </Text>
                     </View>
                   </View>
                 </View>

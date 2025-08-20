@@ -25,11 +25,6 @@ const EditProfileScreen = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  // Log when user data changes (for debugging)
-  useEffect(() => {
-    console.log("🔄 EditProfileScreen: User data updated:", user);
-  }, [user]);
-
   const pickImage = async () => {
     try {
       // Request permissions

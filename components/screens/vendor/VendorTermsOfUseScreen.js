@@ -42,7 +42,7 @@ export default function TermsOfUseScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Terms of Use
         </Text>
@@ -91,7 +91,7 @@ export default function TermsOfUseScreen() {
               <MaterialIcons name="description" size={22} color="#fff" />
             </View>
             <Text
-              className="flex-1 text-[14px] text-black"
+              className="flex-1 text-[16px] text-black"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {section}

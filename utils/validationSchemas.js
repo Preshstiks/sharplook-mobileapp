@@ -118,8 +118,8 @@ export const reviewValidationSchema = Yup.object().shape({
     .required("Experience description is required")
     .min(10, "Please provide a more detailed experience")
     .max(500, "Experience description is too long")
-    .when("star", {
-      is: (star) => star <= 2,
+    .when("rating", {
+      is: (rating) => rating <= 2,
       then: (schema) =>
         schema.min(
           20,

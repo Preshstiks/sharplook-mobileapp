@@ -59,7 +59,6 @@ export default function OtherScreen() {
       fetchNearbyVendors();
     }, [])
   );
-  console.log({ nearbyVendors });
   return (
     <View className="flex-1 bg-white">
       {/* Header */}

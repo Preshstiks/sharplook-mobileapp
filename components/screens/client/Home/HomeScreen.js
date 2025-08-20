@@ -139,8 +139,6 @@ export default function HomeScreen() {
         }
       };
       const fetchTopVendors = async () => {
-        const token = await AsyncStorage.getItem("token");
-        console.log({ token });
         setLoadingVendors(true);
         try {
           const res = await HttpClient.get("/user/topVendors");
@@ -215,7 +213,6 @@ export default function HomeScreen() {
   }, [searchInput, topVendors]);
 
   const currentUser = user.user;
-  console.log({ currentUser });
   const handleProductPress = (product) => {
     navigation.navigate("ProductDetailsScreen", {
       product,
@@ -308,6 +305,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
         {/* Search Bar */}
         <View className="flex-row items-center px-4 mt-6">
           <View className="flex-row items-center flex-1 bg-secondary border border-[#F9BCDC] rounded-xl px-4 mr-3">
@@ -514,7 +512,7 @@ export default function HomeScreen() {
                           </View>
                           <Text
                             style={{ fontFamily: "latoRegular" }}
-                            className="text-[10px] text-faintDark text-center mt-0.5"
+                            className="text-[12px] text-faintDark text-center mt-0.5"
                           >
                             {cat.name}
                           </Text>
@@ -540,7 +538,7 @@ export default function HomeScreen() {
                         </View>
                         <Text
                           style={{ fontFamily: "latoRegular" }}
-                          className="text-[10px] text-faintDark text-center mt-0.5"
+                          className="text-[12px] text-faintDark text-center mt-0.5"
                         >
                           Others
                         </Text>
@@ -675,14 +673,6 @@ export default function HomeScreen() {
               >
                 Recommended Products
               </Text>
-              {/* <TouchableOpacity>
-                <Text
-                  style={{ fontFamily: "poppinsRegular" }}
-                  className="text-primary text-[12px]"
-                >
-                  View all
-                </Text>
-              </TouchableOpacity> */}
             </View>
             {loadingProducts ? (
               <ScrollView

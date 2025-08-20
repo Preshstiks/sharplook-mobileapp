@@ -19,7 +19,7 @@ export default function NotificationDetailScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Notification Details
         </Text>
@@ -28,20 +28,20 @@ export default function NotificationDetailScreen() {
       <View style={styles.body}>
         {notification.message.includes("booking") && (
           <Text
-            className="text-[16px] font-bold mb-6"
+            className="text-[18px] font-bold mb-6"
             style={{ fontFamily: "poppinsBold" }}
           >
             Booking Notification
           </Text>
         )}
         <Text
-          className="text-[14px] mb-4"
+          className="text-[16px] mb-4"
           style={{ fontFamily: "latoRegular" }}
         >
           {notification.message}
         </Text>
         <Text
-          className="text-[14px] mt-6"
+          className="text-[16px] mt-6"
           style={{ fontFamily: "latoRegular" }}
         >
           Thank you!
@@ -55,7 +55,7 @@ export default function NotificationDetailScreen() {
             onPress={() => handleSubmit("ACCEPTED")}
           >
             <Text
-              className="text-[14px] text-white text-center"
+              className="text-[16px] text-white text-center"
               style={{ fontFamily: "poppinsMedium" }}
             >
               Accept
@@ -66,7 +66,7 @@ export default function NotificationDetailScreen() {
             onPress={() => handleSubmit("REJECTED")}
           >
             <Text
-              className="text-[14px] text-primary text-center"
+              className="text-[16px] text-primary text-center"
               style={{ fontFamily: "poppinsMedium" }}
             >
               Reject

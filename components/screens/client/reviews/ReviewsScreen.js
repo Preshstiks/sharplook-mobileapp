@@ -134,7 +134,6 @@ export default function ReviewsScreen() {
             type: "VENDOR",
           });
           setReviews(res.data?.data || []);
-          console.log({ reviews: res.data.data });
         } catch (err) {
           console.error(err.response);
           setError("Failed to load reviews");
@@ -146,7 +145,6 @@ export default function ReviewsScreen() {
       fetchReviews();
     }, [vendorId])
   );
-  console.log({ reviews });
   return (
     <View className="flex-1 bg-white">
       {/* Header */}

@@ -35,7 +35,6 @@ export default function CategoriesScreen() {
   const nearbyVendors = route.params?.nearbyVendors || [];
   const services = route.params?.services || [];
   const [search, setSearch] = useState("");
-
   // New state for nearby vendors
 
   const [loadingNearby, setLoadingNearby] = useState(true);
@@ -342,14 +341,14 @@ export default function CategoriesScreen() {
                         name="star"
                         size={14}
                         color={
-                          i <= Math.round(service.rating || 0)
+                          i <= Math.round(service.averageRating || 0)
                             ? "#FFD700"
                             : "#E0E0E0"
                         }
                       />
                     ))}
                     <Text className="ml-1 text-[14px] text-[#444]">
-                      {(service.rating || 0).toFixed(1)}
+                      {(service.averageRating || 0).toFixed(1)}
                     </Text>
                   </View>
                 </View>

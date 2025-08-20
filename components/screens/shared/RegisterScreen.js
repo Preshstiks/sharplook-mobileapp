@@ -180,10 +180,10 @@ export default function RegisterScreen({ navigation }) {
                   touched={touched.referredByCode}
                   secureTextEntry
                 />
-                <View className="flex-row items-center justify-between mt-4 mb-2">
-                  <View className="flex-row items-center">
+                <View className="flex-row items-start justify-between mt-4 mb-2">
+                  <View className="flex-row items-start flex-1">
                     <Pressable
-                      className="w-5 h-5 border border-primary rounded mr-2 items-center justify-center"
+                      className="w-5 h-5 border border-primary rounded mr-2 items-center justify-center mt-0.5"
                       onPress={() =>
                         setFieldValue(
                           "acceptedPersonalData",
@@ -195,39 +195,30 @@ export default function RegisterScreen({ navigation }) {
                         <MaterialIcons name="check" size={16} color="#EB278D" />
                       )}
                     </Pressable>
-                    <View className="flex-row items-center gap-1">
+                    <View className="flex-1">
                       <Text
-                        className="text-[14px]"
+                        className="text-[13px]"
                         style={{ fontFamily: "poppinsRegular" }}
                       >
-                        By signing up, you agree to our
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => navigation.navigate("AuthPrivacyPolicy")}
-                      >
+                        By signing up, you agree to our{" "}
                         <Text
                           className="text-[14px] text-primary underline"
                           style={{ fontFamily: "poppinsRegular" }}
+                          onPress={() =>
+                            navigation.navigate("AuthPrivacyPolicy")
+                          }
                         >
                           Privacy Policy
-                        </Text>
-                      </TouchableOpacity>
-                      <Text
-                        className="text-[14px]"
-                        style={{ fontFamily: "poppinsRegular" }}
-                      >
-                        and
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => navigation.navigate("AuthTermsOfUse")}
-                      >
+                        </Text>{" "}
+                        and{" "}
                         <Text
                           className="text-[14px] text-primary underline"
                           style={{ fontFamily: "poppinsRegular" }}
+                          onPress={() => navigation.navigate("AuthTermsOfUse")}
                         >
                           Terms of Use
                         </Text>
-                      </TouchableOpacity>
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -241,14 +232,14 @@ export default function RegisterScreen({ navigation }) {
                 <View className="mt-8 w-full items-center">
                   <View className="flex-row justify-center gap-1 items-center mt-2">
                     <Text
-                      className="text-[16px] text-[#6B6B6B]"
+                      className="text-[15px] text-[#6B6B6B]"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       Already have an account?
                     </Text>
                     <Pressable onPress={() => navigation.navigate("Login")}>
                       <Text
-                        className="text-[16px] text-primary"
+                        className="text-[15px] text-primary"
                         style={{ fontFamily: "latoRegular" }}
                       >
                         Login
@@ -260,7 +251,7 @@ export default function RegisterScreen({ navigation }) {
                       onPress={() => navigation.navigate("VendorRegister")}
                     >
                       <Text
-                        className="text-[16px] text-primary"
+                        className="text-[15px] text-primary"
                         style={{ fontFamily: "latoRegular" }}
                       >
                         Switch to Vendor Signup

@@ -205,7 +205,6 @@ export default function ChatListScreen() {
       lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
-  console.log({ filteredChats });
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8FB]">
       <StatusBar backgroundColor="#EB278D" barStyle="light-content" />

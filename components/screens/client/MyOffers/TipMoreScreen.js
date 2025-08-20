@@ -14,6 +14,8 @@ import OutlineTextInput from "../../../reusuableComponents/inputFields/OutlineTe
 import { formatAmount } from "../../../formatAmount";
 import AuthButton from "../../../reusuableComponents/buttons/AuthButton";
 import * as ImagePicker from "expo-image-picker";
+import { HttpClient } from "../../../../api/HttpClient";
+import { showToast } from "../../../ToastComponent/Toast";
 
 export default function TipMoreScreen() {
   const navigation = useNavigation();
@@ -29,29 +31,10 @@ export default function TipMoreScreen() {
   );
   const [homeService, setHomeService] = useState(offer?.serviceType || "");
   const [selectedImage, setSelectedImage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Use passed offer data
-  const offerDetails = offer || {
-    id: 1,
-    serviceType: "In-shop",
-    offerAmount: 8000,
-    vendor: "Hair by Ire",
-    serviceName: "Hair",
-    status: "Accepted",
-    date: "June 15, 2024",
-    time: "09:00 AM",
-    clientImage: require("../../../../assets/icon/avatar.png"),
-    serviceImage: require("../../../../assets/img/product1.jpg"),
-    clientName: "Sarah Johnson",
-    clientPhone: "+234 801 234 5678",
-    clientEmail: "sarah.johnson@email.com",
-    serviceDescription:
-      "Professional hair styling with cornrow braids and twists, including elaborate eye makeup with vibrant purple eyeshadow and gold glitter accents.",
-    location: "Agbede Ibafo",
-    duration: "2 hours",
-    specialRequests:
-      "Please use organic hair products and ensure the style is secure for a long day at work.",
-  };
+  const offerDetails = offer;
 
   // Image picker function
   const pickImage = async () => {
@@ -66,23 +49,27 @@ export default function TipMoreScreen() {
     }
   };
 
-  // Service options for dropdown
-  const serviceOptions = [
-    { label: "Facials", value: "facials" },
-    { label: "Hair Styling", value: "hair_styling" },
-    { label: "Makeup", value: "makeup" },
-    { label: "Nail Art", value: "nail_art" },
-    { label: "Massage", value: "massage" },
-  ];
+  const handleSubmitOffer = async () => {
+    setIsSubmitting(true);
+    try {
+      const response = await HttpClient.patch("/offers/tip", {
+        offerId: offer?.id,
+        tipAmount: Number(offerAmount),
+      });
 
-  // Home service options
-  const homeServiceOptions = [
-    { label: "In-shop", value: "IN_SHOP" },
-    { label: "Home Service", value: "HOME_SERVICE" },
-  ];
+      showToast.success(response.data.message);
 
-  const handleSubmitOffer = () => {
-    navigation.goBack();
+      // Go back 2 screens instead of 1
+      navigation.pop(2);
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to submit tip. Please try again.";
+      showToast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getServiceTypeDisplay = (serviceType) => {
@@ -250,7 +237,7 @@ export default function TipMoreScreen() {
                 resizeMode: "cover",
               }}
             />
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={{
                 position: "absolute",
                 top: 8,
@@ -265,7 +252,7 @@ export default function TipMoreScreen() {
               onPress={pickImage}
             >
               <Feather name="edit" size={24} color="#ED2584" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           {/* Date and Time */}
@@ -361,8 +348,8 @@ export default function TipMoreScreen() {
         <AuthButton
           title="Submit Offer"
           onPress={handleSubmitOffer}
-          loading={false}
-          disabled={false}
+          loading={isSubmitting}
+          disabled={isSubmitting}
         />
       </View>
     </View>

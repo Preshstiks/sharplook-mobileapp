@@ -180,7 +180,7 @@ export default function SubscriptionScreen({ navigation }) {
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text
-          className="flex-1 text-center text-[14px]"
+          className="flex-1 text-center text-[16px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           My Subscription
@@ -202,14 +202,14 @@ export default function SubscriptionScreen({ navigation }) {
             </View>
             {subscription?.subscription ? (
               <Text
-                className="text-primary text-[14px]"
+                className="text-primary text-[16px]"
                 style={{ fontFamily: "poppinsMedium" }}
               >
                 Subscription Active
               </Text>
             ) : (
               <Text
-                className="text-[#FF383C] text-[14px]"
+                className="text-[#FF383C] text-[16px]"
                 style={{ fontFamily: "poppinsMedium" }}
               >
                 Subscription Expired
@@ -220,7 +220,7 @@ export default function SubscriptionScreen({ navigation }) {
           {/* Plan Name */}
           <View className="px-4 pt-3 pb-5">
             <Text
-              className="text-[14px] mb-4"
+              className="text-[16px] mb-4"
               style={{ fontFamily: "poppinsMedium" }}
             >
               {subscriptionPlan.name}
@@ -231,13 +231,13 @@ export default function SubscriptionScreen({ navigation }) {
               <View className="space-y-2">
                 <View className="flex-row justify-between items-center">
                   <Text
-                    className="text-[12px] text-[#8C8D8B]"
+                    className="text-[14px] text-[#8C8D8B]"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     Start Date:
                   </Text>
                   <Text
-                    className="text-[12px]"
+                    className="text-[14px]"
                     style={{ fontFamily: "poppinsMedium" }}
                   >
                     {DateConverter(subscription?.subscription?.paidAt)}
@@ -245,13 +245,13 @@ export default function SubscriptionScreen({ navigation }) {
                 </View>
                 <View className="flex-row justify-between items-center">
                   <Text
-                    className="text-[12px] text-[#8C8D8B]"
+                    className="text-[14px] text-[#8C8D8B]"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     End Date:
                   </Text>
                   <Text
-                    className="text-[12px]"
+                    className="text-[14px]"
                     style={{ fontFamily: "poppinsMedium" }}
                   >
                     {DateConverter(subscription?.subscription?.expiresAt)}
@@ -266,7 +266,7 @@ export default function SubscriptionScreen({ navigation }) {
         <View style={styles.card}>
           <View className="px-4 py-3 border-b border-[#EBEBEA] ">
             <Text
-              className="text-[14px] text-gray-800"
+              className="text-[16px] text-gray-800"
               style={{ fontFamily: "poppinsMedium" }}
             >
               Plan Benefits
@@ -276,7 +276,7 @@ export default function SubscriptionScreen({ navigation }) {
             {subscriptionPlan.benefits.map((benefit, index) => (
               <Text
                 key={index}
-                className="text-[12px] text-[#8C8D8B] text-center"
+                className="text-[14px] text-[#8C8D8B] text-center"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 {benefit}
@@ -311,7 +311,7 @@ export default function SubscriptionScreen({ navigation }) {
       >
         <View className="mb-8 mt-2">
           <Text
-            className="text-[16px] text-fadedDark"
+            className="text-[18px] text-fadedDark"
             style={{ fontFamily: "latoBold" }}
           >
             Payment Method

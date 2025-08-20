@@ -180,14 +180,14 @@ export default function VendorBookingDetailScreen() {
         {/* Status */}
         <View className="mt-6 mb-2">
           <Text
-            className="text-[14px] mb-3 text-[#A5A5A5]"
+            className="text-[16px] mb-3 text-[#A5A5A5]"
             style={{ fontFamily: "poppinsMedium" }}
           >
             Booking{" "}
             <Text className="text-fadedDark">{HexConverter(booking?.id)}</Text>
           </Text>
           <Text
-            className={`text-[12px] ${booking?.dispute !== null ? "text-[#ff0000]" : booking?.status === "ACCEPTED" ? "text-[#0D9488]" : booking?.status === "COMPLETED" ? "text-success" : "text-pending"}`}
+            className={`text-[14px] ${booking?.dispute !== null ? "text-[#ff0000]" : booking?.status === "ACCEPTED" ? "text-[#0D9488]" : booking?.status === "COMPLETED" ? "text-success" : "text-pending"}`}
             style={{ fontFamily: "poppinsMedium" }}
           >
             {booking?.dispute === null ? booking?.status : "DISPUTED"}
@@ -211,13 +211,13 @@ export default function VendorBookingDetailScreen() {
             Booking Details
           </Text>
           <Text
-            className="text-primary text-[12px] mb-1"
+            className="text-primary text-[14px] mb-1"
             style={{ fontFamily: "poppinsSemiBold" }}
           >
             {DateConverter(booking?.date)} at {booking?.time}
           </Text>
           <Text
-            className="text-[12px] mb-2"
+            className="text-[14px] mb-2"
             style={{ fontFamily: "poppinsRegular" }}
           >
             By: {booking?.client?.lastName} {booking?.client?.firstName}
@@ -225,13 +225,13 @@ export default function VendorBookingDetailScreen() {
 
           <View className="flex-row justify-between mb-1">
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {booking?.service?.serviceName}
             </Text>
             <Text
-              className="text-[14px] text-[#00000066]"
+              className="text-[16px] text-[#00000066]"
               style={{ fontFamily: "latoBold" }}
             >
               {formatAmount(booking?.totalAmount)}
@@ -264,24 +264,24 @@ export default function VendorBookingDetailScreen() {
           <View className="h-[1px] mt-3 mb-4 bg-[#00000013]" />
           <View className="flex-row justify-between mb-1">
             <Text
-              className="text-[12px] mb-2"
+              className="text-[14px] mb-2"
               style={{ fontFamily: "poppinsRegular" }}
             >
               Total Payment{" "}
             </Text>
-            <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
+            <Text className="text-[16px]" style={{ fontFamily: "latoBold" }}>
               {formatAmount(booking?.totalAmount)}
             </Text>
           </View>
           <View className="flex-row justify-between mb-1">
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {booking?.service?.serviceName}
             </Text>
             <Text
-              className="text-[14px] text-[#00000066]"
+              className="text-[16px] text-[#00000066]"
               style={{ fontFamily: "latoBold" }}
             >
               {formatAmount(booking?.price)}
@@ -307,13 +307,13 @@ export default function VendorBookingDetailScreen() {
           </Text>
           <View className="flex-row justify-between mt-2 mb-1">
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               Client's Name
             </Text>
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {booking?.client?.lastName} {booking?.client?.firstName}
@@ -321,13 +321,13 @@ export default function VendorBookingDetailScreen() {
           </View>
           <View className="flex-row justify-between mb-1">
             <Text
-              className="text-[12px] text-[#00000066]"
-              style={{ fontFamily: "popptotalAmountinsRegular" }}
+              className="text-[14px] text-[#00000066]"
+              style={{ fontFamily: "poppinsRegular" }}
             >
               Time
             </Text>
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {booking?.time}
@@ -335,13 +335,13 @@ export default function VendorBookingDetailScreen() {
           </View>
           <View className="flex-row justify-between mb-1">
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               Date
             </Text>
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {DateConverter(booking?.date)}
@@ -408,7 +408,7 @@ export default function VendorBookingDetailScreen() {
                 Dispute
               </Text>
               <Text
-                className="text-[14px] text-[#888]  mb-4"
+                className="text-[16px] text-[#888]  mb-4"
                 style={{ fontFamily: "latoRegular" }}
               >
                 Why are you disputing the booking?
@@ -426,7 +426,7 @@ export default function VendorBookingDetailScreen() {
                 onPress={() => pickImage(setFieldValue)}
               >
                 <Text
-                  className="text-[12px] text-center mr-2"
+                  className="text-[14px] text-center mr-2"
                   style={{ fontFamily: "poppinsRegular" }}
                 >
                   Upload a picture evidence
@@ -456,7 +456,7 @@ export default function VendorBookingDetailScreen() {
               )}
               <Text
                 style={{ fontFamily: "poppinsRegular" }}
-                className="text-[10px] text-[#888] mb-2"
+                className="text-[12px] text-[#888] mb-2"
               >
                 Acceptable document type is Jpeg only and it should not be more
                 than 5MB

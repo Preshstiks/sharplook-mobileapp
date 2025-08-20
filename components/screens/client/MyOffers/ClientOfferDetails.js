@@ -140,11 +140,7 @@ export default function ClientOfferDetailsScreen() {
           Offer Details
         </Text>
 
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <TouchableOpacity style={{ marginRight: 15 }}>
-            <Ionicons name="notifications-outline" size={22} color="#1F2937" />
-          </TouchableOpacity>
-        </View>
+        <View style={{ width: 26 }} />
       </View>
 
       {/* Content */}
@@ -275,7 +271,16 @@ export default function ClientOfferDetailsScreen() {
             </View>
 
             <Image
-              source={require("../../../../assets/icon/avatar.png")}
+              source={
+                offerDetails.vendorOffers?.find((offer) => offer.isAccepted)
+                  ?.vendor?.avatar
+                  ? {
+                      uri: offerDetails.vendorOffers?.find(
+                        (offer) => offer.isAccepted
+                      )?.vendor?.avatar,
+                    }
+                  : require("../../../../assets/icon/avatar.png")
+              }
               style={{ width: 45, height: 45 }}
               resizeMode="cover"
               className="rounded-full border border-pinklight"
@@ -409,101 +414,131 @@ export default function ClientOfferDetailsScreen() {
               </Text>
             </View>
           </View>
-
-          {/* Expires At */}
-          {offerDetails.expiresAt && (
-            <View style={{ marginTop: 16 }}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontFamily: "poppinsRegular",
-                  color: "#8C8D8B",
-                  marginBottom: 4,
-                }}
-              >
-                Expires At
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontFamily: "poppinsRegular",
-                  color: "#1F2937",
-                }}
-              >
-                {DateConverter(offerDetails.expiresAt)}
-              </Text>
-            </View>
-          )}
         </View>
       </ScrollView>
 
       {/* Bottom Action Buttons */}
-      {offerDetails.status !== "SELECTED" ||
-        offerDetails.status !== "Selected" ||
-        offerDetails.status !== "CANCELLED" ||
-        (offerDetails.status !== "Cancelled" && (
-          <View
+      {offerDetails.status === "PENDING" && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: 10,
+            left: 0,
+            right: 0,
+            backgroundColor: "#FFFFFF",
+            paddingHorizontal: 16,
+            paddingVertical: 40,
+            borderTopWidth: 1,
+            borderTopColor: "#F3F4F6",
+            flexDirection: "row",
+            gap: 12,
+          }}
+        >
+          <TouchableOpacity
             style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
+              flex: 1,
+              backgroundColor: "#ED2584",
+              paddingVertical: 12,
+              borderRadius: 8,
+              alignItems: "center",
+            }}
+            onPress={() =>
+              navigation.navigate("TipMore", { offer: offerDetails })
+            }
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                fontFamily: "poppinsMedium",
+                color: "#FFFFFF",
+              }}
+            >
+              Tip More
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              flex: 1,
               backgroundColor: "#FFFFFF",
-              paddingHorizontal: 16,
-              paddingVertical: 40,
-              borderTopWidth: 1,
-              borderTopColor: "#F3F4F6",
-              flexDirection: "row",
-              gap: 12,
+              paddingVertical: 12,
+              borderRadius: 8,
+              alignItems: "center",
+              borderWidth: 1,
+              borderColor: "#ED2584",
+            }}
+            onPress={() => setShowModal(true)}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                fontFamily: "poppinsMedium",
+                color: "#ED2584",
+              }}
+            >
+              Cancel Offer
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      {offerDetails.status === "ACCEPTED" && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: 10,
+            left: 0,
+            right: 0,
+            backgroundColor: "#FFFFFF",
+            paddingHorizontal: 16,
+            paddingVertical: 40,
+            borderTopWidth: 1,
+            borderTopColor: "#F3F4F6",
+            flexDirection: "row",
+            gap: 12,
+          }}
+        >
+          <Pressable
+            style={{
+              flex: 1,
+              backgroundColor: "#9CA3AF",
+              paddingVertical: 12,
+              borderRadius: 8,
+              alignItems: "center",
             }}
           >
-            <TouchableOpacity
+            <Text
               style={{
-                flex: 1,
-                backgroundColor:
-                  offerDetails.status === "PENDING" ? "#ED2584" : "#9CA3AF",
-                paddingVertical: 12,
-                borderRadius: 8,
-                alignItems: "center",
+                fontSize: 16,
+                fontFamily: "poppinsMedium",
+                color: "#FFFFFF",
               }}
-              onPress={() =>
-                navigation.navigate("TipMore", { offer: offerDetails })
-              }
             >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontFamily: "poppinsMedium",
-                  color: "#FFFFFF",
-                }}
-              >
-                Tip More
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+              Tip More
+            </Text>
+          </Pressable>
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              backgroundColor: "#FFFFFF",
+              paddingVertical: 12,
+              borderRadius: 8,
+              alignItems: "center",
+              borderWidth: 1,
+              borderColor: "#ED2584",
+            }}
+            onPress={() => setShowModal(true)}
+          >
+            <Text
               style={{
-                flex: 1,
-                backgroundColor: "#FFFFFF",
-                paddingVertical: 12,
-                borderRadius: 8,
-                alignItems: "center",
-                borderWidth: 1,
-                borderColor: "#ED2584",
+                fontSize: 16,
+                fontFamily: "poppinsMedium",
+                color: "#ED2584",
               }}
-              onPress={() => setShowModal(true)}
             >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontFamily: "poppinsMedium",
-                  color: "#ED2584",
-                }}
-              >
-                Cancel Offer
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+              Cancel Offer
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <BottomModal
         isVisible={showModal}
         onClose={() => {

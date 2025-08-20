@@ -19,7 +19,7 @@ export default function LegalScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Legal
         </Text>
@@ -35,7 +35,7 @@ export default function LegalScreen() {
             <Octicons name="shield" size={22} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-black"
+            className="flex-1 text-[16px] text-black"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Privacy Policy
@@ -50,10 +50,42 @@ export default function LegalScreen() {
             <MaterialIcons name="description" size={22} color="#fff" />
           </View>
           <Text
-            className="flex-1 text-[14px] text-black"
+            className="flex-1 text-[16px] text-black"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Terms of Use
+          </Text>
+          <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-row items-center bg-white rounded-xl px-4 py-4 mb-4 shadow-sm border border-[#F6F6F6]"
+          onPress={() => navigation.navigate("ServiceLevelAgreementScreen")}
+        >
+          <View className="bg-primary p-2 rounded-full mr-4">
+            <MaterialIcons name="description" size={22} color="#fff" />
+          </View>
+          <Text
+            className="flex-1 text-[16px] text-black"
+            style={{ fontFamily: "poppinsRegular" }}
+          >
+            Service Level Agreement
+          </Text>
+          <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-row items-center bg-white rounded-xl px-4 py-4 mb-4 shadow-sm border border-[#F6F6F6]"
+          onPress={() =>
+            navigation.navigate("VendorDataProtectionAgreementScreen")
+          }
+        >
+          <View className="bg-primary p-2 rounded-full mr-4">
+            <MaterialIcons name="description" size={22} color="#fff" />
+          </View>
+          <Text
+            className="flex-1 text-[16px] text-black"
+            style={{ fontFamily: "poppinsRegular" }}
+          >
+            Data Protection Agreement
           </Text>
           <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
         </TouchableOpacity>

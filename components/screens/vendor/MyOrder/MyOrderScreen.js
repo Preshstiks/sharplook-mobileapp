@@ -59,7 +59,7 @@ export default function MyOrderScreen() {
       <Empty width={150} height={150} />
       <Text
         style={{ fontFamily: "poppinsRegular" }}
-        className="text-[12px] text-center"
+        className="text-[14px] text-center"
       >
         {tab === "PENDING"
           ? "You have no pending order"
@@ -158,7 +158,7 @@ export default function MyOrderScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: "poppinsMedium" }} className="text-[16px]">
+        <Text style={{ fontFamily: "poppinsMedium" }} className="text-[18px]">
           Orders
         </Text>
         <View style={{ width: 26 }} />
@@ -171,7 +171,7 @@ export default function MyOrderScreen() {
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[14px] ${tab === "" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             All
           </Text>
@@ -182,7 +182,7 @@ export default function MyOrderScreen() {
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "PENDING" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[14px] ${tab === "PENDING" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             Pending
           </Text>
@@ -193,7 +193,7 @@ export default function MyOrderScreen() {
         >
           <Text
             style={{ fontFamily: "latoBold" }}
-            className={`text-[12px] ${tab === "DELIVERED" ? "text-white" : "text-[#A5A5A5]"}`}
+            className={`text-[14px] ${tab === "DELIVERED" ? "text-white" : "text-[#A5A5A5]"}`}
           >
             Delivered
           </Text>
@@ -235,14 +235,14 @@ export default function MyOrderScreen() {
                 <View className="flex-col flex-1">
                   <View className="flex-row justify-between items-center mb-2">
                     <Text
-                      className="text-[12px] text-[#0000004D]"
+                      className="text-[14px] text-[#0000004D]"
                       style={{ fontFamily: "latoBold" }}
                     >
                       {HexConverter(order?.id)}{" "}
                       {formatDateTime(order?.createdAt)}
                     </Text>
                     <Text
-                      className={`text-[12px] ${
+                      className={`text-[14px] ${
                         orderStatus === "PENDING"
                           ? "text-pending"
                           : orderStatus === "DELIVERED"
@@ -256,13 +256,13 @@ export default function MyOrderScreen() {
                   </View>
                   <View className="flex-row items-center justify-between">
                     <Text
-                      className="text-[18px] text-fadedDark"
+                      className="text-[20px] text-fadedDark"
                       style={{ fontFamily: "latoBold" }}
                     >
                       {formatAmount(totalPrice)}
                     </Text>
                     <Text
-                      className="text-[10px] text-gray-500 mb-1"
+                      className="text-[12px] text-gray-500 mb-1"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       {order.items?.length} item
@@ -272,13 +272,13 @@ export default function MyOrderScreen() {
 
                   <View className="flex-row justify-between items-center mt-2">
                     <Text
-                      className="text-[14px]"
+                      className="text-[16px]"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       {clientName}
                     </Text>
                     <Text
-                      className="text-faintDark text-[12px]"
+                      className="text-faintDark text-[14px]"
                       style={{ fontFamily: "latoRegular" }}
                     >
                       View details &gt;

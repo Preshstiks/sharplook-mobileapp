@@ -20,24 +20,24 @@ export default function TermsOfUseIntellectualPropertyScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Terms of Use
         </Text>
         <View style={{ width: 26 }} />
       </View>
       <ScrollView className="flex-1 px-4 " showsVerticalScrollIndicator={false}>
-        <Text className="text-[15px] mt-2" style={{ fontFamily: "latoBold" }}>
+        <Text className="text-[17px] mt-2" style={{ fontFamily: "latoBold" }}>
           Intellectual Property
         </Text>
         <Text
-          className="text-[14px] mt-2 text-black mb-4"
+          className="text-[16px] mt-2 text-black mb-4"
           style={{ fontFamily: "latoBold" }}
         >
           Last updated: August 5, 2025
         </Text>
         <Text
-          className="text-[14px] text-black leading-6 mb-4"
+          className="text-[16px] text-black leading-6 mb-4"
           style={{ fontFamily: "poppinsRegular" }}
         >
           <Text style={{ fontFamily: "poppinsBold" }}>Ownership:</Text> All

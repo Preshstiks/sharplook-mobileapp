@@ -164,7 +164,7 @@ export default function FilterScreen({ navigation }) {
         </View>
 
         {/* Price Range */}
-        <Text
+        {/* <Text
           style={{
             fontFamily: "poppinsMedium",
             fontSize: 16,
@@ -192,8 +192,8 @@ export default function FilterScreen({ navigation }) {
             maximumTrackTintColor="#E0E0E0"
             thumbTintColor="#EB278D"
           />
-        </View>
-        <View
+        </View> */}
+        {/* <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
@@ -219,7 +219,7 @@ export default function FilterScreen({ navigation }) {
           >
             ₦ 1M
           </Text>
-        </View>
+        </View> */}
 
         {/* Ratings */}
         <Text

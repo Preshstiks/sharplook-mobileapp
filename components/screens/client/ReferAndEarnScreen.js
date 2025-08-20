@@ -99,59 +99,30 @@ export default function ReferAndEarnScreen() {
             style={{ fontFamily: "latoBold" }}
             className="text-[32px] text-center mb-2 text-primary"
           >
-            ₦{analytics.totalEarnings || 0}
+            Refer a Friend, Earn{"\n"}
+            <Text>₦100 Each!</Text>
           </Text>
           <Text
-            style={{ fontFamily: "latoRegular" }}
-            className="text-[16px] text-center text-faintDark"
+            style={{ fontFamily: "poppinsRegular" }}
+            className="text-[14px] text-center"
           >
-            Total Earnings
-          </Text>
-          <Text
-            style={{ fontFamily: "latoBold" }}
-            className="text-[18px] text-center mb-2 text-primary"
-          >
-            {analytics.totalReferrals || 0}
-          </Text>
-          <Text
-            style={{ fontFamily: "latoRegular" }}
-            className="text-[14px] text-center text-faintDark"
-          >
-            Total Referrals
-          </Text>
-          <Text
-            style={{ fontFamily: "latoBold" }}
-            className="text-[18px] text-center mb-2 text-primary"
-          >
-            {analytics.successfulReferrals || 0}
-          </Text>
-          <Text
-            style={{ fontFamily: "latoRegular" }}
-            className="text-[14px] text-center text-faintDark"
-          >
-            Successful Referrals
+            Invite your friends to join SharpLook as vendors. When they join and
+            start earning, you both get ₦100 credit.
           </Text>
         </View>
 
         <View style={styles.card}>
           <Text
-            style={{ fontFamily: "latoBold" }}
-            className="text-[16px] text-center mb-2 text-primary"
-          >
-            {referralCode}
-          </Text>
-          <Text
-            style={{ fontFamily: "latoRegular" }}
-            className="text-[14px] text-center text-faintDark mb-4"
+            style={{ fontFamily: "poppinsMedium" }}
+            className="text-[16px] mb-2"
           >
             Your Referral Code
           </Text>
           <Text
-            style={{ fontFamily: "latoBold" }}
-            className="text-[16px] text-center mb-2 text-primary"
+            style={{ fontFamily: "poppinsRegular" }}
+            className="text-[12px] text-faintDark2"
           >
-            Share your referral code with friends and earn ₦100 for each
-            successful referral!
+            Share this code with your friends!
           </Text>
           <View style={styles.codeRow} className="border border-[#EBEBEA]">
             <Text style={styles.code}>{user?.referralCode}</Text>
@@ -172,13 +143,13 @@ export default function ReferAndEarnScreen() {
         <View style={styles.card}>
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-[14px] mb-2"
+            className="text-[16px] mb-2"
           >
             Your Reward Summary
           </Text>
           <Text
             style={{ fontFamily: "poppinsRegular" }}
-            className="text-[10px] text-faintDark2"
+            className="text-[12px] text-faintDark2"
           >
             Your earnings and referral progress.
           </Text>
@@ -192,7 +163,7 @@ export default function ReferAndEarnScreen() {
           </View>
           <View style={styles.summaryRow}>
             <Ionicons name="people-outline" size={20} color="#EB278D" />
-            <Text style={styles.summaryLabel}>Friends Who Joined</Text>
+            <Text style={styles.summaryLabel}>Vendors Who Joined</Text>
             <Text style={styles.summaryValue}>
               {formatAmount(analytics?.totalReferrals)}
             </Text>
@@ -200,12 +171,7 @@ export default function ReferAndEarnScreen() {
         </View>
 
         <View className="mb-10" style={styles.card}>
-          <Text
-            style={{ fontFamily: "latoBold" }}
-            className="text-[16px] text-faintDark"
-          >
-            Referral History
-          </Text>
+          <Text style={styles.sectionTitle}>Referral History</Text>
           {referralTransactions.length > 0 ? (
             referralTransactions.map((tx, idx) => (
               <View key={idx} style={styles.txRow}>
@@ -220,7 +186,7 @@ export default function ReferAndEarnScreen() {
                 <View style={{ flex: 1 }}>
                   <Text
                     style={styles.txDesc}
-                  >{`Friend ${tx.referredUser.firstName} joined with your referral code`}</Text>
+                  >{`${tx.referredUser.firstName} joined with your referral code`}</Text>
                   <Text style={styles.txDate}>
                     {formatDateTime(tx.createdAt)}
                   </Text>

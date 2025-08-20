@@ -211,7 +211,6 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
       fetchAnalytics();
     }, [])
   );
-  console.log({ analytics });
   // Skeleton Loader Component
   const SkeletonBox = ({ width, height, style }) => {
     const animatedOpacity = shimmerAnim.interpolate({
@@ -286,7 +285,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text
-          className="flex-1 text-center text-[14px]"
+          className="flex-1 text-center text-[16px]"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Analytics and Insight
@@ -298,7 +297,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
         <View className="bg-white rounded-2xl border border-[#ED2584] mt-6 mb-6 p-4">
           <View className="flex-row justify-between items-center mb-2">
             <Text
-              className="text-[12px] text-[#ED2584]"
+              className="text-[14px] text-[#ED2584]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               Purchase
@@ -308,7 +307,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
               onPress={handleOpenPicker}
             >
               <Text
-                className="text-white text-[12px] mr-1"
+                className="text-white text-[14px] mr-1"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 {months[selectedMonth - 1]} {selectedYear}
@@ -446,7 +445,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
             </View>
           </Modal>
           <Text
-            className="text-[18px] text-[#ED2584] mb-2"
+            className="text-[20px] text-[#ED2584] mb-2"
             style={{ fontFamily: "latoBold" }}
           >
             {formatAmount(
@@ -456,7 +455,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
           {filteredAnalytics &&
             filteredAnalytics.recentEarnings.length === 0 && (
               <Text
-                className="text-[12px] text-gray-500 mb-2 text-center"
+                className="text-[14px] text-gray-500 mb-2 text-center"
                 style={{ fontFamily: "poppinsRegular" }}
               >
                 No data available for {months[selectedMonth - 1]} {selectedYear}
@@ -481,7 +480,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
             yAxisColor="transparent"
             xAxisLabelTextStyle={{
               color: "#ED2584",
-              fontSize: 12,
+              fontSize: 14,
             }}
             thickness={3}
             animateOnDataChange
@@ -491,7 +490,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
 
         {/* Transaction Summary */}
         <Text
-          className="text-[16px] mb-2"
+          className="text-[18px] mb-2"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Transaction Summary
@@ -549,7 +548,7 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
 
         {/* Recent Earnings */}
         <Text
-          className="text-[16px] mb-2"
+          className="text-[18px] mb-2"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Recent Earnings
@@ -567,13 +566,13 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
                 <Ionicons name="checkmark-circle" size={20} color="#ED2584" />
                 <View className="ml-2 flex-1">
                   <Text
-                    className="text-[14px]"
+                    className="text-[16px]"
                     style={{ fontFamily: "latoBold" }}
                   >
                     {HexConverter(earning?.sourceId)}
                   </Text>
                   <Text
-                    className="text-[12px] text-[#00000099]"
+                    className="text-[14px] text-[#00000099]"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     {earning?.clientDetails
@@ -583,13 +582,13 @@ export default function AnalyticsAndInsightScreen({ navigation }) {
                 </View>
                 <View className="items-end">
                   <Text
-                    className="text-[14px]"
+                    className="text-[16px]"
                     style={{ fontFamily: "latoBold" }}
                   >
                     {formatAmount(earning?.amount)}
                   </Text>
                   <Text
-                    className="text-[12px] text-[#00000099]"
+                    className="text-[14px] text-[#00000099]"
                     style={{ fontFamily: "poppinsRegular" }}
                   >
                     {getRelativeTime(earning?.date)}
@@ -627,12 +626,12 @@ const styles = StyleSheet.create({
   },
   pickerTitle: {
     paddingBottom: 60,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
     color: "#333",
   },
   pickerItem: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#666",
     textAlign: "center",
   },

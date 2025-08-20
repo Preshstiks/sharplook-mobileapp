@@ -231,22 +231,23 @@ export default function ClientWithdrawScreen({ navigation }) {
                   {errors.submit}
                 </Text>
               )}
-              <View style={{ height: 24 }} />
+
+              {/* Withdraw Button */}
+              <View className="mt-2 mb-6">
+                <AuthButton
+                  isloading={isSubmitting}
+                  title="Withdraw"
+                  onPress={handleSubmit}
+                  disabled={
+                    loading ||
+                    isSubmitting ||
+                    formikSubmitting ||
+                    isFetching ||
+                    !accountVerified
+                  }
+                />
+              </View>
             </ScrollView>
-            <View className="px-4 pb-6 bg-white">
-              <AuthButton
-                isloading={isSubmitting}
-                title="Withdraw"
-                onPress={handleSubmit}
-                disabled={
-                  loading ||
-                  isSubmitting ||
-                  formikSubmitting ||
-                  isFetching ||
-                  !accountVerified
-                }
-              />
-            </View>
           </>
         )}
       </Formik>

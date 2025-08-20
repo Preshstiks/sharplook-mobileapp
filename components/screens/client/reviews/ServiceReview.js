@@ -17,6 +17,7 @@ import {
 import { useState } from "react";
 import { HttpClient } from "../../../../api/HttpClient";
 import { EmptyData } from "../../../reusuableComponents/EmptyData";
+import { useAuth } from "../../../../context/AuthContext";
 
 // Inline ReviewSkeleton component
 function ReviewSkeleton() {
@@ -119,9 +120,9 @@ export default function ServiceReviewsScreen() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const { user } = useAuth();
   const hasReviewedThisService = reviews.some(
-    (review) => review.serviceId === serviceId
+    (review) => review.clientId === user?.id
   );
   useFocusEffect(
     useCallback(() => {
@@ -145,7 +146,6 @@ export default function ServiceReviewsScreen() {
       fetchReviews();
     }, [vendorId])
   );
-
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -253,9 +253,9 @@ export default function ServiceReviewsScreen() {
           <View key={review.id || review._id} className="flex-row mb-6">
             <View className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden mr-3 items-center justify-center">
               {/* Use SVG or fallback to Image if SVG not supported */}
-              {review.avatarUrl ? (
+              {review?.client?.avatar ? (
                 <Image
-                  source={{ uri: review.avatarUrl }}
+                  source={{ uri: review?.client?.avatar }}
                   style={{ width: 48, height: 48 }}
                   resizeMode="cover"
                 />
@@ -269,7 +269,7 @@ export default function ServiceReviewsScreen() {
                   className="text-[14px] font-semibold text-faintDark"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
-                  {review.name || review.userName || "Anonymous"}
+                  {review?.client?.lastName} {review?.client?.firstName}
                 </Text>
                 <View className="flex-row items-center">
                   <Text

@@ -6,13 +6,9 @@ import {
   ActivityIndicator,
   Modal,
   Linking,
+  ScrollView,
 } from "react-native";
-import {
-  Ionicons,
-  FontAwesome,
-  Entypo,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { Ionicons, Entypo } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import TawkToChatForClient from "../../../TawkToChatForClient";
 import { useAuth } from "../../../../context/AuthContext";
@@ -49,6 +45,104 @@ export default function HelpSupportScreen() {
   const handleEmailPress = () => {
     Linking.openURL("mailto:hello@sharplook.beauty");
   };
+
+  // Get Started data
+  const getStartedData = [
+    {
+      id: 1,
+      title: "Creating an account",
+      content:
+        "Sign up using your email, phone number, or social media account. Fill in your basic details, verify your phone number, and you're ready to start booking or offering services.",
+    },
+    {
+      id: 2,
+      title: "Navigating the app",
+      content:
+        "From the home screen, browse services, view top vendors, check promotions, and manage your bookings. Use the menu to access your profile, wallet, chat, and settings.",
+    },
+  ];
+
+  // Payment data
+  const paymentData = [
+    {
+      id: 1,
+      title: "Accepted payment methods",
+      content:
+        "We accept card payments, bank transfers, USSD, and wallet balance.",
+    },
+    {
+      id: 2,
+      title: "Funding your wallet",
+      content:
+        'Go to "SharpPay" → "Fund Wallet" → Choose Paystack and follow the payment steps.',
+    },
+    {
+      id: 3,
+      title: "Payment security & refunds",
+      content:
+        "All transactions are secure. Refunds are processed based on our policy if services aren't delivered.",
+    },
+  ];
+
+  // Booking System data
+  const bookingSystemData = [
+    {
+      id: 1,
+      title: "How to book a vendor",
+      content:
+        "Search for a vendor, view their profile, choose a service, and pick a date and time.",
+    },
+    {
+      id: 2,
+      title: "Cancelling a booking",
+      content:
+        "Cancel anytime before the service date from your booking details page.",
+    },
+    {
+      id: 3,
+      title: "Booking statuses",
+      content: [
+        "Pending – awaiting vendor's confirmation",
+        "Accepted – vendor has accepted",
+        "Completed – service is done",
+      ],
+    },
+  ];
+
+  // Reusable card component
+  const HelpCard = ({ title, content, icon }) => (
+    <View className="bg-white rounded-xl px-4 py-4 mb-3 shadow-sm border border-[#F6F6F6]">
+      <View className="flex-row items-center">
+        <View className="flex-1">
+          <Text
+            className="text-[16px] mb-1"
+            style={{ fontFamily: "poppinsSemiBold" }}
+          >
+            {title}
+          </Text>
+          {Array.isArray(content) ? (
+            content.map((line, index) => (
+              <Text
+                key={index}
+                className="text-[14px] text-[#00000080]"
+                style={{ fontFamily: "poppinsRegular" }}
+              >
+                {line}
+              </Text>
+            ))
+          ) : (
+            <Text
+              className="text-[14px] text-[#00000080]"
+              style={{ fontFamily: "poppinsRegular" }}
+            >
+              {content}
+            </Text>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -64,112 +158,64 @@ export default function HelpSupportScreen() {
         </Text>
         <View style={{ width: 26 }} />
       </View>
-      {/* Search Bar */}
-      <View className="px-4 mt-4">
-        {/* <View className="flex-row items-center bg-[#F6F6F6] rounded-lg px-3 py-2 mb-4">
-          <Ionicons name="search" size={18} color="#BDBDBD" />
-          <TextInput
-            className="flex-1 ml-2 text-[14px]"
-            placeholder="Search Help Center"
-            style={{ fontFamily: "latoRegular" }}
-          />
-        </View> */}
-        <Text
-          className="text-[18px] mb-5 pt-5"
-          style={{ fontFamily: "latoBold" }}
-        >
-          Help Topics
-        </Text>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("GetStartedScreen")}
-          className="flex-row items-center bg-white rounded-xl px-4 py-4 mb-3 shadow-sm border border-[#F6F6F6]"
-        >
-          <View className="bg-primary p-2 rounded-full mr-4">
-            <FontAwesome name="flag" size={22} color="#fff" />
-          </View>
-          <Text
-            className="flex-1 text-[16px] text-black"
-            style={{ fontFamily: "poppinsRegular" }}
-          >
-            Get Started
-          </Text>
-          <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("PaymentScreen")}
-          className="flex-row items-center bg-white rounded-xl px-4 py-4 mb-3 shadow-sm border border-[#F6F6F6]"
-        >
-          <View className="bg-primary p-2 rounded-full mr-4">
-            <MaterialIcons name="payment" size={22} color="#fff" />
-          </View>
-          <Text
-            className="flex-1 text-[16px] text-black"
-            style={{ fontFamily: "poppinsRegular" }}
-          >
-            Payment
-          </Text>
-          <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("BookingSystemScreen")}
-          className="flex-row items-center bg-white rounded-xl px-4 py-4 mb-3 shadow-sm border border-[#F6F6F6]"
-        >
-          <View className="bg-primary p-2 rounded-full mr-4">
-            <MaterialIcons name="event-available" size={22} color="#fff" />
-          </View>
-          <Text
-            className="flex-1 text-[16px] text-black"
-            style={{ fontFamily: "poppinsRegular" }}
-          >
-            Booking System
-          </Text>
-          <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
-        </TouchableOpacity>
-        {/* <TouchableOpacity className="flex-row items-center bg-white rounded-xl px-4 py-4 mb-3 shadow-sm border border-[#F6F6F6]">
-          <View className="bg-primary p-2 rounded-full mr-4">
-            <Entypo name="chat" size={22} color="#fff" />
-          </View>
-          <Text
-            className="flex-1 text-[14px] text-black"
-            style={{ fontFamily: "poppinsRegular" }}
-          >
-            Chat
-          </Text>
-          <Ionicons name="chevron-forward" size={20} color="#A9A9A9" />
-        </TouchableOpacity> */}
-      </View>
-      {/* Contact Us Section */}
-      <View className="items-center mt-10">
-        <Text className="text-[18px] mb-4" style={{ fontFamily: "latoBold" }}>
-          Contact Us
-        </Text>
-        <Text
-          className="text-[14px] text-[#555] mb-3"
-          style={{ fontFamily: "poppinsRegular" }}
-        >
-          We are ready to hear from you via email
-        </Text>
-        {/* <Text
-          className="text-[12px] text-[#555] mb-3"
-          style={{ fontFamily: "poppinsRegular" }}
-        >
-          We are ready to hear from you
-        </Text> */}
-        <View className="flex-row justify-center gap-[40px] items-center mb-4">
-          {/* <TouchableOpacity>
-            <FontAwesome name="instagram" size={32} color="#EB278D" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <FontAwesome name="facebook-square" size={32} color="#1877F3" />
-          </TouchableOpacity> */}
-          <TouchableOpacity onPress={handleEmailPress}>
-            <Text className="text-primary underline">
-              hello@sharplook.beauty
+      <ScrollView>
+        {/* Help Topics */}
+        <View className="px-4 mt-4">
+          {/* Get Started Section */}
+          <View className="items-center">
+            <Text
+              className="text-[14px] text-[#555] mb-3"
+              style={{ fontFamily: "poppinsRegular" }}
+            >
+              We are ready to hear from you via email
             </Text>
-            {/* <MaterialIcons name="email" size={32} color="black" /> */}
-          </TouchableOpacity>
+            <View className="flex-row justify-center gap-[40px] items-center mb-4">
+              <TouchableOpacity onPress={handleEmailPress}>
+                <Text className="text-primary underline">
+                  hello@sharplook.beauty
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View>
+            {getStartedData.map((item) => (
+              <HelpCard
+                key={item.id}
+                title={item.title}
+                content={item.content}
+                icon={item.icon}
+              />
+            ))}
+          </View>
+
+          {/* Payment Section */}
+          <View>
+            {paymentData.map((item) => (
+              <HelpCard
+                key={item.id}
+                title={item.title}
+                content={item.content}
+                icon={item.icon}
+              />
+            ))}
+          </View>
+
+          {/* Booking System Section */}
+          <View className="mb-6">
+            {bookingSystemData.map((item) => (
+              <HelpCard
+                key={item.id}
+                title={item.title}
+                content={item.content}
+                icon={item.icon}
+              />
+            ))}
+          </View>
         </View>
-      </View>
+      </ScrollView>
+
+      {/* Contact Us Section */}
+
       <View className="absolute bottom-[85px] right-4">
         <View className="items-center">
           <TouchableOpacity

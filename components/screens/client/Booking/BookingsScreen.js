@@ -52,7 +52,6 @@ export default function BookingsScreen() {
       });
 
       socketRef.current.on("bookingUpdated", (data) => {
-        console.log("bookingUpdated:", JSON.stringify(data));
         const { bookingId, status } = data;
 
         if (bookingId && status) {
@@ -63,8 +62,6 @@ export default function BookingsScreen() {
                 : booking
             )
           );
-
-          console.log(`Updated booking ${bookingId} status to ${status}`);
         }
       });
     }
@@ -77,19 +74,16 @@ export default function BookingsScreen() {
     };
   }, [userId]);
 
-  // Join booking rooms when bookings change
   useEffect(() => {
     if (socketRef.current && bookings.length > 0) {
       bookings.forEach((booking) => {
         if (booking.id) {
           socketRef.current.emit("joinBookingRoom", { bookingId: booking.id });
-          console.log(`Joined booking room: ${booking.id}`);
         }
       });
     }
-  }, [bookings]); // Re-run when bookings array changes
+  }, [bookings]);
 
-  // Socket cleanup effect
   useEffect(() => {
     return () => {
       if (socketRef.current) {

@@ -152,12 +152,12 @@ export default function VendorBookingsScreen() {
           <View className="ml-3 flex-1">
             <Text
               style={{ fontFamily: "poppinsMedium" }}
-              className="text-white text-[16px]"
+              className="text-white text-[18px]"
             >
               {user?.vendorOnboarding?.businessName}
             </Text>
             <Text
-              className="text-white text-[12px] opacity-80"
+              className="text-white text-[14px] opacity-80"
               style={{ fontFamily: "poppinsRegular" }}
             >
               <Ionicons name="location-sharp" size={12} color="white" />
@@ -180,24 +180,24 @@ export default function VendorBookingsScreen() {
       >
         <View className="flex-1 items-center">
           <Text
-            className="text-[12px] text-[#A5A5A5]"
+            className="text-[14px] text-[#A5A5A5]"
             style={{ fontFamily: "latoRegular" }}
           >
             Total Bookings
           </Text>
-          <Text className="text-[18px] mt-1" style={{ fontFamily: "latoBold" }}>
+          <Text className="text-[20px] mt-1" style={{ fontFamily: "latoBold" }}>
             {totalBookings}
           </Text>
         </View>
         <View className="w-[1px] bg-[#FDE9F4] mx-4" />
         <View className="flex-1 items-center">
           <Text
-            className="text-[12px] text-[#A5A5A5]"
+            className="text-[14px] text-[#A5A5A5]"
             style={{ fontFamily: "latoRegular" }}
           >
             Total Amount
           </Text>
-          <Text className="text-[18px] mt-1" style={{ fontFamily: "latoBold" }}>
+          <Text className="text-[20px] mt-1" style={{ fontFamily: "latoBold" }}>
             {formatAmount(totalAmount)}
           </Text>
         </View>
@@ -222,7 +222,7 @@ export default function VendorBookingsScreen() {
       {/* Search */}
       <View className="mx-4 my-2">
         <TextInput
-          className="bg-[#F5F5F5] rounded-[8px] px-4 py-3 text-[14px]"
+          className="bg-[#F5F5F5] rounded-[8px] px-4 py-3 text-[16px]"
           placeholder="Search"
           value={search}
           onChangeText={setSearch}
@@ -236,7 +236,7 @@ export default function VendorBookingsScreen() {
           <View className="items-center justify-center py-8">
             <EmptySVG width={120} height={120} />
             <Text
-              className="text-[14px] text-gray-400 mt-2"
+              className="text-[16px] text-gray-400 mt-2"
               style={{ fontFamily: "poppinsRegular" }}
             >
               No bookings found
@@ -253,33 +253,33 @@ export default function VendorBookingsScreen() {
             >
               <View className="flex-row justify-between items-center mb-2">
                 <Text
-                  className="text-[12px] text-[#0000004D]"
+                  className="text-[14px] text-[#0000004D]"
                   style={{ fontFamily: "latoBold" }}
                 >
                   {HexConverter(b?.id)} {DateConverter(b.date)} {b.time}
                 </Text>
                 <Text
-                  className={`text-[12px] ${b.dispute !== null ? "text-[#ff0000]" : b.status === "ACCEPTED" ? "text-[#0D9488]" : b.status === "COMPLETED" ? "text-success" : "text-pending"}`}
+                  className={`text-[14px] ${b.dispute !== null ? "text-[#ff0000]" : b.status === "ACCEPTED" ? "text-[#0D9488]" : b.status === "COMPLETED" ? "text-success" : "text-pending"}`}
                   style={{ fontFamily: "latoBold" }}
                 >
                   {b?.dispute !== null ? "DISPUTED" : b?.status}
                 </Text>
               </View>
               <Text
-                className="text-[18px] text-fadedDark"
+                className="text-[20px] text-fadedDark"
                 style={{ fontFamily: "latoBold" }}
               >
                 {formatAmount(b?.price)}
               </Text>
               <View className="flex-row justify-between items-center mt-2">
                 <Text
-                  className="text-[14px]"
+                  className="text-[16px]"
                   style={{ fontFamily: "latoRegular" }}
                 >
                   {b?.client?.lastName} {b?.client?.firstName}
                 </Text>
                 <Text
-                  className="text-faintDark text-[12px]"
+                  className="text-faintDark text-[14px]"
                   style={{ fontFamily: "latoRegular" }}
                 >
                   View details &gt;

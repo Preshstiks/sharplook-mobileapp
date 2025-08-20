@@ -259,7 +259,6 @@ export default function AddLocationScreen({ navigation }) {
                     }
                   })
                   .catch(function(error) { 
-                    console.log('Geocoding error:', error);
                     marker.bindPopup('You are here').openPopup();
                   });
               }

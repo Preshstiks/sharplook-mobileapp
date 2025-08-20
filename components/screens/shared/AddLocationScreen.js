@@ -243,7 +243,6 @@ export default function ClientAddLocationScreen({ navigation }) {
                     }
                   })
                   .catch(function(error) { 
-                    console.log('Geocoding error:', error);
                     marker.bindPopup('You are here').openPopup();
                   });
               }

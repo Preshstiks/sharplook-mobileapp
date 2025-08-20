@@ -36,7 +36,6 @@ export default function ClientOffersScreen() {
       setLoading(false);
     }
   };
-
   const fetchAcceptedOffers = async () => {
     try {
       setLoading(true);
@@ -372,15 +371,7 @@ export default function ClientOffersScreen() {
             Offers & Bookings
           </Text>
 
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <TouchableOpacity style={{ marginRight: 15 }}>
-              <Ionicons
-                name="notifications-outline"
-                size={22}
-                color="#1F2937"
-              />
-            </TouchableOpacity>
-          </View>
+          <View style={{ width: 26 }} />
         </View>
 
         {/* Filter Tabs */}
@@ -456,11 +447,7 @@ export default function ClientOffersScreen() {
           Offers & Bookings
         </Text>
 
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <TouchableOpacity style={{ marginRight: 15 }}>
-            <Ionicons name="notifications-outline" size={22} color="#1F2937" />
-          </TouchableOpacity>
-        </View>
+        <View style={{ width: 26 }} />
       </View>
 
       {/* Filter Tabs */}

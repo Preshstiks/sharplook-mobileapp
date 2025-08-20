@@ -259,14 +259,14 @@ export default function NotificationList() {
             </View>
             <View style={{ flex: 1 }}>
               <Text
-                className="text-[14px] opacity-60"
+                className="text-[16px] opacity-60"
                 style={{ fontFamily: "latoRegular" }}
               >
                 {item.message}
               </Text>
             </View>
             <Text
-              className="text-[10px] opacity-60 mt-1"
+              className="text-[12px] opacity-60 mt-1"
               style={{ fontFamily: "latoRegular" }}
             >
               {getRelativeTime(item.createdAt)}

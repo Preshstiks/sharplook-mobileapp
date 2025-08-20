@@ -159,7 +159,7 @@ export default function VendorOffersScreen() {
 
         <Text
           style={{
-            fontSize: 14,
+            fontSize: 16,
             fontFamily: "poppinsMedium",
             color: "#1F2937",
           }}
@@ -193,7 +193,7 @@ export default function VendorOffersScreen() {
           <Text
             style={{
               textAlign: "center",
-              fontSize: 12,
+              fontSize: 14,
               fontFamily: "poppinsRegular",
               color: activeTab === "nearby" ? "#FFFFFF" : "#6B7280",
             }}
@@ -215,7 +215,7 @@ export default function VendorOffersScreen() {
           <Text
             style={{
               textAlign: "center",
-              fontSize: 12,
+              fontSize: 14,
               fontFamily: "poppinsRegular",
               color: activeTab === "all" ? "#FFFFFF" : "#6B7280",
             }}
@@ -277,7 +277,7 @@ export default function VendorOffersScreen() {
                   <View style={{ flex: 1 }}>
                     <Text
                       style={{
-                        fontSize: 14,
+                        fontSize: 16,
                         fontFamily: "poppinsMedium",
                         color: "#1F2937",
                         marginBottom: 4,
@@ -287,7 +287,7 @@ export default function VendorOffersScreen() {
                     </Text>
                     <Text
                       style={{
-                        fontSize: 10,
+                        fontSize: 12,
                         fontFamily: "poppinsRegular",
                         color: "#8C8D8B",
                         marginBottom: 4,
@@ -297,7 +297,7 @@ export default function VendorOffersScreen() {
                     </Text>
                     <Text
                       style={{
-                        fontSize: 14,
+                        fontSize: 16,
                         fontFamily: "poppinsMedium",
                         color: "#ED2584",
                       }}
@@ -320,7 +320,7 @@ export default function VendorOffersScreen() {
                     >
                       <Text
                         style={{
-                          fontSize: 12,
+                          fontSize: 14,
                           fontFamily: "poppinsMedium",
                           color: "#ED2584",
                         }}
@@ -332,7 +332,7 @@ export default function VendorOffersScreen() {
                     </View>
                     <Text
                       style={{
-                        fontSize: 12,
+                        fontSize: 14,
                         fontFamily: "poppinsRegular",
                         color: "#9CA3AF",
                       }}

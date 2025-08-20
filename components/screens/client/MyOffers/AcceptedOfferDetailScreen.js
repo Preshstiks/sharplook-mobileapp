@@ -109,9 +109,6 @@ export default function AcceptedOfferDetailScreen() {
       });
 
       // Debug the first vendor's structure more deeply
-      if (res.data.data.vendors?.[0]) {
-        const firstVendor = res.data.data.vendors[0];
-      }
 
       setAcceptedOffer(res.data.data.vendors);
     } catch (error) {
@@ -119,7 +116,6 @@ export default function AcceptedOfferDetailScreen() {
       setLoading(false);
     }
   };
-
   useFocusEffect(
     useCallback(() => {
       getAcceptedOffer();
@@ -284,8 +280,8 @@ export default function AcceptedOfferDetailScreen() {
                   <View>
                     <Image
                       source={
-                        vendor?.vendor?.avatar
-                          ? { uri: vendor.vendor.avatar }
+                        vendor?.avatar
+                          ? { uri: vendor?.avatar }
                           : require("../../../../assets/icon/avatar.png")
                       }
                       className="w-20 border border-pinklight h-20 rounded-full mb-2"

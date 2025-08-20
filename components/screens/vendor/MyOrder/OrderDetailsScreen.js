@@ -40,7 +40,7 @@ export default function OrderDetailsScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: "poppinsMedium" }} className="text-[16px]">
+        <Text style={{ fontFamily: "poppinsMedium" }} className="text-[18px]">
           Order details
         </Text>
         <View className="relative">
@@ -52,14 +52,14 @@ export default function OrderDetailsScreen() {
         {/* Status */}
         <View className="mt-6 mb-2">
           <Text
-            className="text-[14px] mb-3 text-[#A5A5A5]"
+            className="text-[16px] mb-3 text-[#A5A5A5]"
             style={{ fontFamily: "poppinsMedium" }}
           >
             Order{" "}
             <Text className="text-fadedDark">{HexConverter(order?.id)}</Text>
           </Text>
           <Text
-            className={`text-[12px] ${order?.status === "PENDING" ? "text-pending" : order?.status === "DELIVERED" ? "text-success" : ""}`}
+            className={`text-[14px] ${order?.status === "PENDING" ? "text-pending" : order?.status === "DELIVERED" ? "text-success" : ""}`}
             style={{ fontFamily: "poppinsMedium" }}
           >
             {order?.status === "PENDING"
@@ -81,24 +81,24 @@ export default function OrderDetailsScreen() {
         >
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-[16px] mb-1"
+            className="text-[18px] mb-1"
           >
             Order Details
           </Text>
           <Text
-            className="text-primary text-[12px] mb-1"
+            className="text-primary text-[14px] mb-1"
             style={{ fontFamily: "poppinsSemiBold" }}
           >
             {formatDateTime(order?.createdAt)}
           </Text>
           <Text
-            className="text-[12px] mb-2"
+            className="text-[14px] mb-2"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Delivery Type: {order?.order?.deliveryType}
           </Text>
           <Text
-            className="text-[12px] mb-2"
+            className="text-[14px] mb-2"
             style={{ fontFamily: "poppinsRegular" }}
           >
             To: {order?.order?.user?.location}
@@ -106,13 +106,13 @@ export default function OrderDetailsScreen() {
 
           <View className="flex-row justify-between mb-1">
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {order?.items[0]?.productName}
             </Text>
             <Text
-              className="text-[14px] text-[#00000066]"
+              className="text-[16px] text-[#00000066]"
               style={{ fontFamily: "latoBold" }}
             >
               {` ${formatAmount(order?.items[0]?.price)} x ${order?.items[0]?.quantity}`}
@@ -132,12 +132,12 @@ export default function OrderDetailsScreen() {
         >
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-[16px] mb-1"
+            className="text-[18px] mb-1"
           >
             Payment Summary
           </Text>
           <Text
-            className="text-primary text-[12px] mb-1"
+            className="text-primary text-[14px] mb-1"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Payment Date: {DateConverter(order?.createdAt)}
@@ -145,12 +145,12 @@ export default function OrderDetailsScreen() {
           <View className="h-[1px] mt-3 mb-4 bg-[#00000013]" />
           <View className="flex-row justify-between mb-1">
             <Text
-              className="text-[12px] mb-2"
+              className="text-[14px] mb-2"
               style={{ fontFamily: "poppinsRegular" }}
             >
               Total Payment{" "}
             </Text>
-            <Text className="text-[14px]" style={{ fontFamily: "latoBold" }}>
+            <Text className="text-[16px]" style={{ fontFamily: "latoBold" }}>
               {formatAmount(order?.total)}
             </Text>
           </View>
@@ -168,19 +168,19 @@ export default function OrderDetailsScreen() {
         >
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-[16px] mb-2"
+            className="text-[18px] mb-2"
           >
             Customer's Details
           </Text>
           <View className="flex-row justify-between mt-2 mb-1">
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               Client's Name
             </Text>
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {order?.order?.user?.lastName} {order?.order?.user?.firstName}
@@ -188,13 +188,13 @@ export default function OrderDetailsScreen() {
           </View>
           <View className="flex-row justify-between mb-1">
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "popptotalAmountinsRegular" }}
             >
               Phone Number
             </Text>
             <Text
-              className="text-[12px] text-[#00000066]"
+              className="text-[14px] text-[#00000066]"
               style={{ fontFamily: "poppinsRegular" }}
             >
               {order?.order?.user?.phone}

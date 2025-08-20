@@ -8,29 +8,6 @@ import LegalScreen from "./LegalScreen";
 import TermsOfUseScreen from "./TermsOfUseScreen";
 import PrivacyPolicyScreen from "./PrivacyPolicyScreen";
 
-// New Privacy Policy Screen Components
-import DataControllerScreen from "./privacypolicy/DataControllerScreen";
-import PrivacyPolicyIntroScreen from "./privacypolicy/PrivacyPolicyIntroScreen";
-import AutomaticCollectionScreen from "./privacypolicy/AutomaticCollectionScreen";
-import CollectionOfPersonalInfoScreen from "./privacypolicy/CollectionOfPersonalInfoScreen";
-import CookiesAndUsageDataScreen from "./privacypolicy/CookiesAndUsageDataScreen";
-import HowWeShareInfoScreen from "./privacypolicy/HowWeShareInfoScreen";
-import ManagingPersonalInfoScreen from "./privacypolicy/ManagingPersonalInfoScreen";
-import UseAndProcessingScreen from "./privacypolicy/UseAndProcessingScreen";
-import UsageDataScreen from "./privacypolicy/UsageDataScreen";
-import InformationTransferScreen from "./privacypolicy/InformationTransferScreen";
-import ServiceProvidersScreen from "./privacypolicy/ServiceProvidersScreen";
-import PrivacyOfChildrenScreen from "./privacypolicy/PrivacyOfChildrenScreen";
-import NewslettersScreen from "./privacypolicy/NewslettersScreen";
-import LinksToOtherAppsScreen from "./privacypolicy/LinksToOtherAppsScreen";
-import InformationSecurityScreen from "./privacypolicy/InformationSecurityScreen";
-import DataBreachScreen from "./privacypolicy/DataBreachScreen";
-import LegalDisclosuresScreen from "./privacypolicy/LegalDisclosuresScreen";
-import ChangesAndAmendmentsScreen from "./privacypolicy/ChangesAndAmendmentsScreen";
-import IndemnityScreen from "./privacypolicy/IndemnityScreen";
-import AcceptanceOfPolicyScreen from "./privacypolicy/AcceptanceOfPolicyScreen";
-import ContactingUsScreen from "./privacypolicy/ContactingUsScreen";
-
 // New Terms of Use Screen Components
 import TermsOfUseAcceptanceOfTermsScreen from "./termsofuse/TermsOfUseAcceptanceOfTermsScreen";
 import TermsOfUseChangesToTermsScreen from "./termsofuse/TermsOfUseChangesToTermsScreen";
@@ -51,11 +28,11 @@ import TermsOfUseDisputeResolutionScreen from "./termsofuse/TermsOfUseDisputeRes
 import TermsOfUseSeverabilityScreen from "./termsofuse/TermsOfUseSeverabilityScreen";
 import TermsOfUseEntireAgreementScreen from "./termsofuse/TermsOfUseEntireAgreementScreen";
 import TermsOfUseContactUsScreen from "./termsofuse/TermsOfUseContactUsScreen";
+import ServiceLevelAgreementScreen from "./ServiceLevelAgreementScreen";
+import DataProtectionAgreementScreen from "./DataProtectionAgreementScreen";
 
 import ProfileScreen from "./ProfileScreen";
-import GetStartedScreen from "./GetStarted";
-import PaymentScreen from "./PaymentScreen";
-import BookingSystemScreen from "./BookingSystemScreen";
+
 const Stack = createNativeStackNavigator();
 
 export default function ProfileStack() {
@@ -153,82 +130,13 @@ export default function ProfileStack() {
         name="TermsOfUseContactUsScreen"
         component={TermsOfUseContactUsScreen}
       />
-
-      {/* New Privacy Policy Screen Routes */}
       <Stack.Screen
-        name="DataControllerScreen"
-        component={DataControllerScreen}
+        name="ServiceLevelAgreementScreen"
+        component={ServiceLevelAgreementScreen}
       />
       <Stack.Screen
-        name="PrivacyPolicyIntroScreen"
-        component={PrivacyPolicyIntroScreen}
-      />
-      <Stack.Screen
-        name="AutomaticCollectionScreen"
-        component={AutomaticCollectionScreen}
-      />
-      <Stack.Screen
-        name="CollectionOfPersonalInfoScreen"
-        component={CollectionOfPersonalInfoScreen}
-      />
-      <Stack.Screen
-        name="CookiesAndUsageDataScreen"
-        component={CookiesAndUsageDataScreen}
-      />
-      <Stack.Screen
-        name="HowWeShareInfoScreen"
-        component={HowWeShareInfoScreen}
-      />
-      <Stack.Screen
-        name="ManagingPersonalInfoScreen"
-        component={ManagingPersonalInfoScreen}
-      />
-      <Stack.Screen
-        name="UseAndProcessingScreen"
-        component={UseAndProcessingScreen}
-      />
-      <Stack.Screen name="UsageDataScreen" component={UsageDataScreen} />
-      <Stack.Screen
-        name="InformationTransferScreen"
-        component={InformationTransferScreen}
-      />
-      <Stack.Screen
-        name="ServiceProvidersScreen"
-        component={ServiceProvidersScreen}
-      />
-      <Stack.Screen
-        name="PrivacyOfChildrenScreen"
-        component={PrivacyOfChildrenScreen}
-      />
-      <Stack.Screen name="NewslettersScreen" component={NewslettersScreen} />
-      <Stack.Screen
-        name="LinksToOtherAppsScreen"
-        component={LinksToOtherAppsScreen}
-      />
-      <Stack.Screen
-        name="InformationSecurityScreen"
-        component={InformationSecurityScreen}
-      />
-      <Stack.Screen name="DataBreachScreen" component={DataBreachScreen} />
-      <Stack.Screen
-        name="LegalDisclosuresScreen"
-        component={LegalDisclosuresScreen}
-      />
-      <Stack.Screen
-        name="ChangesAndAmendmentsScreen"
-        component={ChangesAndAmendmentsScreen}
-      />
-      <Stack.Screen name="IndemnityScreen" component={IndemnityScreen} />
-      <Stack.Screen
-        name="AcceptanceOfPolicyScreen"
-        component={AcceptanceOfPolicyScreen}
-      />
-      <Stack.Screen name="ContactingUsScreen" component={ContactingUsScreen} />
-      <Stack.Screen name="GetStartedScreen" component={GetStartedScreen} />
-      <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
-      <Stack.Screen
-        name="BookingSystemScreen"
-        component={BookingSystemScreen}
+        name="DataProtectionAgreementScreen"
+        component={DataProtectionAgreementScreen}
       />
 
       {/* Add other screens here */}

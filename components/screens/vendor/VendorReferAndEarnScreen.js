@@ -64,7 +64,7 @@ export default function VendorReferAndEarnScreen() {
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "latoBold" }}
-          className="text-[14px] text-faintDark"
+          className="text-[16px] text-faintDark"
         >
           Refer and Earn
         </Text>
@@ -77,14 +77,14 @@ export default function VendorReferAndEarnScreen() {
         <View style={styles.headerBox}>
           <Text
             style={{ fontFamily: "latoBold" }}
-            className="text-[30px] text-center mb-2 text-primary"
+            className="text-[32px] text-center mb-2 text-primary"
           >
             Refer a Friend, Earn{"\n"}
             <Text>₦100 Each!</Text>
           </Text>
           <Text
             style={{ fontFamily: "poppinsRegular" }}
-            className="text-[12px] text-center"
+            className="text-[14px] text-center"
           >
             Invite your friends to join SharpLook as vendors. When they join and
             start earning, you both get ₦100 credit.
@@ -94,13 +94,13 @@ export default function VendorReferAndEarnScreen() {
         <View style={styles.card}>
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-[14px] mb-2"
+            className="text-[16px] mb-2"
           >
             Your Referral Code
           </Text>
           <Text
             style={{ fontFamily: "poppinsRegular" }}
-            className="text-[10px] text-faintDark2"
+            className="text-[12px] text-faintDark2"
           >
             Share this code with your friends!
           </Text>
@@ -123,13 +123,13 @@ export default function VendorReferAndEarnScreen() {
         <View style={styles.card}>
           <Text
             style={{ fontFamily: "poppinsMedium" }}
-            className="text-[14px] mb-2"
+            className="text-[16px] mb-2"
           >
             Your Reward Summary
           </Text>
           <Text
             style={{ fontFamily: "poppinsRegular" }}
-            className="text-[10px] text-faintDark2"
+            className="text-[12px] text-faintDark2"
           >
             Your earnings and referral progress.
           </Text>

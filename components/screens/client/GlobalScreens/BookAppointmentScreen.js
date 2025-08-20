@@ -123,7 +123,6 @@ export default function BookAppointmentScreen() {
           reference,
           paymentMethod: "PAYSTACK",
         };
-        console.log({ bookingPayload });
         const bookRes = await HttpClient.post(
           "/bookings/bookVendor",
           bookingPayload
@@ -156,7 +155,7 @@ export default function BookAppointmentScreen() {
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text
-          className="text-white text-[18px] flex-1 text-center"
+          className="text-white text-[16px] flex-1 text-center"
           style={{ fontFamily: "poppinsMedium" }}
         >
           Book Appointment
@@ -209,8 +208,12 @@ export default function BookAppointmentScreen() {
                   "/bookings/bookVendor",
                   payload
                 );
-                showToast.success(res.data.message);
-                navigation.goBack();
+                if (res.data.data.message === "Insufficient wallet balance") {
+                  showToast.error(res.data.data.message);
+                } else {
+                  showToast.success(res.data.message);
+                  navigation.goBack();
+                }
               } catch (error) {
                 if (
                   error.response?.data?.message ===

@@ -53,7 +53,7 @@ export default function CustomDrawerContent(props) {
         >
           <Ionicons name="storefront" size={22} color="#ED2584" />
           <Text
-            className="ml-4 text-[14px] text-faintDark"
+            className="ml-4 text-[16px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Store Setup and Management
@@ -66,7 +66,7 @@ export default function CustomDrawerContent(props) {
         >
           <Ionicons name="analytics-outline" size={22} color="#ED2584" />
           <Text
-            className="ml-4 text-[15px] text-faintDark"
+            className="ml-4 text-[17px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Analytics and Insight
@@ -79,7 +79,7 @@ export default function CustomDrawerContent(props) {
         >
           <Ionicons name="pricetag-outline" size={22} color="#ED2584" />
           <Text
-            className="ml-4 text-[15px] text-faintDark"
+            className="ml-4 text-[17px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Offers
@@ -91,7 +91,7 @@ export default function CustomDrawerContent(props) {
         >
           <Ionicons name="receipt-outline" size={22} color="#ED2584" />
           <Text
-            className="ml-4 text-[15px] text-faintDark"
+            className="ml-4 text-[17px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Orders
@@ -104,7 +104,7 @@ export default function CustomDrawerContent(props) {
         >
           <Ionicons name="gift-outline" size={22} color="#ED2584" />
           <Text
-            className="ml-4 text-[15px] text-faintDark"
+            className="ml-4 text-[17px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Refer and Earn
@@ -117,7 +117,7 @@ export default function CustomDrawerContent(props) {
         >
           <Ionicons name="card-outline" size={22} color="#ED2584" />
           <Text
-            className="ml-4 text-[15px] text-faintDark"
+            className="ml-4 text-[17px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Subscription
@@ -130,25 +130,25 @@ export default function CustomDrawerContent(props) {
         >
           <Ionicons name="notifications-outline" size={22} color="#ED2584" />
           <Text
-            className="ml-4 text-[14px] text-faintDark"
+            className="ml-4 text-[16px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Notification
           </Text>
         </TouchableOpacity>
         {/* Settings */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="flex-row items-center px-6 py-4"
           onPress={() => props.navigation.navigate("VendorSettingsScreen")}
         >
           <Ionicons name="settings-outline" size={22} color="#ED2584" />
           <Text
-            className="ml-4 text-[14px] text-faintDark"
+            className="ml-4 text-[16px] text-faintDark"
             style={{ fontFamily: "poppinsRegular" }}
           >
             Settings
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         {/* Logout */}
         <TouchableOpacity
           className="flex-row items-center px-6 py-4"

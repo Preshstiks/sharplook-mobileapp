@@ -17,33 +17,47 @@ import AuthButton from "../../reusuableComponents/buttons/AuthButton";
 import OutlinedButton from "../../reusuableComponents/buttons/OutlineButton";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useAuth } from "../../../context/AuthContext";
+import { useCart } from "../../../context/CartContext";
 import { showToast } from "../../ToastComponent/Toast";
+import { HttpClient } from "../../../api/HttpClient";
 
 const { height: screenHeight } = Dimensions.get("window");
 
 export default function ProductDetailsScreen() {
   const [quantity, setQuantity] = useState(1);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [addingToCart, setAddingToCart] = useState({});
   const navigation = useNavigation();
   const route = useRoute();
   const { user } = useAuth();
+  const { cartItems, fetchCart } = useCart();
 
   // Get data from route params
   const {
     product,
     onAddToCart,
     cartProductIds = [],
-    addingToCart = {},
+    addingToCart: externalAddingToCart = {},
   } = route.params || {};
 
   if (!product) {
     navigation.goBack();
     return null;
   }
-
   const productId = product.id || product._id;
-  const isInCart = cartProductIds.includes(productId);
-  const isAdding = addingToCart[productId];
+
+  // Use cart context data if available, otherwise fall back to route params
+  const currentCartProductIds = cartItems.map(
+    (item) =>
+      item.product?.id ||
+      item.product?._id ||
+      item.productId ||
+      item.id ||
+      item._id
+  );
+
+  const isInCart = currentCartProductIds.includes(productId);
+  const isAdding = addingToCart[productId] || externalAddingToCart[productId];
 
   const maxStock = product.stock || 24;
 
@@ -90,7 +104,7 @@ export default function ProductDetailsScreen() {
         vendorName: product?.vendor?.vendorOnboarding?.businessName,
       };
 
-      navigation.navigate("ProductReviewsScreen", reviewsParams);
+      navigation.navigate("ProductReviewScreen", reviewsParams);
     } catch (error) {
       showToast.error("Failed to load reviews");
     } finally {
@@ -98,9 +112,28 @@ export default function ProductDetailsScreen() {
     }
   };
 
-  const handleAddToCart = () => {
-    if (!isInCart && !isAdding && onAddToCart) {
-      onAddToCart(product, quantity);
+  const handleAddToCart = async () => {
+    if (!isInCart && !isAdding) {
+      setAddingToCart((prev) => ({ ...prev, [productId]: true }));
+
+      try {
+        const res = await HttpClient.post("/client/addProductTocart", {
+          productId: productId,
+        });
+        await fetchCart(); // Refresh cart after adding
+        showToast.success(res.data.message);
+      } catch (error) {
+        const message =
+          error?.response?.data?.message ||
+          error?.response?.message ||
+          "Failed to add to cart.";
+        showToast.error(message);
+      } finally {
+        setAddingToCart((prev) => {
+          const { [productId]: removed, ...rest } = prev;
+          return rest;
+        });
+      }
     }
   };
 
@@ -160,7 +193,7 @@ export default function ProductDetailsScreen() {
                 marginBottom: 16,
               }}
             >
-              {formatAmount(product.productPrice)}
+              {formatAmount(product.price)}
             </Text>
 
             <View className="flex-row items-center justify-between mb-4">

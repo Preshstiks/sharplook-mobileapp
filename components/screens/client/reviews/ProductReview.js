@@ -18,6 +18,7 @@ import {
 import { useState } from "react";
 import { HttpClient } from "../../../../api/HttpClient";
 import { EmptyData } from "../../../reusuableComponents/EmptyData";
+import { useAuth } from "../../../../context/AuthContext";
 
 // Inline ReviewSkeleton component
 function ReviewSkeleton() {
@@ -114,16 +115,20 @@ function ReviewSkeleton() {
 export default function ProductReviewsScreen() {
   const navigation = useNavigation();
   const route = useRoute();
+  // Handle both object format and direct ID format
   const vendor = route.params?.vendor;
   const product = route.params?.product;
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const vendorId = vendor?.id;
-  const productId = product?.id;
+  const vendorId = vendor?.id || route.params?.vendorId;
+  const productId = product?.id || route.params?.productId;
+  const { user } = useAuth();
+
   const hasReviewedThisProduct = reviews.some(
-    (review) => review.productId === productId
+    (review) => review.clientId === user?.id
   );
+
   useFocusEffect(
     useCallback(() => {
       const fetchReviews = async () => {
@@ -144,7 +149,7 @@ export default function ProductReviewsScreen() {
         }
       };
       fetchReviews();
-    }, [vendorId])
+    }, [vendorId, productId])
   );
 
   return (
@@ -215,12 +220,12 @@ export default function ProductReviewsScreen() {
           {!hasReviewedThisProduct && (
             <TouchableOpacity
               className="bg-primary flex-row items-center px-4 py-[10px] rounded-lg"
-              onPress={() =>
+              onPress={() => {
                 navigation.navigate("AddProductReviewScreen", {
                   vendorId,
                   productId,
-                })
-              }
+                });
+              }}
             >
               <Ionicons
                 name="create-outline"
@@ -255,9 +260,9 @@ export default function ProductReviewsScreen() {
           <View key={review.id || review._id} className="flex-row mb-6">
             <View className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden mr-3 items-center justify-center">
               {/* Use SVG or fallback to Image if SVG not supported */}
-              {review.avatarUrl ? (
+              {review?.client?.avatar ? (
                 <Image
-                  source={{ uri: review.avatarUrl }}
+                  source={{ uri: review?.client?.avatar }}
                   style={{ width: 48, height: 48 }}
                   resizeMode="cover"
                 />
@@ -271,7 +276,7 @@ export default function ProductReviewsScreen() {
                   className="text-[14px] font-semibold text-faintDark"
                   style={{ fontFamily: "poppinsMedium" }}
                 >
-                  {review.name || review.userName || "Anonymous"}
+                  {review?.client?.lastName} {review?.client?.firstName}
                 </Text>
                 <View className="flex-row items-center">
                   <Text
