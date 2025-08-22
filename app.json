@@ -2,7 +2,7 @@
   "expo": {
     "name": "sharplook",
     "slug": "sharplook",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "orientation": "portrait",
     "icon": "./assets/icon/app-icon.png",
     "userInterfaceStyle": "light",
@@ -16,6 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.techtrove.sharplook",
+      "buildNumber": "17",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "This app uses the camera to allow users to upload profile and service photos.",
@@ -25,11 +26,7 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses your location in the background to keep features updated.",
         "NSPhotoLibraryUsageDescription": "This app uses your photo library to allow you to select and upload profile and service photos.",
         "NSPhotoLibraryAddUsageDescription": "This app saves photos to your library for profile pictures and service images.",
-        "UIBackgroundModes": [
-          "remote-notification",
-          "processing",
-          "background-fetch"
-        ],
+        "UIBackgroundModes": ["remote-notification"],
         "NSUserNotificationsUsageDescription": "This app uses notifications to keep you updated about bookings, messages, and important updates.",
         "NSUserNotificationAlertStyle": "alert"
       },
@@ -54,13 +51,11 @@
         "SYSTEM_ALERT_WINDOW",
         "ACCESS_NETWORK_STATE"
       ],
+      "versionCode": 44,
       "useNextNotificationsApi": true,
       "googleServicesFile": "./google-services.json",
       "allowBackup": true,
-      "foregroundServiceType": [
-        "dataSync",
-        "location"
-      ],
+      "foregroundServiceType": ["dataSync", "location"],
       "notification": {
         "icon": "./assets/icon/app-icon.png",
         "color": "#EB278D",
@@ -79,6 +74,16 @@
           "icon": "./assets/icon/app-icon.png"
         }
       ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static",
+            "useModularHeaders": true
+          }
+        }
+      ],
+      ["@react-native-firebase/app"],
       [
         "@react-native-firebase/messaging",
         {
